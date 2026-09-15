@@ -1,0 +1,1220 @@
+<!DOCTYPE html>
+<html lang="id" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Logic Matrix: Teka-Teki Boolean Interaktif</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        cyber: ['Orbitron', 'sans-serif'],
+                    },
+                    colors: {
+                        cyber: {
+                            bg: '#080d1a',
+                            panel: '#0f172a',
+                            border: '#1e293b',
+                            neonBlue: '#38bdf8',
+                            neonCyan: '#06b6d4',
+                            neonPurple: '#a855f7',
+                            neonPink: '#ec4899',
+                            neonGreen: '#10b981',
+                            neonAmber: '#f59e0b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #060913;
+            color: #f1f5f9;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        .font-cyber {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+        }
+
+        .glow-purple {
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .glow-green {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .cell-btn {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+
+        .cell-btn:hover {
+            transform: scale(1.06);
+            z-index: 10;
+        }
+
+        .cell-btn:active {
+            transform: scale(0.94);
+        }
+
+        /* Scanline effect for Cyberpunk vibe */
+        .scanlines {
+            background: linear-gradient(
+                rgba(18, 16, 16, 0) 50%, 
+                rgba(0, 0, 0, 0.25) 50%
+            ), linear-gradient(
+                90deg,
+                rgba(255, 0, 0, 0.03),
+                rgba(0, 255, 0, 0.01),
+                rgba(0, 0, 255, 0.03)
+            );
+            background-size: 100% 3px, 6px 100%;
+            pointer-events: none;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 0.8; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.02); }
+        }
+
+        .animate-pulse-glow {
+            animation: pulseGlow 2s infinite ease-in-out;
+        }
+
+        /* Particle Canvas */
+        #fx-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col justify-between relative bg-slate-950 text-slate-100 min-h-screen">
+
+    <!-- Particle overlay canvas -->
+    <canvas id="fx-canvas"></canvas>
+
+    <!-- Scanline Overlay -->
+    <div class="scanlines fixed inset-0 z-30"></div>
+
+    <!-- Top Navigation & Stats Bar -->
+    <header class="glass-panel sticky top-0 z-40 px-4 py-3 flex items-center justify-between border-b border-slate-800">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center text-white text-xl font-bold shadow-lg shadow-cyan-500/30">
+                <i class="fa-solid fa-microchip"></i>
+            </div>
+            <div>
+                <h1 class="text-sm font-black font-cyber tracking-wider text-cyan-400">CYBER LOGIC MATRIX</h1>
+                <p class="text-[11px] text-slate-400 font-mono">Teka-Teki Biner & Operasi Logika</p>
+            </div>
+        </div>
+
+        <!-- Center Quick Stats -->
+        <div class="hidden sm:flex items-center gap-6 bg-slate-900/90 px-4 py-1.5 rounded-full border border-slate-700/80 font-mono text-xs">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-trophy text-amber-400"></i>
+                <span class="text-slate-400">Skor:</span>
+                <span id="stat-score" class="text-amber-400 font-bold">0</span>
+            </div>
+            <div class="w-px h-4 bg-slate-700"></div>
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-star text-cyan-400"></i>
+                <span class="text-slate-400">Bintang:</span>
+                <span id="stat-stars" class="text-cyan-400 font-bold">0/45</span>
+            </div>
+            <div class="w-px h-4 bg-slate-700"></div>
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-purple-400"></i>
+                <span class="text-slate-400">Level:</span>
+                <span id="stat-level-title" class="text-purple-300 font-bold">1</span>
+            </div>
+        </div>
+
+        <!-- Right Controls -->
+        <div class="flex items-center gap-2">
+            <button id="btn-sound" onclick="toggleSound()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-400 flex items-center justify-center border border-slate-700 transition" title="Efek Suara">
+                <i id="icon-sound" class="fa-solid fa-volume-high"></i>
+            </button>
+            <button onclick="toggleHelpModal()" class="w-9 h-9 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 flex items-center justify-center border border-slate-700 transition" title="Bantuan & Panduan Logic">
+                <i class="fa-solid fa-circle-question"></i>
+            </button>
+            <button onclick="showModeSelect()" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs font-cyber tracking-wider transition shadow-lg shadow-cyan-600/30 flex items-center gap-1.5">
+                <i class="fa-solid fa-house"></i>
+                <span class="hidden md:inline">Menu Utama</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 relative flex items-center justify-center p-3 md:p-6 z-20">
+        
+        <!-- SCREEN 1: MODE SELECT / MAIN MENU -->
+        <section id="view-menu" class="w-full max-w-4xl mx-auto flex flex-col items-center text-center glass-panel p-6 md:p-12 rounded-3xl border border-cyan-500/30 glow-cyan my-auto">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 text-xs font-mono font-bold tracking-widest uppercase mb-4 animate-pulse">
+                <i class="fa-solid fa-shield-halved"></i> Modul Tantangan Logika Biner v2.5
+            </div>
+
+            <h1 class="text-3xl md:text-5xl font-black font-cyber text-white tracking-wider mb-4 leading-tight">
+                CYBER LOGIC <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-purple-400 to-pink-500">MATRIX</span>
+            </h1>
+
+            <p class="text-slate-300 text-xs md:text-base max-w-2xl leading-relaxed mb-8 font-normal">
+                Kuasai gerbang logika Boolean (<span class="text-amber-400 font-bold">XOR</span>, <span class="text-cyan-400 font-bold">AND</span>, <span class="text-purple-400 font-bold">OR</span>, <span class="text-emerald-400 font-bold">NOT</span>). Padukan kisi warna hitam-putih untuk meretas matriks sandi dan pecahkan teka-teki logika komputasional!
+            </p>
+
+            <!-- Mode Selector Cards -->
+            <div class="grid md:grid-cols-3 gap-5 w-full mb-8">
+                <!-- Mode Level Campaign -->
+                <button onclick="startCampaign()" class="group glass-panel p-6 rounded-2xl border border-cyan-500/40 hover:border-cyan-400 hover:bg-cyan-950/40 transition text-left relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 rounded-full blur-xl group-hover:bg-cyan-500/20 transition"></div>
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl font-bold mb-4 border border-cyan-500/30 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                        </div>
+                        <h3 class="text-lg font-bold font-cyber text-white mb-2 group-hover:text-cyan-300">Petualangan Kampanye</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            Selesaikan 15 level teka-teki logika buatan tangan dari tingkat pemula hingga pakar.
+                        </p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-mono font-bold text-cyan-400">
+                        <span>15 Level Utama</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
+                </button>
+
+                <!-- Mode Arcade Speed Rush -->
+                <button onclick="startArcadeMode()" class="group glass-panel p-6 rounded-2xl border border-amber-500/40 hover:border-amber-400 hover:bg-amber-950/40 transition text-left relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-amber-500/10 rounded-full blur-xl group-hover:bg-amber-500/20 transition"></div>
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-2xl font-bold mb-4 border border-amber-500/30 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-stopwatch-20"></i>
+                        </div>
+                        <h3 class="text-lg font-bold font-cyber text-white mb-2 group-hover:text-amber-300">Arcade Speed Rush</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            Uji kecepatan berpikir! Pecahkan matriks terbanyak dalam batas waktu sebelum waktu habis.
+                        </p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-mono font-bold text-amber-400">
+                        <span>Mode Kecepatan Waktu</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
+                </button>
+
+                <!-- Mode Sandbox Free Play -->
+                <button onclick="startSandboxMode()" class="group glass-panel p-6 rounded-2xl border border-purple-500/40 hover:border-purple-400 hover:bg-purple-950/40 transition text-left relative overflow-hidden flex flex-col justify-between">
+                    <div class="absolute top-0 right-0 w-24 h-24 bg-purple-500/10 rounded-full blur-xl group-hover:bg-purple-500/20 transition"></div>
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-2xl font-bold mb-4 border border-purple-500/30 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-flask"></i>
+                        </div>
+                        <h3 class="text-lg font-bold font-cyber text-white mb-2 group-hover:text-purple-300">Sandbox Eksperimen</h3>
+                        <p class="text-slate-400 text-xs leading-relaxed">
+                            Bebas mendesain kisi matriks biner sendiri dan menguji kombinasi XOR, AND, OR, dan NOT.
+                        </p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-mono font-bold text-purple-400">
+                        <span>Laboratorium Logika</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
+                </button>
+            </div>
+
+            <div class="flex items-center gap-4 text-xs text-slate-400 font-mono">
+                <span><i class="fa-solid fa-check text-cyan-400 mr-1"></i> Tanpa Install</span>
+                <span><i class="fa-solid fa-check text-cyan-400 mr-1"></i> Cocok untuk Pembelajaran SMP/SMA</span>
+                <span><i class="fa-solid fa-check text-cyan-400 mr-1"></i> Berpikir Komputasional</span>
+            </div>
+        </section>
+
+        <!-- SCREEN 2: LEVEL SELECTOR (CAMPAIGN) -->
+        <section id="view-levels" class="w-full max-w-4xl mx-auto flex-col glass-panel p-6 md:p-8 rounded-3xl border border-slate-700 hidden">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                <div>
+                    <h2 class="text-2xl font-black font-cyber text-white">PILIH LEVEL KAMPANYE</h2>
+                    <p class="text-xs text-slate-400 font-mono">Pilih matriks teka-teki logika yang ingin kamu retas</p>
+                </div>
+                <button onclick="showModeSelect()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs border border-slate-700 transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
+                </button>
+            </div>
+
+            <div id="levels-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 overflow-y-auto max-h-[60vh] p-1">
+                <!-- JS Populated Level Cards -->
+            </div>
+        </section>
+
+        <!-- SCREEN 3: GAMEPLAY ARENA -->
+        <section id="view-gameplay" class="w-full max-w-5xl mx-auto flex-col glass-panel p-4 md:p-8 rounded-3xl border border-slate-700 hidden">
+            
+            <!-- Level Bar Info -->
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-800">
+                <div class="flex items-center gap-3">
+                    <span id="game-level-tag" class="px-3 py-1 rounded-lg bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-mono text-xs font-bold">
+                        LEVEL 1
+                    </span>
+                    <h2 id="game-level-title" class="text-base md:text-lg font-extrabold font-cyber text-white">
+                        Inisiasi Biner Pertemuan Pertama
+                    </h2>
+                </div>
+
+                <div class="flex items-center gap-4 text-xs font-mono">
+                    <div class="flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800">
+                        <i class="fa-solid fa-shoe-prints text-amber-400"></i>
+                        <span class="text-slate-400">Langkah:</span>
+                        <span id="game-moves" class="text-amber-400 font-bold">0</span>
+                        <span id="game-max-moves" class="text-slate-500">/ 5</span>
+                    </div>
+
+                    <!-- Timer (Used in Arcade mode or speed level) -->
+                    <div id="timer-box" class="flex items-center gap-1.5 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-800">
+                        <i class="fa-solid fa-stopwatch text-cyan-400"></i>
+                        <span class="text-slate-400">Waktu:</span>
+                        <span id="game-timer" class="text-cyan-400 font-bold">--:--</span>
+                    </div>
+
+                    <button onclick="resetCurrentLevel()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs border border-slate-700 transition" title="Mulai Ulang Level">
+                        <i class="fa-solid fa-rotate-left"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Level Instruction / Hint Banner -->
+            <div id="game-instruction-box" class="mb-5 p-3.5 rounded-2xl bg-cyan-950/40 border border-cyan-500/30 flex items-start gap-3">
+                <i class="fa-solid fa-lightbulb text-cyan-400 text-lg mt-0.5 shrink-0"></i>
+                <div>
+                    <div class="text-xs font-bold text-cyan-300 font-cyber mb-0.5">Tujuan Misi:</div>
+                    <div id="game-instruction-text" class="text-xs md:text-sm text-slate-200 leading-relaxed">
+                        Ubah Kotak A atau pilih operator logika yang sesuai sehingga Kotak Hasil persis sama dengan Target Matriks!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Puzzle Grids Container -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center my-auto">
+                
+                <!-- GRID A (Interactive Input 1) -->
+                <div class="lg:col-span-3 flex flex-col items-center glass-panel p-4 rounded-2xl border border-slate-800 relative">
+                    <span class="text-xs font-mono font-bold text-slate-300 mb-2 flex items-center gap-1">
+                        <i class="fa-solid fa-table-cells text-cyan-400"></i> KOTAK INPUT A
+                    </span>
+                    <div id="grid-a-container" class="grid grid-cols-4 gap-1.5 w-44 h-44 md:w-48 md:h-48 bg-slate-950 p-2 rounded-xl border border-slate-800 shadow-inner">
+                        <!-- JS populated cells -->
+                    </div>
+                    <span class="text-[10px] font-mono text-slate-400 mt-2 text-center">Klik sel untuk membalik warna (Hitam ↔ Putih)</span>
+                </div>
+
+                <!-- OPERATOR SELECTOR / CONTROLLER -->
+                <div class="lg:col-span-2 flex flex-col items-center justify-center gap-3">
+                    <span class="text-xs font-mono font-bold text-slate-400 uppercase tracking-wider">Operator Logika</span>
+                    
+                    <div id="operator-selector-box" class="flex flex-col gap-2 w-full max-w-[140px]">
+                        <button onclick="setOperator('XOR')" id="op-btn-XOR" class="op-btn py-2 px-3 rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/50 font-cyber font-bold text-xs hover:bg-amber-500/30 transition flex items-center justify-center gap-2">
+                            <span>XOR</span> <span class="text-[10px] font-mono font-normal opacity-80">(Beda)</span>
+                        </button>
+                        <button onclick="setOperator('AND')" id="op-btn-AND" class="op-btn py-2 px-3 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 font-cyber font-bold text-xs hover:bg-slate-700 transition flex items-center justify-center gap-2">
+                            <span>AND</span> <span class="text-[10px] font-mono font-normal opacity-80">(Dan)</span>
+                        </button>
+                        <button onclick="setOperator('OR')" id="op-btn-OR" class="op-btn py-2 px-3 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 font-cyber font-bold text-xs hover:bg-slate-700 transition flex items-center justify-center gap-2">
+                            <span>OR</span> <span class="text-[10px] font-mono font-normal opacity-80">(Atau)</span>
+                        </button>
+                        <button onclick="setOperator('NOT')" id="op-btn-NOT" class="op-btn py-2 px-3 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 font-cyber font-bold text-xs hover:bg-slate-700 transition flex items-center justify-center gap-2">
+                            <span>NOT A</span> <span class="text-[10px] font-mono font-normal opacity-80">(Inversi)</span>
+                        </button>
+                    </div>
+
+                    <div class="text-slate-600 my-1"><i class="fa-solid fa-arrow-down lg:fa-arrow-right text-lg"></i></div>
+                </div>
+
+                <!-- GRID B (Input 2 or Static) -->
+                <div class="lg:col-span-3 flex flex-col items-center glass-panel p-4 rounded-2xl border border-slate-800 relative">
+                    <span class="text-xs font-mono font-bold text-slate-300 mb-2 flex items-center gap-1">
+                        <i class="fa-solid fa-table-cells text-purple-400"></i> KOTAK INPUT B
+                    </span>
+                    <div id="grid-b-container" class="grid grid-cols-4 gap-1.5 w-44 h-44 md:w-48 md:h-48 bg-slate-950 p-2 rounded-xl border border-slate-800 shadow-inner">
+                        <!-- JS populated cells -->
+                    </div>
+                    <span id="grid-b-hint" class="text-[10px] font-mono text-slate-400 mt-2 text-center">Matriks Referensi Komputasi</span>
+                </div>
+
+                <!-- GRID RESULT vs TARGET -->
+                <div class="lg:col-span-4 flex flex-col items-center glass-panel p-4 rounded-2xl border-2 border-cyan-500/50 bg-cyan-950/20 glow-cyan">
+                    <div class="flex items-center justify-between w-full mb-2">
+                        <span class="text-xs font-mono font-bold text-cyan-300 flex items-center gap-1">
+                            <i class="fa-solid fa-square-check"></i> HASIL & TARGET
+                        </span>
+                        <span id="match-percent-badge" class="text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                            Match: 0%
+                        </span>
+                    </div>
+
+                    <div class="flex items-center gap-3 my-2">
+                        <!-- Computed Result Grid -->
+                        <div class="flex flex-col items-center">
+                            <span class="text-[10px] font-mono text-slate-400 mb-1">Hasil Gabungan</span>
+                            <div id="grid-res-container" class="grid grid-cols-4 gap-1 w-28 h-28 md:w-32 md:h-32 bg-slate-950 p-1.5 rounded-xl border border-slate-800"></div>
+                        </div>
+
+                        <div class="text-cyan-400 text-lg font-bold">VS</div>
+
+                        <!-- Target Goal Grid -->
+                        <div class="flex flex-col items-center">
+                            <span class="text-[10px] font-mono text-emerald-400 mb-1">Target Matriks</span>
+                            <div id="grid-target-container" class="grid grid-cols-4 gap-1 w-28 h-28 md:w-32 md:h-32 bg-slate-950 p-1.5 rounded-xl border border-emerald-500/50 shadow-lg shadow-emerald-500/10"></div>
+                        </div>
+                    </div>
+
+                    <button id="btn-submit-solution" onclick="checkPuzzleSolution()" class="w-full mt-3 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-cyber font-black text-xs tracking-wider shadow-lg shadow-cyan-500/30 transition active:scale-95 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-bolt"></i> EKSEKUSI SOLUSI
+                    </button>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- SCREEN 4: SANDBOX EXPERIMENT LAB -->
+        <section id="view-sandbox" class="w-full max-w-5xl mx-auto flex-col glass-panel p-6 md:p-8 rounded-3xl border border-purple-500/30 hidden">
+            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+                <div>
+                    <h2 class="text-2xl font-black font-cyber text-purple-400">LABORATORIUM LOGIKA SANDBOX</h2>
+                    <p class="text-xs text-slate-400 font-mono">Bebas bereksperimen dengan operasi Boolean & ekspresi matriks</p>
+                </div>
+                <button onclick="showModeSelect()" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-mono text-xs border border-slate-700 transition">
+                    <i class="fa-solid fa-arrow-left mr-1"></i> Kembali
+                </button>
+            </div>
+
+            <div class="grid md:grid-cols-12 gap-6 items-center">
+                <!-- Grid Sandbox A -->
+                <div class="md:col-span-4 flex flex-col items-center glass-panel p-4 rounded-2xl border border-slate-800">
+                    <span class="text-xs font-mono font-bold text-slate-300 mb-2">Matriks A (4x4)</span>
+                    <div id="sandbox-grid-a" class="grid grid-cols-4 gap-1.5 w-44 h-44 bg-slate-950 p-2 rounded-xl border border-slate-800"></div>
+                    <button onclick="randomizeSandboxGrid('A')" class="mt-3 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-300 border border-slate-700">
+                        <i class="fa-solid fa-dice mr-1"></i> Acak A
+                    </button>
+                </div>
+
+                <!-- Operators Sandbox -->
+                <div class="md:col-span-4 flex flex-col items-center gap-3">
+                    <span class="text-xs font-mono font-bold text-slate-400">Pilih Operasi Matriks:</span>
+                    <select id="sandbox-op-select" onchange="calculateSandbox()" class="bg-slate-900 text-purple-300 border border-purple-500/50 rounded-xl px-4 py-2.5 font-cyber font-bold text-sm w-full text-center focus:outline-none">
+                        <option value="XOR">XOR (Exclusive OR)</option>
+                        <option value="AND">AND (Konjungsi)</option>
+                        <option value="OR">OR (Disjungsi)</option>
+                        <option value="NAND">NAND (Not AND)</option>
+                        <option value="NOR">NOR (Not OR)</option>
+                        <option value="XNOR">XNOR (Not XOR)</option>
+                    </select>
+
+                    <div class="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 w-full text-xs font-mono space-y-1 text-slate-300">
+                        <div class="text-purple-400 font-bold mb-1">Status Array Biner:</div>
+                        <div id="sandbox-binary-out-a" class="truncate text-[10px] text-slate-400">A: [0,1,0,1...]</div>
+                        <div id="sandbox-binary-out-b" class="truncate text-[10px] text-slate-400">B: [1,0,1,0...]</div>
+                        <div id="sandbox-binary-out-res" class="truncate text-[10px] text-cyan-300 font-bold">R: [1,1,1,1...]</div>
+                    </div>
+                </div>
+
+                <!-- Grid Sandbox B & Result -->
+                <div class="md:col-span-4 flex flex-col items-center glass-panel p-4 rounded-2xl border border-slate-800">
+                    <span class="text-xs font-mono font-bold text-slate-300 mb-2">Matriks B (4x4)</span>
+                    <div id="sandbox-grid-b" class="grid grid-cols-4 gap-1.5 w-44 h-44 bg-slate-950 p-2 rounded-xl border border-slate-800"></div>
+                    <button onclick="randomizeSandboxGrid('B')" class="mt-3 px-3 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs font-mono text-slate-300 border border-slate-700">
+                        <i class="fa-solid fa-dice mr-1"></i> Acak B
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sandbox Result Output Grid -->
+            <div class="mt-6 glass-panel p-5 rounded-2xl border border-purple-500/40 flex flex-col items-center">
+                <span class="text-xs font-mono font-bold text-purple-300 mb-3 uppercase tracking-wider">Hasil Kombinasi Matriks Biner</span>
+                <div id="sandbox-grid-res" class="grid grid-cols-4 gap-2 w-52 h-52 bg-slate-950 p-2 rounded-2xl border border-purple-500/30 glow-purple"></div>
+                <div class="mt-3 font-mono text-xs text-slate-300">
+                    Jumlah Piksel Hitam ($1 / True$): <span id="sandbox-black-count" class="text-purple-400 font-bold">0</span> / 16
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: VICTORY / LEVEL COMPLETE -->
+    <div id="modal-victory" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel border-2 border-cyan-500/60 rounded-3xl p-6 md:p-8 max-w-md w-full text-center relative glow-cyan animate-pulse-glow">
+            <div class="w-16 h-16 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-3xl mx-auto mb-4 border border-cyan-500/40">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+
+            <h3 class="text-2xl font-black font-cyber text-white mb-1">RETASAN BERHASIL!</h3>
+            <p id="modal-victory-subtitle" class="text-xs text-slate-400 font-mono mb-4">Matriks logika telah dikonfirmasi 100% tepat!</p>
+
+            <!-- Stars Rating -->
+            <div id="modal-stars-container" class="flex items-center justify-center gap-2 text-2xl text-amber-400 mb-6">
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800 text-xs font-mono mb-6">
+                <div>
+                    <span class="text-slate-400 block">Langkah Digunakan:</span>
+                    <span id="modal-stat-moves" class="text-cyan-400 font-bold text-base">0</span>
+                </div>
+                <div>
+                    <span class="text-slate-400 block">Bonus Skor:</span>
+                    <span id="modal-stat-score" class="text-amber-400 font-bold text-base">+500</span>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <button onclick="closeVictoryModal(); showLevelsSelect();" class="flex-1 py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-cyber font-bold text-xs border border-slate-700 transition">
+                    Pilih Level
+                </button>
+                <button id="btn-next-level" onclick="nextLevel()" class="flex-1 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-cyber font-black text-xs shadow-lg shadow-cyan-500/30 transition">
+                    Level Berikutnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: HELP / LOGIC OPERATORS GUIDE -->
+    <div id="modal-help" class="fixed inset-0 bg-slate-950/85 backdrop-blur-md z-50 flex items-center justify-center p-4 hidden">
+        <div class="glass-panel border border-slate-700 rounded-3xl p-6 max-w-2xl w-full max-h-[85vh] flex flex-col">
+            <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-800">
+                <div class="flex items-center gap-2">
+                    <i class="fa-solid fa-book text-amber-400 text-xl"></i>
+                    <h3 class="text-lg font-bold font-cyber text-white">PANDUAN OPERASI LOGIKA BOOLEAN</h3>
+                </div>
+                <button onclick="toggleHelpModal()" class="w-8 h-8 rounded-lg bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="overflow-y-auto space-y-4 pr-1 text-xs md:text-sm text-slate-300">
+                <div class="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30">
+                    <h4 class="font-bold text-amber-400 font-cyber mb-1">1. Operasi XOR (Exclusive OR / Beda Warna)</h4>
+                    <p class="text-slate-300 text-xs leading-relaxed">
+                        Hasil bernilai <strong>Hitam (1)</strong> HANYA jika dua piksel yang dikombinasikan memiliki <strong>warna yang BERBEDA</strong>. Jika warna sama (Hitam+Hitam atau Putih+Putih), hasil berubah menjadi <strong>Putih (0)</strong>.
+                    </p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-cyan-500/10 border border-cyan-500/30">
+                    <h4 class="font-bold text-cyan-400 font-cyber mb-1">2. Operasi AND (Konjungsi / Kedua Hitam)</h4>
+                    <p class="text-slate-300 text-xs leading-relaxed">
+                        Hasil bernilai <strong>Hitam (1)</strong> HANYA jika kedua piksel sama-sama berwarna <strong>Hitam (1)</strong>.
+                    </p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/30">
+                    <h4 class="font-bold text-purple-400 font-cyber mb-1">3. Operasi OR (Disjungsi / Salah Satu Hitam)</h4>
+                    <p class="text-slate-300 text-xs leading-relaxed">
+                        Hasil bernilai <strong>Hitam (1)</strong> jika <strong>salah satu atau kedua</strong> piksel berwarna <strong>Hitam (1)</strong>.
+                    </p>
+                </div>
+
+                <div class="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30">
+                    <h4 class="font-bold text-emerald-400 font-cyber mb-1">4. Operasi NOT (Inversi Warna)</h4>
+                    <p class="text-slate-300 text-xs leading-relaxed">
+                        Membalikkan seluruh warna pada Matriks A (Hitam $\rightarrow$ Putih, Putih $\rightarrow$ Hitam).
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="glass-panel z-40 px-4 py-2.5 text-center text-xs text-slate-400 border-t border-slate-800 flex flex-wrap items-center justify-between gap-2">
+        <span class="font-mono text-[11px]">Cyber Logic Matrix &copy; 2026 — Modul Game Edukasi Informatika</span>
+        <span class="font-mono text-[11px] text-cyan-400">Tekan <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">R</kbd> untuk Reset | <kbd class="px-1.5 py-0.5 bg-slate-800 rounded border border-slate-700">H</kbd> Bantuan</span>
+    </footer>
+
+    <script>
+        /* WEB AUDIO API SYNTHESIZER FOR CYBER GAME SFX */
+        let audioCtx = null;
+        let isSoundEnabled = true;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSound(type) {
+            if (!isSoundEnabled) return;
+            initAudio();
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(600, now);
+                osc.frequency.exponentialRampToValueAtTime(200, now + 0.05);
+                gain.gain.setValueAtTime(0.15, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.05);
+                osc.start(now);
+                osc.stop(now + 0.05);
+            } else if (type === 'toggle') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.exponentialRampToValueAtTime(800, now + 0.08);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'win') {
+                // Victory Arpeggio
+                const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+                notes.forEach((freq, i) => {
+                    const noteOsc = audioCtx.createOscillator();
+                    const noteGain = audioCtx.createGain();
+                    noteOsc.connect(noteGain);
+                    noteGain.connect(audioCtx.destination);
+
+                    noteOsc.type = 'sine';
+                    noteOsc.frequency.setValueAtTime(freq, now + i * 0.08);
+                    noteGain.gain.setValueAtTime(0.2, now + i * 0.08);
+                    noteGain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+
+                    noteOsc.start(now + i * 0.08);
+                    noteOsc.stop(now + i * 0.08 + 0.3);
+                });
+            } else if (type === 'fail') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(250, now);
+                osc.frequency.linearRampToValueAtTime(100, now + 0.25);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+                osc.start(now);
+                osc.stop(now + 0.25);
+            }
+        }
+
+        function toggleSound() {
+            isSoundEnabled = !isSoundEnabled;
+            const icon = document.getElementById('icon-sound');
+            const btn = document.getElementById('btn-sound');
+            if (isSoundEnabled) {
+                icon.className = 'fa-solid fa-volume-high';
+                btn.classList.replace('text-slate-500', 'text-cyan-400');
+                playSound('click');
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark';
+                btn.classList.replace('text-cyan-400', 'text-slate-500');
+            }
+        }
+    </script>
+
+    <script>
+        /* CANVAS PARTICLE SYSTEM */
+        const canvas = document.getElementById('fx-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function spawnWinParticles() {
+            const colors = ['#38bdf8', '#06b6d4', '#a855f7', '#10b981', '#f59e0b'];
+            for (let i = 0; i < 80; i++) {
+                particles.push({
+                    x: canvas.width / 2,
+                    y: canvas.height / 2,
+                    vx: (Math.random() - 0.5) * 14,
+                    vy: (Math.random() - 0.5) * 14 - 3,
+                    size: Math.random() * 6 + 3,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    life: 1,
+                    decay: Math.random() * 0.02 + 0.015
+                });
+            }
+        }
+
+        function renderParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach((p, idx) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                p.vy += 0.15; // gravity
+                p.life -= p.decay;
+
+                if (p.life <= 0) {
+                    particles.splice(idx, 1);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                    ctx.fillStyle = p.color;
+                    ctx.globalAlpha = p.life;
+                    ctx.fill();
+                    ctx.globalAlpha = 1;
+                }
+            });
+            requestAnimationFrame(renderParticles);
+        }
+        renderParticles();
+    </script>
+
+    <script>
+        /* GAME DATA AND STATE MANAGEMENT */
+        const LEVELS_DATA = [
+            {
+                id: 1,
+                title: "Pertemuan Biner Pertama",
+                instruction: "Cocokkan hasil dengan Target Matriks menggunakan operasi XOR!",
+                gridA: [1,1,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+                gridB: [1,0,1,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+                target: [0,1,1,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+                defaultOp: "XOR",
+                maxMoves: 3,
+                editableA: true
+            },
+            {
+                id: 2,
+                title: "Inversi Pola Diagonal",
+                instruction: "Aktifkan sel diagonal Kotak A agar hasil XOR membentuk salib silang!",
+                gridA: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+                gridB: [1,0,0,1, 0,1,1,0, 0,1,1,0, 1,0,0,1],
+                target: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+                defaultOp: "XOR",
+                maxMoves: 4,
+                editableA: true
+            },
+            {
+                id: 3,
+                title: "Filtrasi Gerbang AND",
+                instruction: "Gunakan operasi AND untuk hanya menyaring sel yang sama-sama bernilai Hitam!",
+                gridA: [1,1,1,1, 0,0,0,0, 1,1,0,0, 1,0,1,0],
+                gridB: [1,0,1,0, 1,1,0,0, 1,1,1,1, 1,0,0,0],
+                target: [1,0,1,0, 0,0,0,0, 1,1,0,0, 1,0,0,0],
+                defaultOp: "AND",
+                maxMoves: 2,
+                editableA: true
+            },
+            {
+                id: 4,
+                title: "Penggabungan Warna OR",
+                instruction: "Pilih operator OR dan bentuk Bingkai Kotak pada Kotak A!",
+                gridA: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+                gridB: [0,0,0,0, 0,1,1,0, 0,1,1,0, 0,0,0,0],
+                target: [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+                defaultOp: "OR",
+                maxMoves: 12,
+                editableA: true
+            },
+            {
+                id: 5,
+                title: "Misteri Restoran Rara (BK-K9-03-U)",
+                instruction: "Gunakan operasi XOR untuk memecahkan teka-teki kombinasi gambar Hitam Putih!",
+                gridA: [1,1,0,0, 0,1,1,0, 1,0,0,1, 0,0,1,1],
+                gridB: [1,0,1,0, 0,1,0,1, 1,0,1,0, 0,1,0,1],
+                target: [0,1,1,0, 0,0,1,1, 0,0,1,1, 0,1,1,0],
+                defaultOp: "XOR",
+                maxMoves: 4,
+                editableA: true
+            },
+            {
+                id: 6,
+                title: "Pola Checkerboard 50:50",
+                instruction: "Buatlah pola papan catur sempurna dengan XOR!",
+                gridA: [1,0,1,0, 1,0,1,0, 1,0,1,0, 1,0,1,0],
+                gridB: [0,1,0,1, 0,1,0,1, 0,1,0,1, 0,1,0,1],
+                target: [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+                defaultOp: "XOR",
+                maxMoves: 5,
+                editableA: true
+            },
+            {
+                id: 7,
+                title: "Pembersihan Glitch Biner",
+                instruction: "Bersihkan semua titik hitam hingga target menjadi Serba Putih (0)!",
+                gridA: [1,0,1,0, 0,1,0,1, 1,0,1,0, 0,1,0,1],
+                gridB: [1,0,1,0, 0,1,0,1, 1,0,1,0, 0,1,0,1],
+                target: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+                defaultOp: "XOR",
+                maxMoves: 1,
+                editableA: true
+            },
+            {
+                id: 8,
+                title: "Matriks Inversi NOT",
+                instruction: "Gunakan fitur NOT A untuk membalik seluruh piksel sekaligus!",
+                gridA: [0,1,0,1, 1,0,1,0, 0,1,0,1, 1,0,1,0],
+                gridB: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+                target: [1,0,1,0, 0,1,0,1, 1,0,1,0, 0,1,0,1],
+                defaultOp: "NOT",
+                maxMoves: 1,
+                editableA: true
+            },
+            {
+                id: 9,
+                title: "Piramida Logika Level 9",
+                instruction: "Bentuk pola piramida pada Kotak A menggunakan gabungan XOR!",
+                gridA: [0,0,0,0, 0,0,0,0, 0,0,0,0, 0,0,0,0],
+                gridB: [1,1,1,1, 1,0,0,1, 1,0,0,1, 1,1,1,1],
+                target: [0,1,1,0, 0,1,1,0, 0,1,1,0, 0,0,0,0],
+                defaultOp: "XOR",
+                maxMoves: 6,
+                editableA: true
+            },
+            {
+                id: 10,
+                title: "Tantangan Cyber Master",
+                instruction: "Cocokkan pola matriks kompleks dalam maksimal 5 langkah!",
+                gridA: [1,0,0,1, 0,1,1,0, 0,1,1,0, 1,0,0,1],
+                gridB: [0,1,1,0, 1,0,0,1, 1,0,0,1, 0,1,1,0],
+                target: [1,1,1,1, 1,1,1,1, 1,1,1,1, 1,1,1,1],
+                defaultOp: "XOR",
+                maxMoves: 5,
+                editableA: true
+            }
+        ];
+
+        // State Variable
+        let currentLevelIndex = 0;
+        let currentOperator = 'XOR';
+        let currentGridA = [];
+        let currentGridB = [];
+        let computedResult = [];
+        let movesCount = 0;
+        let totalScore = 0;
+        let starsEarned = {};
+        let activeGameMode = 'campaign'; // 'campaign', 'arcade', 'sandbox'
+
+        // Arcade timer
+        let arcadeTimer = 30;
+        let arcadeTimerInterval = null;
+
+        // Sandbox Grids
+        let sandboxA = [1,0,1,0, 0,1,0,1, 1,0,1,0, 0,1,0,1];
+        let sandboxB = [0,1,0,1, 1,0,1,0, 0,1,0,1, 1,0,1,0];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadProgressFromStorage();
+            showModeSelect();
+            initSandbox();
+
+            // Keyboard Shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'r' || e.key === 'R') {
+                    if (activeGameMode === 'campaign') resetCurrentLevel();
+                } else if (e.key === 'h' || e.key === 'H') {
+                    toggleHelpModal();
+                }
+            });
+        });
+
+        /* NAVIGATION & VIEWS SWITCHER */
+        function hideAllViews() {
+            document.getElementById('view-menu').classList.add('hidden');
+            document.getElementById('view-levels').classList.add('hidden');
+            document.getElementById('view-gameplay').classList.add('hidden');
+            document.getElementById('view-sandbox').classList.add('hidden');
+        }
+
+        function showModeSelect() {
+            hideAllViews();
+            document.getElementById('view-menu').classList.remove('hidden');
+            playSound('click');
+        }
+
+        function startCampaign() {
+            activeGameMode = 'campaign';
+            showLevelsSelect();
+        }
+
+        function showLevelsSelect() {
+            hideAllViews();
+            document.getElementById('view-levels').classList.remove('hidden');
+            renderLevelsGrid();
+            playSound('click');
+        }
+
+        function renderLevelsGrid() {
+            const container = document.getElementById('levels-grid');
+            container.innerHTML = '';
+
+            LEVELS_DATA.forEach((lvl, idx) => {
+                const isUnlocked = idx === 0 || (starsEarned[LEVELS_DATA[idx - 1].id] > 0);
+                const stars = starsEarned[lvl.id] || 0;
+
+                const card = document.createElement('div');
+                card.className = `glass-panel p-4 rounded-2xl border flex flex-col justify-between transition text-left relative overflow-hidden ${isUnlocked ? 'border-cyan-500/40 hover:border-cyan-400 cursor-pointer hover:bg-cyan-950/30' : 'border-slate-800 opacity-50 cursor-not-allowed'}`;
+                
+                let starsHTML = '';
+                for (let i = 1; i <= 3; i++) {
+                    starsHTML += `<i class="fa-solid fa-star ${i <= stars ? 'text-amber-400' : 'text-slate-700'} text-xs"></i>`;
+                }
+
+                card.innerHTML = `
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-xs font-cyber font-bold ${isUnlocked ? 'text-cyan-400' : 'text-slate-500'}">L-${lvl.id}</span>
+                        <div class="flex items-center gap-1">${starsHTML}</div>
+                    </div>
+                    <div class="text-xs font-bold text-white mb-2 truncate">${lvl.title}</div>
+                    <div class="text-[10px] font-mono text-slate-400">Target: ${lvl.defaultOp}</div>
+                `;
+
+                if (isUnlocked) {
+                    card.onclick = () => loadLevel(idx);
+                }
+                container.appendChild(card);
+            });
+        }
+
+        function loadLevel(levelIdx) {
+            currentLevelIndex = levelIdx;
+            const lvl = LEVELS_DATA[levelIdx];
+
+            currentGridA = [...lvl.gridA];
+            currentGridB = [...lvl.gridB];
+            currentOperator = lvl.defaultOp;
+            movesCount = 0;
+
+            hideAllViews();
+            document.getElementById('view-gameplay').classList.remove('hidden');
+
+            document.getElementById('game-level-tag').innerText = `LEVEL ${lvl.id}`;
+            document.getElementById('game-level-title').innerText = lvl.title;
+            document.getElementById('game-instruction-text').innerText = lvl.instruction;
+            document.getElementById('game-moves').innerText = movesCount;
+            document.getElementById('game-max-moves').innerText = `/ ${lvl.maxMoves}`;
+            document.getElementById('timer-box').classList.add('hidden');
+
+            setOperator(currentOperator);
+            renderGameplayGrids();
+            calculateResult();
+            playSound('click');
+        }
+
+        function resetCurrentLevel() {
+            loadLevel(currentLevelIndex);
+        }
+
+        function setOperator(op) {
+            currentOperator = op;
+            playSound('click');
+
+            // Highlight button
+            document.querySelectorAll('.op-btn').forEach(btn => {
+                btn.className = 'op-btn py-2 px-3 rounded-xl bg-slate-800 text-slate-400 border border-slate-700 font-cyber font-bold text-xs hover:bg-slate-700 transition flex items-center justify-center gap-2';
+            });
+
+            const activeBtn = document.getElementById(`op-btn-${op}`);
+            if (activeBtn) {
+                if (op === 'XOR') activeBtn.className = 'op-btn py-2 px-3 rounded-xl bg-amber-500/30 text-amber-300 border border-amber-500/60 font-cyber font-bold text-xs shadow-lg shadow-amber-500/20 transition flex items-center justify-center gap-2';
+                if (op === 'AND') activeBtn.className = 'op-btn py-2 px-3 rounded-xl bg-cyan-500/30 text-cyan-300 border border-cyan-500/60 font-cyber font-bold text-xs shadow-lg shadow-cyan-500/20 transition flex items-center justify-center gap-2';
+                if (op === 'OR') activeBtn.className = 'op-btn py-2 px-3 rounded-xl bg-purple-500/30 text-purple-300 border border-purple-500/60 font-cyber font-bold text-xs shadow-lg shadow-purple-500/20 transition flex items-center justify-center gap-2';
+                if (op === 'NOT') activeBtn.className = 'op-btn py-2 px-3 rounded-xl bg-emerald-500/30 text-emerald-300 border border-emerald-500/60 font-cyber font-bold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center justify-center gap-2';
+            }
+
+            calculateResult();
+        }
+
+        function renderGameplayGrids() {
+            // Render Grid A
+            const containerA = document.getElementById('grid-a-container');
+            containerA.innerHTML = '';
+            currentGridA.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = `cell-btn rounded-md border border-slate-800 ${val === 1 ? 'bg-black shadow-inner' : 'bg-white'}`;
+                cell.onclick = () => toggleCellA(idx);
+                containerA.appendChild(cell);
+            });
+
+            // Render Grid B
+            const containerB = document.getElementById('grid-b-container');
+            containerB.innerHTML = '';
+            currentGridB.forEach((val) => {
+                const cell = document.createElement('div');
+                cell.className = `rounded-md border border-slate-800 ${val === 1 ? 'bg-black' : 'bg-white'}`;
+                containerB.appendChild(cell);
+            });
+
+            // Render Target Grid
+            const lvl = LEVELS_DATA[currentLevelIndex];
+            const containerTarget = document.getElementById('grid-target-container');
+            containerTarget.innerHTML = '';
+            lvl.target.forEach((val) => {
+                const cell = document.createElement('div');
+                cell.className = `rounded-md border border-slate-800 ${val === 1 ? 'bg-black' : 'bg-white'}`;
+                containerTarget.appendChild(cell);
+            });
+        }
+
+        function toggleCellA(idx) {
+            currentGridA[idx] = currentGridA[idx] === 1 ? 0 : 1;
+            movesCount++;
+            document.getElementById('game-moves').innerText = movesCount;
+            playSound('toggle');
+            renderGameplayGrids();
+            calculateResult();
+        }
+
+        function calculateResult() {
+            computedResult = [];
+            for (let i = 0; i < 16; i++) {
+                const a = currentGridA[i];
+                const b = currentGridB[i];
+                let res = 0;
+
+                if (currentOperator === 'XOR') res = a ^ b;
+                else if (currentOperator === 'AND') res = a & b;
+                else if (currentOperator === 'OR') res = a | b;
+                else if (currentOperator === 'NOT') res = a === 1 ? 0 : 1;
+
+                computedResult.push(res);
+            }
+
+            // Render Result Grid
+            const containerRes = document.getElementById('grid-res-container');
+            containerRes.innerHTML = '';
+            computedResult.forEach((val) => {
+                const cell = document.createElement('div');
+                cell.className = `rounded-md border border-slate-800 ${val === 1 ? 'bg-black' : 'bg-white'}`;
+                containerRes.appendChild(cell);
+            });
+
+            // Calculate Match Percentage
+            const target = LEVELS_DATA[currentLevelIndex].target;
+            let matches = 0;
+            for (let i = 0; i < 16; i++) {
+                if (computedResult[i] === target[i]) matches++;
+            }
+            const matchPct = Math.round((matches / 16) * 100);
+            const badge = document.getElementById('match-percent-badge');
+            badge.innerText = `Match: ${matchPct}%`;
+
+            if (matchPct === 100) {
+                badge.className = 'text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 animate-pulse';
+            } else {
+                badge.className = 'text-xs font-mono font-bold px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40';
+            }
+        }
+
+        function checkPuzzleSolution() {
+            const target = LEVELS_DATA[currentLevelIndex].target;
+            let isExactMatch = true;
+
+            for (let i = 0; i < 16; i++) {
+                if (computedResult[i] !== target[i]) {
+                    isExactMatch = false;
+                    break;
+                }
+            }
+
+            if (isExactMatch) {
+                playSound('win');
+                spawnWinParticles();
+
+                const lvl = LEVELS_DATA[currentLevelIndex];
+                let stars = 1;
+                if (movesCount <= lvl.maxMoves) stars = 3;
+                else if (movesCount <= lvl.maxMoves + 3) stars = 2;
+
+                starsEarned[lvl.id] = Math.max(starsEarned[lvl.id] || 0, stars);
+                const earnedScore = 500 * stars;
+                totalScore += earnedScore;
+
+                saveProgressToStorage();
+                updateStatsUI();
+
+                // Show Victory Modal
+                document.getElementById('modal-stat-moves').innerText = movesCount;
+                document.getElementById('modal-stat-score').innerText = `+${earnedScore}`;
+
+                const starsContainer = document.getElementById('modal-stars-container');
+                starsContainer.innerHTML = '';
+                for (let i = 1; i <= 3; i++) {
+                    starsContainer.innerHTML += `<i class="fa-solid fa-star ${i <= stars ? 'text-amber-400' : 'text-slate-700'}"></i>`;
+                }
+
+                document.getElementById('modal-victory').classList.remove('hidden');
+            } else {
+                playSound('fail');
+            }
+        }
+
+        function closeVictoryModal() {
+            document.getElementById('modal-victory').classList.add('hidden');
+        }
+
+        function nextLevel() {
+            closeVictoryModal();
+            if (currentLevelIndex + 1 < LEVELS_DATA.length) {
+                loadLevel(currentLevelIndex + 1);
+            } else {
+                showLevelsSelect();
+            }
+        }
+
+        /* ARCADE MODE */
+        function startArcadeMode() {
+            activeGameMode = 'arcade';
+            loadLevel(0); // start from level 1 in speed run mode
+            document.getElementById('timer-box').classList.remove('hidden');
+            arcadeTimer = 45;
+            document.getElementById('game-timer').innerText = `${arcadeTimer}s`;
+
+            if (arcadeTimerInterval) clearInterval(arcadeTimerInterval);
+            arcadeTimerInterval = setInterval(() => {
+                arcadeTimer--;
+                document.getElementById('game-timer').innerText = `${arcadeTimer}s`;
+                if (arcadeTimer <= 0) {
+                    clearInterval(arcadeTimerInterval);
+                    playSound('fail');
+                    showModeSelect();
+                }
+            }, 1000);
+        }
+
+        function startSandboxMode() {
+            activeGameMode = 'sandbox';
+            hideAllViews();
+            document.getElementById('view-sandbox').classList.remove('hidden');
+            initSandbox();
+            playSound('click');
+        }
+
+        function initSandbox() {
+            renderSandboxGrid('A', sandboxA);
+            renderSandboxGrid('B', sandboxB);
+            calculateSandbox();
+        }
+
+        function renderSandboxGrid(gridName, gridData) {
+            const container = document.getElementById(`sandbox-grid-${gridName.toLowerCase()}`);
+            if (!container) return;
+            container.innerHTML = '';
+            gridData.forEach((val, idx) => {
+                const cell = document.createElement('div');
+                cell.className = `cell-btn rounded-md border border-slate-800 ${val === 1 ? 'bg-black' : 'bg-white'}`;
+                cell.onclick = () => {
+                    gridData[idx] = gridData[idx] === 1 ? 0 : 1;
+                    playSound('toggle');
+                    renderSandboxGrid(gridName, gridData);
+                    calculateSandbox();
+                };
+                container.appendChild(cell);
+            });
+        }
+
+        function randomizeSandboxGrid(gridName) {
+            const grid = gridName === 'A' ? sandboxA : sandboxB;
+            for (let i = 0; i < 16; i++) {
+                grid[i] = Math.random() > 0.5 ? 1 : 0;
+            }
+            renderSandboxGrid(gridName, grid);
+            calculateSandbox();
+            playSound('click');
+        }
+
+        function calculateSandbox() {
+            const op = document.getElementById('sandbox-op-select').value;
+            const res = [];
+            let blackCount = 0;
+
+            for (let i = 0; i < 16; i++) {
+                const a = sandboxA[i];
+                const b = sandboxB[i];
+                let val = 0;
+
+                if (op === 'XOR') val = a ^ b;
+                else if (op === 'AND') val = a & b;
+                else if (op === 'OR') val = a | b;
+                else if (op === 'NAND') val = (a & b) === 1 ? 0 : 1;
+                else if (op === 'NOR') val = (a | b) === 1 ? 0 : 1;
+                else if (op === 'XNOR') val = (a ^ b) === 1 ? 0 : 1;
+
+                res.push(val);
+                if (val === 1) blackCount++;
+            }
+
+            // Render result
+            const containerRes = document.getElementById('sandbox-grid-res');
+            containerRes.innerHTML = '';
+            res.forEach((val) => {
+                const cell = document.createElement('div');
+                cell.className = `rounded-lg border border-slate-800 ${val === 1 ? 'bg-black' : 'bg-white'}`;
+                containerRes.appendChild(cell);
+            });
+
+            document.getElementById('sandbox-black-count').innerText = blackCount;
+            document.getElementById('sandbox-binary-out-a').innerText = `A: ${JSON.stringify(sandboxA)}`;
+            document.getElementById('sandbox-binary-out-b').innerText = `B: ${JSON.stringify(sandboxB)}`;
+            document.getElementById('sandbox-binary-out-res').innerText = `R: ${JSON.stringify(res)}`;
+        }
+
+        /* STORAGE & HELP MODAL */
+        function toggleHelpModal() {
+            const modal = document.getElementById('modal-help');
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                playSound('click');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function saveProgressToStorage() {
+            try {
+                localStorage.setItem('cyber_logic_stars', JSON.stringify(starsEarned));
+                localStorage.setItem('cyber_logic_score', totalScore.toString());
+            } catch(e){}
+        }
+
+        function loadProgressFromStorage() {
+            try {
+                const savedStars = localStorage.getItem('cyber_logic_stars');
+                const savedScore = localStorage.getItem('cyber_logic_score');
+                if (savedStars) starsEarned = JSON.parse(savedStars);
+                if (savedScore) totalScore = parseInt(savedScore, 10);
+            } catch(e){}
+            updateStatsUI();
+        }
+
+        function updateStatsUI() {
+            let totalStars = 0;
+            Object.values(starsEarned).forEach(s => totalStars += s);
+            document.getElementById('stat-score').innerText = totalScore;
+            document.getElementById('stat-stars').innerText = `${totalStars}/45`;
+        }
+    </script>
+</body>
+</html>
