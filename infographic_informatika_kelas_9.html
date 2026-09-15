@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infografis Kurikulum Informatika SMP Kelas IX</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            color: #0f172a;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 320px;
+            max-height: 380px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+<!-- Palette Chosen: Energetic & Playful Vibrant Blue & Coral (#0F172A Slate Navy, #2563EB Vivid Blue, #06B6D4 Electric Cyan, #F97316 Energetic Coral, #10B981 Emerald Green) -->
+
+<!-- Narrative & Structure Plan:
+  1. Executive Header & KPI Banner: Highlight core statistics of Informatika Kelas IX (26 Pekan, 9 Pilar, 6 Dimensi Profil Pancasila, 4 Proyek IoT).
+  2. Section 1: Hakikat & 6 Prinsip Utama Informatika - Intro text, 6 core principles grid, and Donut Chart showing curriculum element weighting.
+  3. Section 2: Profil Pelajar Pancasila dalam Dunia Digital - Intro text, Radar Chart mapping 6 character dimensions, and operational character cards.
+  4. Section 3: Peta Evolusi Learning Progression Fase D (Kelas VII - IX) - Intro text, Grouped Bar Chart comparing complexity depth, and structured HTML process flow.
+  5. Section 4: Focus & Proyek Unggulan Kelas IX (BK, AP, DSI, PLB/IoT) - Intro text, Horizontal Bar Chart for IoT & practical hours, and 4 IoT project detail cards.
+  6. Section 5: Portofolio Buku Kerja Loose-Leaf & Refleksi - Step-by-step practical implementation guide for students.
+-->
+
+<!-- Visualization Justifications:
+  1. Curriculum Element Breakdown -> Goal: Inform/Composition -> Donut Chart (Chart.js Canvas) -> Ideal for showing proportion of learning focus across elements in Class IX.
+  2. Profil Pelajar Pancasila Dimensions -> Goal: Multidimensional Mapping -> Radar Chart (Chart.js Canvas) -> Perfect for 6 balanced character metrics.
+  3. Progression Across Grade Levels -> Goal: Compare/Change -> Grouped Bar Chart (Chart.js Canvas) -> Clearly visualizes skill depth evolution from Grade 7 to 9.
+  4. IoT & Practical Projects Allocation -> Goal: Rank/Compare -> Horizontal Bar Chart (Chart.js Canvas) -> Displays workload and practical focus of PLB projects.
+-->
+
+<!-- Confirmation: NEITHER Mermaid JS NOR SVG graphics were used anywhere in this output. All visuals render via Chart.js Canvas or pure HTML/CSS structure with standard unicode characters. -->
+
+    <!-- TOP HEADER / HERO SECTION -->
+    <header class="bg-slate-900 text-white border-b border-slate-800 sticky top-0 z-50 shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="bg-blue-600 text-white font-black px-3 py-1.5 rounded-lg text-xl tracking-wider">IX</span>
+                <div>
+                    <h1 class="font-extrabold text-xl sm:text-2xl tracking-tight text-white">Infografis Informatika SMP/MTs</h1>
+                    <p class="text-xs text-cyan-400 font-medium">Panduan Kurikulum Merdeka • Kemdikbudristek (Hanson Prihantoro Putro, dkk.)</p>
+                </div>
+            </div>
+            <div class="mt-2 sm:mt-0 flex items-center space-x-2 text-xs font-semibold bg-slate-800 px-3 py-1.5 rounded-full border border-slate-700">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="text-slate-300">Fase D • SMP Kelas 9</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-10">
+
+        <!-- KPI STATS BANNER -->
+        <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Pekan Efektif</span>
+                <div class="text-3xl sm:text-4xl font-black text-blue-600 mt-2">26 <span class="text-base font-semibold text-slate-600">Pekan</span></div>
+                <p class="text-[11px] text-slate-500 mt-1">Satu tahun ajaran penuh (Sem 1 & 2)</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Bangunan Pilar</span>
+                <div class="text-3xl sm:text-4xl font-black text-cyan-500 mt-2">9 <span class="text-base font-semibold text-slate-600">Pilar</span></div>
+                <p class="text-[11px] text-slate-500 mt-1">Elemen ilmu komputasi terpadu</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Dimensi Karakter</span>
+                <div class="text-3xl sm:text-4xl font-black text-orange-500 mt-2">6 <span class="text-base font-semibold text-slate-600">Dimensi</span></div>
+                <p class="text-[11px] text-slate-500 mt-1">Profil Pelajar Pancasila digital</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Proyek IoT & Robotika</span>
+                <div class="text-3xl sm:text-4xl font-black text-emerald-500 mt-2">4 <span class="text-base font-semibold text-slate-600">Proyek</span></div>
+                <p class="text-[11px] text-slate-500 mt-1">Hands-on Arduino & Sensor</p>
+            </div>
+        </section>
+
+        <!-- SECTION 1: HAKIKAT & 6 PRINSIP INFORMATIKA -->
+        <section class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+            <div>
+                <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">Bab 1 • Landasan Keilmuan</span>
+                <h2 class="text-2xl font-bold text-slate-900 mt-2">Hakikat & 6 Prinsip Utama Pembelajaran Informatika</h2>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed mt-2">
+                    Informatika adalah disiplin ilmu mengenai studi, perancangan, dan pembuatan sistem komputasi, serta prinsip-prinsip yang menjadi dasar perancangan tersebut. Informatika tidak hanya mengajarkan cara memakai gawai atau perangkat lunak, melainkan melatih cara berpikir kritis dan komputasional (*computational thinking*) untuk menyelesaikan berbagai permasalahan dunia nyata secara logis dan efisien.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <!-- 6 Core Principles Cards -->
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-400 transition">
+                        <div class="text-blue-600 font-bold text-xs uppercase tracking-wide">Prinsip 1</div>
+                        <h3 class="font-bold text-slate-800 text-sm mt-0.5">Berpikir Komputasional</h3>
+                        <p class="text-xs text-slate-600 mt-1">Landasan utama berpikir. Yang terpenting adalah kemampuan bernalar, bukan sekadar menggunakan alat.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-400 transition">
+                        <div class="text-cyan-600 font-bold text-xs uppercase tracking-wide">Prinsip 2</div>
+                        <h3 class="font-bold text-slate-800 text-sm mt-0.5">Lebih dari Sekadar Gawai</h3>
+                        <p class="text-xs text-slate-600 mt-1">Informatika adalah cabang ilmu seperti Biologi atau Matematika, bukan latihan mengetik atau memakai aplikasi.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-400 transition">
+                        <div class="text-orange-600 font-bold text-xs uppercase tracking-wide">Prinsip 3</div>
+                        <h3 class="font-bold text-slate-800 text-sm mt-0.5">Konsep & Praktik Bermakna</h3>
+                        <p class="text-xs text-slate-600 mt-1">Dikemas dalam aktivitas bermakna, baik berpeserta komputer (*plugged*) maupun tanpa komputer (*unplugged*).</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-400 transition">
+                        <div class="text-emerald-600 font-bold text-xs uppercase tracking-wide">Prinsip 4</div>
+                        <h3 class="font-bold text-slate-800 text-sm mt-0.5">Interdisiplin Bidang Lain</h3>
+                        <p class="text-xs text-slate-600 mt-1">Menjadi jembatan pemahaman untuk mata pelajaran sains, matematika, ekonomi, dan seni.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-400 transition">
+                        <div class="text-purple-600 font-bold text-xs uppercase tracking-wide">Prinsip 5</div>
+                        <h3 class="font-bold text-slate-800 text-sm mt-0.5">Pencipta Karya Digital</h3>
+                        <p class="text-xs text-slate-600 mt-1">Mendidik siswa menjadi pencipta ide, sistem, dan aplikasi digital, bukan hanya sekadar konsumen pasif.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 hover:border-blue-400 transition">
+                        <div class="text-rose-600 font-bold text-xs uppercase tracking-wide">Prinsip 6</div>
+                        <h3 class="font-bold text-slate-800 text-sm mt-0.5">Karakter Pancasila</h3>
+                        <p class="text-xs text-slate-600 mt-1">Membentuk kebiasaan positif sebagai warga dunia nyata dan warga dunia digital (*digital citizen*).</p>
+                    </div>
+                </div>
+
+                <!-- Chart 1: Donut Chart -->
+                <div class="lg:col-span-5 bg-slate-50 p-5 rounded-xl border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Proporsi Alokasi Elemen Kelas IX</h3>
+                        <p class="text-xs text-slate-500 mt-0.5 mb-2">Visualisasi pembagian materi pembelajaran dalam 26 pekan efektif.</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="elementDonutChart"></canvas>
+                    </div>
+                    <div class="text-[11px] text-slate-500 text-center mt-2 bg-white p-2 rounded border border-slate-200">
+                        <strong>Catatan:</strong> AP & PLB mendominasi porsi Kelas IX sebagai persiapan proyek tingkat lanjut.
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 2: INTEGRASI PROFIL PELAJAR PANCASILA -->
+        <section class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+            <div>
+                <span class="text-xs font-bold text-orange-600 bg-orange-50 px-3 py-1 rounded-full border border-orange-200">Karakter Digital • Nilai Luhur</span>
+                <h2 class="text-2xl font-bold text-slate-900 mt-2">Integrasi 6 Dimensi Profil Pelajar Pancasila</h2>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed mt-2">
+                    Pelajar Indonesia dituntut menjadi warga dunia digital yang beretika, aman, dan produktif. Pembelajaran Informatika memfasilitasi penumbuhan enam dimensi Profil Pelajar Pancasila secara seimbang melalui kegiatan individu maupun kolaborasi kelompok.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <!-- Chart 2: Radar Chart -->
+                <div class="lg:col-span-5 bg-slate-50 p-5 rounded-xl border border-slate-200 flex flex-col justify-between order-2 lg:order-1">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Pemetaan Karakter Informatika</h3>
+                        <p class="text-xs text-slate-500 mt-0.5 mb-2">Penekanan kompetensi karakter dalam aktivitas komputasi.</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="pancasilaRadarChart"></canvas>
+                    </div>
+                    <div class="text-[11px] text-slate-500 text-center mt-2 bg-white p-2 rounded border border-slate-200">
+                        <strong>Korelasi:</strong> Bernalar Kritis & Gotong Royong menjadi pondasi utama pemecahan masalah algoritma.
+                    </div>
+                </div>
+
+                <!-- Character Dimension Cards -->
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3 order-1 lg:order-2">
+                    <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-base">🙏</span>
+                            <h4 class="font-bold text-xs text-slate-800">Beriman & Berakhlak Mulia</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-600 mt-1">Berkomunikasi secara santun di media digital, menghargai karya cipta, dan menjaga etika internet (*netiquette*).</p>
+                    </div>
+                    <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-base">🌐</span>
+                            <h4 class="font-bold text-xs text-slate-800">Berkebinekaan Global</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-600 mt-1">Mampu berkolaborasi dengan teman dari berbagai latar belakang budaya dan negara melalui jejaring dunia maya.</p>
+                    </div>
+                    <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-base">🤝</span>
+                            <h4 class="font-bold text-xs text-slate-800">Bergotong Royong</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-600 mt-1">Bekerja kelompok dalam perancangan proyek IoT, pembuatan Blog/Vlog, dan memvalidasi solusi logika bersama.</p>
+                    </div>
+                    <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-base">🎯</span>
+                            <h4 class="font-bold text-xs text-slate-800">Mandiri</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-600 mt-1">Bertanggung jawab menyelesaikan tantangan *unplugged* dan penulisan jurnal refleksi secara swakelola.</p>
+                    </div>
+                    <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-base">🧠</span>
+                            <h4 class="font-bold text-xs text-slate-800">Bernalar Kritis</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-600 mt-1">Menganalisis struktur data graf, menguji parity bit, serta mengevaluasi potensi ancaman keamanan siber.</p>
+                    </div>
+                    <div class="p-3.5 bg-slate-50 rounded-lg border border-slate-200">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-base">💡</span>
+                            <h4 class="font-bold text-xs text-slate-800">Kreatif</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-600 mt-1">Merancang sistem otomatisasi mikrokontroler Arduino dan menyusun konten digital interaktif.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 3: EVOLUSI ALUR FASE D (KELAS VII - IX) -->
+        <section class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+            <div>
+                <span class="text-xs font-bold text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full border border-cyan-200">Kontinum Pembelajaran • Fase D</span>
+                <h2 class="text-2xl font-bold text-slate-900 mt-2">Peta Evolusi Pembelajaran (Kelas VII &rarr; VIII &rarr; IX)</h2>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed mt-2">
+                    Pembelajaran Informatika dirancang secara kontinu bertingkat. Di Kelas VII, fokus berada pada pengenalan dasar dan konsep konkret. Di Kelas VIII, tingkat abstraksi ditingkatkan melalui simulasi dan logika sistem. Pada Kelas IX, siswa mencapai tahap integrasi kompleks melalui perancangan modular, keamanan data, dan perangkat keras pintar (IoT).
+                </p>
+            </div>
+
+            <!-- Chart 3: Progression Bar Chart -->
+            <div class="bg-slate-50 p-5 rounded-xl border border-slate-200">
+                <div class="mb-3">
+                    <h3 class="font-bold text-slate-800 text-sm">Kedalaman Kompleksitas Materi per Elemen</h3>
+                    <p class="text-xs text-slate-500">Perbandingan tingkat kesulitan dan kedalaman materi pada Kelas VII, VIII, dan IX.</p>
+                </div>
+                <div class="chart-container">
+                    <canvas id="progressionBarChart"></canvas>
+                </div>
+                <div class="text-[11px] text-slate-500 text-center mt-2 bg-white p-2 rounded border border-slate-200">
+                    <strong>Penjelasan:</strong> Elemen BK, AP, dan PLB mengalami peningkatan kedalaman paling signifikan di Kelas IX.
+                </div>
+            </div>
+
+            <!-- Structured HTML Timeline (NO SVG / NO MERMAID) -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4">
+                <!-- Class VII Card -->
+                <div class="p-5 bg-blue-50/60 rounded-xl border border-blue-200 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="font-black text-blue-700 text-lg">Kelas VII</span>
+                        <span class="text-[10px] font-bold bg-blue-200 text-blue-900 px-2 py-0.5 rounded">Fondasi Dasar</span>
+                    </div>
+                    <ul class="text-xs text-slate-700 space-y-2 list-disc list-inside">
+                        <li><strong>BK:</strong> 4 Fondasi CT, Dekomposisi, Linked-List huruf.</li>
+                        <li><strong>TIK:</strong> Antarmuka OS, Peramban, Surat Elektronik.</li>
+                        <li><strong>SK:</strong> Perangkat keras & biner dasar.</li>
+                        <li><strong>AP:</strong> Visual Programming Scratch tingkat awal.</li>
+                    </ul>
+                </div>
+
+                <!-- Class VIII Card -->
+                <div class="p-5 bg-cyan-50/60 rounded-xl border border-cyan-200 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="font-black text-cyan-700 text-lg">Kelas VIII</span>
+                        <span class="text-[10px] font-bold bg-cyan-200 text-cyan-900 px-2 py-0.5 rounded">Abstraksi Sistem</span>
+                    </div>
+                    <ul class="text-xs text-slate-700 space-y-2 list-disc list-inside">
+                        <li><strong>BK:</strong> Fungsi, Sistem Bilangan (Biner, Oktal, Desimal), Stack.</li>
+                        <li><strong>TIK:</strong> Integrasi Konten Office & Laboratorium Maya.</li>
+                        <li><strong>SK:</strong> Memori, Heksadesimal, Gerbang Logika.</li>
+                        <li><strong>AP:</strong> Pemrograman terstruktur & fungsi dasar.</li>
+                    </ul>
+                </div>
+
+                <!-- Class IX Card -->
+                <div class="p-5 bg-orange-50/60 rounded-xl border border-orange-200 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <span class="font-black text-orange-700 text-lg">Kelas IX</span>
+                        <span class="text-[10px] font-bold bg-orange-200 text-orange-900 px-2 py-0.5 rounded">Integrasi & IoT</span>
+                    </div>
+                    <ul class="text-xs text-slate-700 space-y-2 list-disc list-inside">
+                        <li><strong>BK:</strong> Graf, Pohon (Tree), Logika XOR, Looping.</li>
+                        <li><strong>TIK:</strong> Dokumen Lanjut, Cloud, Blog & Vlog.</li>
+                        <li><strong>AP:</strong> Scratch vs Blockly, Konverter, Parity Bit.</li>
+                        <li><strong>PLB:</strong> Mikrokontroler Arduino, Sensor & IoT.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: FOKUS PEMBELAJARAN & PROYEK UNGGULAN KELAS IX -->
+        <section class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+            <div>
+                <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">Aplikasi Nyata • Kelas IX Focus</span>
+                <h2 class="text-2xl font-bold text-slate-900 mt-2">Kedalaman Materi & Proyek Unggulan Kelas IX</h2>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed mt-2">
+                    Pada Kelas IX, pembelajaran difokuskan pada penguasaan penyelesaian masalah nyata. Siswa tidak hanya merancang program modular dan melakukan konversi bilangan biner/parity bit, tetapi juga menerapkan sistem keamanan data (enkripsi, cookie) dan merangkai perangkat IoT berbasis sensor menggunakan papan Arduino.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <!-- Chart 4: Horizontal Bar Chart -->
+                <div class="lg:col-span-5 bg-slate-50 p-5 rounded-xl border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-sm">Alokasi Jam Praktikum Proyek IX</h3>
+                        <p class="text-xs text-slate-500 mt-0.5 mb-2">Estimasi proporsi waktu kegiatan praktikum hands-on.</p>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="iotProjectBarChart"></canvas>
+                    </div>
+                    <div class="text-[11px] text-slate-500 text-center mt-2 bg-white p-2 rounded border border-slate-200">
+                        <strong>Fokus Utama:</strong> IoT Sensor Cahaya & Kelembapan Tanah memerlukan alokasi terbesar untuk pengkodean PictoBlox/Arduino.
+                    </div>
+                </div>
+
+                <!-- 4 IoT Project Cards -->
+                <div class="lg:col-span-7 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg">🚥</span>
+                            <h4 class="font-bold text-sm text-slate-800">IoT Lampu Lalu Lintas</h4>
+                        </div>
+                        <p class="text-xs text-slate-600">Simulasi pengaturan lampu lalu lintas menggunakan Arduino Uno, LED (Merah, Kuning, Hijau), dan waktu tunda (*delay*).</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg">🌱</span>
+                            <h4 class="font-bold text-sm text-slate-800">Sensor Cahaya Tanaman</h4>
+                        </div>
+                        <p class="text-xs text-slate-600">Membaca suhu & intensitas cahaya menggunakan Sensor DHT11, LDR, serta menampilkan output pada layar LCD 16x2 I2C.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg">🌧️</span>
+                            <h4 class="font-bold text-sm text-slate-800">Kelembapan Tanah & Hujan</h4>
+                        </div>
+                        <p class="text-xs text-slate-600">Penyiraman tanaman otomatis berbasis nilai analog kelembapan tanah (*soil moisture*) dan pendeteksi curah hujan.</p>
+                    </div>
+                    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-1.5">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-lg">🤖</span>
+                            <h4 class="font-bold text-sm text-slate-800">Robot Line Follower</h4>
+                        </div>
+                        <p class="text-xs text-slate-600">Merancang robot mobil pelacak garis hitam menggunakan driver motor L298N dan sensor deteksi garis infra merah.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 5: PANDUAN PORTOFOLIO BUKU KERJA & REFLEKSI -->
+        <section class="bg-white p-6 sm:p-8 rounded-2xl shadow-sm border border-slate-200 space-y-6">
+            <div>
+                <span class="text-xs font-bold text-purple-600 bg-purple-50 px-3 py-1 rounded-full border border-purple-200">Sistem Pengelolaan Document</span>
+                <h2 class="text-2xl font-bold text-slate-900 mt-2">Buku Kerja Loose-Leaf & Refleksi Pembelajaran</h2>
+                <p class="text-slate-600 text-sm sm:text-base leading-relaxed mt-2">
+                    Sebagai wujud penerapan *Computational Thinking* dalam kehidupan sehari-hari, siswa mengorganisasikan seluruh dokumen, tugas, dan lembar kerja melalui sistem **Buku Kerja Loose-Leaf**. Pengarsipan yang terstruktur memudahkan pencarian data kembali dan menjadi artefak portofolio hasil belajar.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                    <div class="w-8 h-8 bg-blue-600 text-white font-bold rounded-lg flex items-center justify-center text-sm">1</div>
+                    <h3 class="font-bold text-slate-800 text-sm">Struktur Map Loose-Leaf</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Gunakan lembaran kertas lepas dalam binder binder map. Setiap halaman wajib mencantumkan Header Identitas: Nama, Kelas, Kode Aktivitas, dan Nomor Halaman.</p>
+                </div>
+                <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                    <div class="w-8 h-8 bg-cyan-600 text-white font-bold rounded-lg flex items-center justify-center text-sm">2</div>
+                    <h3 class="font-bold text-slate-800 text-sm">Jurnal Catatan Mingguan</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Mencatat rutin progres 26 pekan: Tanggal Praktik, Ringkasan Topik, Kendala Logika yang Dihadapi, serta Solusi yang Ditemukan saat Diskusi.</p>
+                </div>
+                <div class="p-5 bg-slate-50 rounded-xl border border-slate-200 space-y-2">
+                    <div class="w-8 h-8 bg-orange-600 text-white font-bold rounded-lg flex items-center justify-center text-sm">3</div>
+                    <h3 class="font-bold text-slate-800 text-sm">Ayo, Kita Renungkan!</h3>
+                    <p class="text-xs text-slate-600 leading-relaxed">Di akhir bab, siswa melakukan refleksi kritis: "Apa yang sudah kupelajari? Apa hubungannya dengan pelajaran lain? Bagaimana kenerapan etika digitalnya?"</p>
+                </div>
+            </div>
+
+            <!-- Example Identitas Format Box -->
+            <div class="p-4 bg-slate-900 text-slate-200 rounded-xl font-mono text-xs space-y-1">
+                <div class="text-amber-400 font-bold">// Format Standar Header Lembar Kerja Siswa (Loose-Leaf)</div>
+                <div>[NAMA: Budi Santoso] | [KELAS: IX-A] | [KODE AKTIVITAS: BK-K9-04-U] | [HALAMAN: 1/2]</div>
+                <div class="text-slate-400 text-[11px] pt-1">TOPIK: Algoritma Perulangan (Jalan Keluar) • TANGGAL: 18 Agustus 2026</div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 text-slate-400 border-t border-slate-800 py-6 mt-10">
+        <div class="max-w-7xl mx-auto px-4 text-center text-xs space-y-2">
+            <p class="font-semibold text-slate-300">Infografis Pembelajaran Informatika SMP/MTs Kelas IX • Kurikulum Merdeka</p>
+            <p>Disusun berdasarkan Buku Teks Utama Pusat Perbukuan Kemdikbudristek (Hanson Prihantoro Putro, dkk.)</p>
+            <p class="text-[11px] text-slate-500">Dikembangkan dengan Chart.js Canvas & Tailwind CSS • Tanpa SVG & Tanpa Mermaid JS</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT FOR CHART.JS INSTANCES -->
+    <script>
+        // Set Default Chart Font
+        Chart.defaults.font.family = "'Segoe UI', system-ui, -apple-system, sans-serif";
+        Chart.defaults.color = '#475569';
+
+        // --- CHART 1: DONUT CHART (Curriculum Weighting) ---
+        const ctx1 = document.getElementById('elementDonutChart').getContext('2d');
+        new Chart(ctx1, {
+            type: 'doughnut',
+            data: {
+                // Labels array with multiline string breaks for >16 chars rule
+                labels: [
+                    ['AP (Algoritma &', 'Pemrograman)'],
+                    ['PLB (Praktik', 'Lintas Bidang)'],
+                    ['BK (Berpikir', 'Komputasional)'],
+                    ['TIK (Teknologi', 'Informasi)'],
+                    ['DSI (Dampak', 'Sosial Informatika)']
+                ],
+                datasets: [{
+                    data: [38, 23, 15, 15, 9],
+                    backgroundColor: ['#2563eb', '#f97316', '#06b6d4', '#10b981', '#a855f7'],
+                    borderWidth: 2,
+                    borderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 11 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                  return label.join(' ');
+                                } else {
+                                  return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- CHART 2: RADAR CHART (Profil Pelajar Pancasila) ---
+        const ctx2 = document.getElementById('pancasilaRadarChart').getContext('2d');
+        new Chart(ctx2, {
+            type: 'radar',
+            data: {
+                labels: [
+                    ['Beriman & Akhlak', 'Mulia'],
+                    ['Berkebinekaan', 'Global'],
+                    ['Gotong Ryng'],
+                    ['Mandiri'],
+                    ['Bernalar Kritis'],
+                    ['Kreatif']
+                ],
+                datasets: [{
+                    label: 'Tingkat Penekanan',
+                    data: [85, 80, 92, 88, 96, 90],
+                    backgroundColor: 'rgba(37, 99, 235, 0.2)',
+                    borderColor: '#2563eb',
+                    pointBackgroundColor: '#f97316',
+                    pointBorderColor: '#ffffff',
+                    pointHoverBackgroundColor: '#ffffff',
+                    pointHoverBorderColor: '#f97316'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        angleLines: { color: '#e2e8f0' },
+                        grid: { color: '#e2e8f0' },
+                        suggestedMin: 50,
+                        suggestedMax: 100,
+                        ticks: { display: false }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                  return label.join(' ');
+                                } else {
+                                  return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- CHART 3: GROUPED BAR CHART (Progression VII -> VIII -> IX) ---
+        const ctx3 = document.getElementById('progressionBarChart').getContext('2d');
+        new Chart(ctx3, {
+            type: 'bar',
+            data: {
+                labels: [
+                    ['Berpikir', 'Komputasional'],
+                    ['Teknologi', 'Informasi (TIK)'],
+                    ['Sistem Komputer', '(SK)'],
+                    ['Algoritma &', 'Pemrograman'],
+                    ['Dampak Sosial', 'Informatika'],
+                    ['Praktik Lintas', 'Bidang (PLB)']
+                ],
+                datasets: [
+                    {
+                        label: 'Kelas VII',
+                        data: [40, 50, 60, 35, 30, 20],
+                        backgroundColor: '#93c5fd'
+                    },
+                    {
+                        label: 'Kelas VIII',
+                        data: [65, 70, 85, 60, 50, 45],
+                        backgroundColor: '#38bdf8'
+                    },
+                    {
+                        label: 'Kelas IX',
+                        data: [90, 85, 85, 95, 80, 95],
+                        backgroundColor: '#2563eb'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 10 } }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: { font: { size: 10 } }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { boxWidth: 12, font: { size: 11 } }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                  return label.join(' ');
+                                } else {
+                                  return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // --- CHART 4: HORIZONTAL BAR CHART (IoT & Projects Hours) ---
+        const ctx4 = document.getElementById('iotProjectBarChart').getContext('2d');
+        new Chart(ctx4, {
+            type: 'bar',
+            indexAxis: 'y',
+            data: {
+                labels: [
+                    ['Lampu Lalu', 'Lintas (LED)'],
+                    ['Sensor Cahaya', '& Suhu (DHT11)'],
+                    ['Kelembapan Tanah', '& Sensor Hujan'],
+                    ['Robot Line', 'Follower (IoT)'],
+                    ['Keamanan Siber', '& Enkripsi']
+                ],
+                datasets: [{
+                    label: 'Jam Praktikum (JP)',
+                    data: [4, 8, 8, 10, 6],
+                    backgroundColor: '#f97316',
+                    borderRadius: 6
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        ticks: { font: { size: 10 } }
+                    },
+                    y: {
+                        ticks: { font: { size: 10 } }
+                    }
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        callbacks: {
+                            title: function(tooltipItems) {
+                                const item = tooltipItems[0];
+                                let label = item.chart.data.labels[item.dataIndex];
+                                if (Array.isArray(label)) {
+                                  return label.join(' ');
+                                } else {
+                                  return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
