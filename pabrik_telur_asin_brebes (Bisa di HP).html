@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pabrik Telur Asin Brebes - Belajar Algoritma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f3f4f6; /* Gray-100 */
+        }
+        
+        .egg-container {
+            position: relative;
+            width: 120px;
+            height: 160px;
+            margin: 0 auto;
+        }
+
+        .egg {
+            width: 100%;
+            height: 100%;
+            background-color: #fff9e6; /* Telur mentah */
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            box-shadow: inset -15px -15px 20px rgba(0,0,0,0.1), 0 10px 15px rgba(0,0,0,0.2);
+            transition: all 0.5s ease;
+            position: absolute;
+            bottom: 0;
+            z-index: 2;
+        }
+
+        .egg.clean {
+            background-color: #ffffff; /* Telur bersih */
+        }
+
+        .egg.salted {
+            background-color: #8b5a2b; /* Telur dibalur abu gosok/garam (coklat) */
+        }
+
+        .egg.boiled {
+            background-color: #a4c3b2; /* Telur asin matang (biru kehijauan) */
+            box-shadow: inset -15px -15px 20px rgba(0,0,0,0.2), 0 10px 15px rgba(0,0,0,0.3);
+        }
+        
+        .egg.failed {
+             background-color: #ef4444; /* Gagal (merah) */
+        }
+
+        /* Elemen tambahan (Sikat, Garam, Panci) */
+        .tool-animation {
+            position: absolute;
+            font-size: 3rem;
+            z-index: 3;
+            opacity: 0;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.3s;
+        }
+
+        .animating-brush { animation: scrub 1s infinite alternate; opacity: 1; }
+        .animating-salt { animation: sprinkle 1.5s infinite; opacity: 1; color: white; text-shadow: 1px 1px 2px black;}
+        .animating-boil { animation: boiling 0.5s infinite alternate; opacity: 1; color: #ef4444; }
+
+        @keyframes scrub {
+            0% { transform: translate(-80%, -50%) rotate(-15deg); }
+            100% { transform: translate(-20%, -50%) rotate(15deg); }
+        }
+
+        @keyframes sprinkle {
+            0% { transform: translate(-50%, -100%); opacity: 0; }
+            50% { opacity: 1; }
+            100% { transform: translate(-50%, 0); opacity: 0; }
+        }
+
+        @keyframes boiling {
+            0% { transform: translate(-50%, -40%); }
+            100% { transform: translate(-50%, -60%); }
+        }
+
+        /* Blocks Workspace */
+        .block-list {
+            min-height: 50px;
+            padding: 10px;
+            background: #e5e7eb;
+            border-radius: 8px;
+            border: 2px dashed #9ca3af;
+        }
+
+        .code-block {
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            color: white;
+            font-weight: 600;
+            cursor: grab;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .code-block:active { cursor: grabbing; }
+        .block-action { background-color: #3b82f6; } /* Blue */
+        .block-condition { background-color: #f59e0b; } /* Yellow */
+        .block-loop { background-color: #10b981; } /* Green */
+        
+        .remove-btn {
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            width: 24px; height: 24px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer;
+        }
+        .remove-btn:hover { background: rgba(255,0,0,0.5); }
+
+        /* Custom Modal */
+        #custom-modal { display: none; }
+        #custom-modal.active { display: flex; }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col bg-gray-50">
+
+    <header class="bg-teal-600 text-white p-4 shadow-md z-10 relative">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold"><i class="fa-solid fa-egg mr-2"></i> Pabrik Telur Asin Brebes</h1>
+            <div class="flex items-center space-x-4">
+                <span id="level-indicator" class="font-semibold bg-teal-800 px-3 py-1 rounded-full text-sm">Level: 1</span>
+                <button onclick="showInstructions()" class="bg-teal-500 hover:bg-teal-400 px-3 py-1 rounded-full text-sm transition">
+                    <i class="fa-solid fa-circle-info mr-1"></i> Bantuan
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 w-full max-w-6xl mx-auto p-4 flex flex-col md:flex-row gap-6">
+        
+        <!-- Left Panel: Problem & Visualizer -->
+        <div class="w-full md:w-1/2 flex flex-col gap-4">
+            
+            <!-- Problem Description -->
+            <div class="bg-white p-6 rounded-xl shadow-lg border-l-4 border-teal-500">
+                <h2 class="text-lg font-bold mb-2 text-teal-700" id="level-title">Misi: Cuci Telur</h2>
+                <p id="level-desc" class="text-gray-600 text-sm mb-4">
+                    Telur bebek baru saja datang dari peternakan. Kita harus mencucinya agar bersih sebelum diasinkan.
+                </p>
+                <div class="bg-blue-50 p-3 rounded text-sm text-blue-800 border border-blue-200">
+                    <strong>Tujuan:</strong> <span id="level-goal">Gunakan blok "Cuci Telur".</span>
+                </div>
+            </div>
+
+            <!-- Visualization Area -->
+            <div class="bg-white flex-1 p-6 rounded-xl shadow-lg flex flex-col items-center justify-center relative overflow-hidden">
+                <h3 class="text-sm font-bold text-gray-400 absolute top-4 left-4 uppercase tracking-wider">Mesin Pabrik</h3>
+                
+                <div class="egg-container mb-8">
+                    <div id="the-egg" class="egg"></div>
+                    <!-- Tools Animation overlays -->
+                    <i id="anim-brush" class="fa-solid fa-brush tool-animation text-gray-600"></i>
+                    <i id="anim-salt" class="fa-solid fa-cubes-stacked tool-animation"></i>
+                    <i id="anim-boil" class="fa-solid fa-fire tool-animation"></i>
+                </div>
+
+                <div id="status-message" class="text-lg font-semibold text-center h-8 transition-colors duration-300">
+                    Menunggu program...
+                </div>
+                
+                <!-- Status Indicators -->
+                <div class="flex gap-4 mt-6 text-sm">
+                    <div class="flex flex-col items-center">
+                        <div id="ind-clean" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mb-1 text-gray-400"><i class="fa-solid fa-droplet"></i></div>
+                        <span class="text-xs">Bersih</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div id="ind-salt" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mb-1 text-gray-400"><i class="fa-solid fa-cube"></i></div>
+                        <span class="text-xs">Asin</span>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <div id="ind-boil" class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mb-1 text-gray-400"><i class="fa-solid fa-fire-burner"></i></div>
+                        <span class="text-xs">Matang</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel: Workspace -->
+        <div class="w-full md:w-1/2 bg-white rounded-xl shadow-lg flex flex-col border border-gray-200 min-h-[500px]">
+            <div class="bg-gray-800 text-white p-3 flex justify-between items-center">
+                <h2 class="font-bold"><i class="fa-solid fa-code mr-2"></i> Ruang Algoritma</h2>
+                <div class="text-xs bg-gray-700 px-2 py-1 rounded text-center">Seret (Drag) / Ketuk (Tap) blok</div>
+            </div>
+            
+            <div class="flex-1 flex flex-col p-4 gap-4 overflow-y-auto">
+                
+                <!-- Available Blocks (Palette) -->
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-500 mb-2 uppercase">Blok Tersedia</h3>
+                    <div id="block-palette" class="flex flex-wrap gap-2" ondragover="allowDrop(event)" ondrop="dropPalette(event)">
+                        <!-- Blocks will be injected here based on level -->
+                    </div>
+                </div>
+
+                <!-- User Workspace -->
+                <div class="flex-1 flex flex-col">
+                    <div class="flex justify-between items-end mb-2">
+                        <h3 class="text-sm font-semibold text-gray-500 uppercase">Program Kamu</h3>
+                        <button onclick="clearWorkspace()" class="text-xs text-red-500 hover:text-red-700"><i class="fa-solid fa-trash mr-1"></i>Hapus Semua</button>
+                    </div>
+                    
+                    <div id="workspace" class="block-list flex-1" ondragover="allowDrop(event)" ondrop="dropWorkspace(event)">
+                        <!-- Dropped blocks go here -->
+                        <div class="text-center text-gray-400 mt-4 text-sm pointer-events-none" id="workspace-placeholder">
+                            Tarik atau Ketuk blok untuk menyusun algoritma
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="p-4 bg-gray-50 border-t border-gray-200 flex gap-3">
+                <button onclick="runProgram()" id="run-btn" class="flex-1 bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow transition flex justify-center items-center">
+                    <i class="fa-solid fa-play mr-2"></i> Jalankan Pabrik
+                </button>
+                <button onclick="resetEgg()" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg shadow transition">
+                    <i class="fa-solid fa-rotate-right"></i> Reset
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Custom Modal for Alerts/Messages -->
+    <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 transform transition-all scale-100">
+            <div id="modal-icon" class="text-5xl mb-4 text-center">🏆</div>
+            <h3 id="modal-title" class="text-2xl font-bold text-center mb-2">Level Selesai!</h3>
+            <p id="modal-desc" class="text-gray-600 text-center mb-6">Kerja bagus! Algoritmamu berhasil membuat telur asin yang sempurna.</p>
+            <div class="flex justify-center gap-3">
+                <button id="modal-btn-retry" onclick="closeModal()" class="hidden bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-6 rounded-lg transition">Coba Lagi</button>
+                <button id="modal-btn-next" onclick="nextLevel()" class="bg-teal-500 hover:bg-teal-600 text-white font-bold py-2 px-6 rounded-lg transition shadow-lg">Level Selanjutnya</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- GAME STATE & LEVELS DEFINITION ---
+        let currentLevel = 0;
+        let isRunning = false;
+        
+        // Egg State
+        let eggState = {
+            isClean: false,
+            isSalted: false,
+            isBoiled: false,
+            isRuined: false
+        };
+
+        // All available blocks definition
+        const ALL_BLOCKS = {
+            'action-wash': { id: 'action-wash', text: 'Cuci Telur', type: 'action', icon: 'fa-droplet' },
+            'action-salt': { id: 'action-salt', text: 'Balur Garam & Abu', type: 'action', icon: 'fa-cube' },
+            'action-boil': { id: 'action-boil', text: 'Rebus Telur', type: 'action', icon: 'fa-fire-burner' },
+            'cond-dirty': { id: 'cond-dirty', text: 'Jika (Telur Kotor)', type: 'condition', icon: 'fa-question-circle', wraps: true },
+            'loop-3': { id: 'loop-3', text: 'Ulangi 3 Kali (Simulasi)', type: 'loop', icon: 'fa-rotate-right', wraps: true } // Simplified loop for visual
+        };
+
+        const LEVELS = [
+            {
+                title: "Level 1: Urutan (Sequence)",
+                desc: "Algoritma adalah langkah-langkah yang <b>berurutan</b>. Untuk membuat telur asin, kita harus: 1. Mencuci, 2. Membalur Garam, 3. Merebus.<br>Susun blok secara berurutan!",
+                goal: "Gunakan Cuci, Balur, lalu Rebus secara berurutan.",
+                availableBlocks: ['action-wash', 'action-salt', 'action-boil'],
+                expectedSequence: ['action-wash', 'action-salt', 'action-boil']
+            },
+            {
+                title: "Level 2: Percabangan (If)",
+                desc: "Terkadang kita perlu membuat keputusan. Cek dulu, <b>JIKA</b> telur kotor, maka cuci. Setelah itu balur garam dan rebus.",
+                goal: "Gunakan blok 'Jika (Telur Kotor)' sebelum blok Cuci, dilanjutkan Balur dan Rebus.",
+                availableBlocks: ['cond-dirty', 'action-wash', 'action-salt', 'action-boil'],
+                expectedSequence: ['cond-dirty', 'action-wash', 'action-salt', 'action-boil']
+            }
+        ];
+
+        // --- STREAMING_CHUNK:Implementing UI & Drag-Drop Functions ---
+        
+        function initLevel() {
+            if (currentLevel >= LEVELS.length) {
+                showModal("🎉 Selamat!", "Kamu telah menyelesaikan semua misi pabrik telur asin! Kamu sudah paham dasar urutan dan percabangan dalam algoritma.", true);
+                return;
+            }
+
+            const level = LEVELS[currentLevel];
+            document.getElementById('level-indicator').innerText = `Level: ${currentLevel + 1}`;
+            document.getElementById('level-title').innerHTML = level.title;
+            document.getElementById('level-desc').innerHTML = level.desc;
+            document.getElementById('level-goal').innerHTML = level.goal;
+
+            renderPalette(level.availableBlocks);
+            clearWorkspace();
+            resetEgg();
+        }
+
+        function renderPalette(blockIds) {
+            const palette = document.getElementById('block-palette');
+            palette.innerHTML = '';
+            blockIds.forEach(id => {
+                const blockDef = ALL_BLOCKS[id];
+                palette.appendChild(createBlockElement(blockDef, false));
+            });
+        }
+
+        function createBlockElement(blockDef, inWorkspace = false) {
+            const div = document.createElement('div');
+            // Basic class styling
+            let bgClass = '';
+            if(blockDef.type === 'action') bgClass = 'block-action';
+            if(blockDef.type === 'condition') bgClass = 'block-condition';
+            if(blockDef.type === 'loop') bgClass = 'block-loop';
+
+            div.className = `code-block ${bgClass}`;
+            div.id = `block-${blockDef.id}-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`; // Unique ID for dropping duplicates
+            div.setAttribute('draggable', 'true');
+            div.setAttribute('data-type', blockDef.id); // Store original ID type
+            
+            div.addEventListener('dragstart', dragStart);
+
+            let innerHTML = `<span><i class="fa-solid ${blockDef.icon} mr-2"></i> ${blockDef.text}</span>`;
+            
+            if (inWorkspace) {
+                innerHTML += `<div class="remove-btn" onclick="removeBlock(this)"><i class="fa-solid fa-xmark text-sm"></i></div>`;
+            } else {
+                // Tambahan: Fitur Tap/Klik untuk HP
+                div.onclick = function() {
+                    if(!isRunning) addBlockToWorkspace(blockDef.id);
+                };
+                div.title = "Ketuk untuk menambahkan ke ruang kerja";
+            }
+            
+            div.innerHTML = innerHTML;
+            return div;
+        }
+
+        // Fungsi baru untuk memasukkan blok via Tap/Klik
+        function addBlockToWorkspace(blockId) {
+            if(isRunning) return;
+            const blockDef = ALL_BLOCKS[blockId];
+            const newBlock = createBlockElement(blockDef, true);
+            document.getElementById('workspace').appendChild(newBlock);
+            document.getElementById('workspace-placeholder').style.display = 'none';
+        }
+
+        // Drag and Drop Events
+        function dragStart(e) {
+            if(isRunning) { e.preventDefault(); return; }
+            e.dataTransfer.setData('text/plain', e.target.id);
+            // Detect if dragging from palette or workspace
+            e.dataTransfer.setData('source', e.target.parentElement.id);
+        }
+
+        function allowDrop(e) {
+            if(isRunning) return;
+            e.preventDefault();
+        }
+
+        function dropWorkspace(e) {
+            e.preventDefault();
+            if(isRunning) return;
+            
+            const data = e.dataTransfer.getData('text/plain');
+            const sourceId = e.dataTransfer.getData('source');
+            const draggedElement = document.getElementById(data);
+            
+            document.getElementById('workspace-placeholder').style.display = 'none';
+
+            if (sourceId === 'block-palette') {
+                // Clone if from palette
+                const blockType = draggedElement.getAttribute('data-type');
+                const newBlock = createBlockElement(ALL_BLOCKS[blockType], true);
+                document.getElementById('workspace').appendChild(newBlock);
+            } else if (sourceId === 'workspace' && e.target.id === 'workspace') {
+                 // Reorder within workspace (simplified: just append to end for now)
+                 // A more complex implementation would calculate drop position
+                 document.getElementById('workspace').appendChild(draggedElement);
+            } else if (sourceId === 'workspace' && e.target.closest('.code-block')) {
+                 // Insert before another block
+                 const targetBlock = e.target.closest('.code-block');
+                 document.getElementById('workspace').insertBefore(draggedElement, targetBlock);
+            }
+        }
+
+        function dropPalette(e) {
+             e.preventDefault();
+             if(isRunning) return;
+             const data = e.dataTransfer.getData('text/plain');
+             const sourceId = e.dataTransfer.getData('source');
+             
+             // If dragged from workspace to palette, remove it
+             if (sourceId === 'workspace') {
+                 const el = document.getElementById(data);
+                 if(el) el.remove();
+                 checkWorkspaceEmpty();
+             }
+        }
+
+        function removeBlock(btnElement) {
+            if(isRunning) return;
+            btnElement.parentElement.remove();
+            checkWorkspaceEmpty();
+        }
+
+        function clearWorkspace() {
+            if(isRunning) return;
+            const ws = document.getElementById('workspace');
+            const blocks = ws.querySelectorAll('.code-block');
+            blocks.forEach(b => b.remove());
+            checkWorkspaceEmpty();
+        }
+
+        function checkWorkspaceEmpty() {
+            const ws = document.getElementById('workspace');
+            const blocks = ws.querySelectorAll('.code-block');
+            document.getElementById('workspace-placeholder').style.display = blocks.length === 0 ? 'block' : 'none';
+        }
+
+
+        // --- STREAMING_CHUNK:Implementing Core Game Logic & Animations ---
+
+        function resetEgg() {
+            if(isRunning) return;
+            eggState = { isClean: false, isSalted: false, isBoiled: false, isRuined: false };
+            
+            const egg = document.getElementById('the-egg');
+            egg.className = 'egg'; // Reset classes
+            
+            // Reset indicators
+            document.getElementById('ind-clean').className = 'w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mb-1 text-gray-400';
+            document.getElementById('ind-salt').className = 'w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mb-1 text-gray-400';
+            document.getElementById('ind-boil').className = 'w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center mb-1 text-gray-400';
+            
+            setStatus("Pabrik siap.", "text-gray-600");
+            hideAnimations();
+        }
+
+        function setStatus(msg, colorClass) {
+            const statusEl = document.getElementById('status-message');
+            statusEl.innerText = msg;
+            statusEl.className = `text-lg font-semibold text-center h-8 transition-colors duration-300 ${colorClass}`;
+        }
+
+        function hideAnimations() {
+            document.getElementById('anim-brush').classList.remove('animating-brush');
+            document.getElementById('anim-salt').classList.remove('animating-salt');
+            document.getElementById('anim-boil').classList.remove('animating-boil');
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function executeBlock(blockType) {
+            const egg = document.getElementById('the-egg');
+            
+            if (eggState.isRuined) return false; // Stop if ruined
+
+            switch (blockType) {
+                case 'action-wash':
+                    setStatus("Mencuci telur...", "text-blue-600");
+                    document.getElementById('anim-brush').classList.add('animating-brush');
+                    await delay(1200);
+                    hideAnimations();
+                    
+                    eggState.isClean = true;
+                    egg.classList.add('clean');
+                    document.getElementById('ind-clean').classList.replace('bg-gray-200', 'bg-blue-500');
+                    document.getElementById('ind-clean').classList.replace('text-gray-400', 'text-white');
+                    break;
+                    
+                case 'action-salt':
+                    if (!eggState.isClean) {
+                        setStatus("Gagal! Telur masih kotor, garam tidak menempel.", "text-red-500");
+                        egg.classList.add('failed');
+                        eggState.isRuined = true;
+                        return false;
+                    }
+                    setStatus("Membalur dengan abu & garam...", "text-yellow-600");
+                    document.getElementById('anim-salt').classList.add('animating-salt');
+                    await delay(1500);
+                    hideAnimations();
+                    
+                    eggState.isSalted = true;
+                    egg.classList.remove('clean');
+                    egg.classList.add('salted');
+                    document.getElementById('ind-salt').classList.replace('bg-gray-200', 'bg-yellow-500');
+                    document.getElementById('ind-salt').classList.replace('text-gray-400', 'text-white');
+                    break;
+                    
+                case 'action-boil':
+                    if (!eggState.isSalted) {
+                        setStatus("Gagal! Telur belum diasinkan, ini cuma telur rebus biasa.", "text-red-500");
+                        egg.classList.add('failed');
+                        eggState.isRuined = true;
+                        return false;
+                    }
+                    setStatus("Merebus telur...", "text-red-600");
+                    document.getElementById('anim-boil').classList.add('animating-boil');
+                    await delay(1500);
+                    hideAnimations();
+                    
+                    eggState.isBoiled = true;
+                    egg.classList.remove('salted');
+                    egg.classList.add('boiled');
+                    document.getElementById('ind-boil').classList.replace('bg-gray-200', 'bg-red-500');
+                    document.getElementById('ind-boil').classList.replace('text-gray-400', 'text-white');
+                    break;
+                    
+                case 'cond-dirty':
+                    setStatus("Mengecek kondisi telur...", "text-orange-500");
+                    await delay(800);
+                    if (!eggState.isClean) {
+                         setStatus("Telur kotor, lanjut ke blok berikutnya.", "text-green-500");
+                    } else {
+                         setStatus("Telur sudah bersih.", "text-blue-500");
+                    }
+                    await delay(800);
+                    break;
+            }
+            return true;
+        }
+
+        async function runProgram() {
+            if(isRunning) return;
+            
+            const ws = document.getElementById('workspace');
+            const blocks = ws.querySelectorAll('.code-block');
+            
+            if (blocks.length === 0) {
+                setStatus("Tambahkan blok perintah dulu!", "text-red-500");
+                return;
+            }
+
+            isRunning = true;
+            document.getElementById('run-btn').disabled = true;
+            document.getElementById('run-btn').classList.add('opacity-50', 'cursor-not-allowed');
+            resetEgg(); // Reset state before running new sequence
+
+            let userSequence = [];
+            
+            // Highlight blocks as they run
+            for (let i = 0; i < blocks.length; i++) {
+                const block = blocks[i];
+                const type = block.getAttribute('data-type');
+                userSequence.push(type);
+                
+                // Visual highlight
+                block.classList.add('ring-4', 'ring-teal-400', 'scale-105');
+                block.style.transition = 'all 0.2s';
+                
+                const success = await executeBlock(type);
+                
+                block.classList.remove('ring-4', 'ring-teal-400', 'scale-105');
+                
+                if (!success) {
+                    break; // Stop execution if ruin
+                }
+                await delay(300); // Pause between blocks
+            }
+
+            // --- STREAMING_CHUNK:Evaluating User Program vs Level Goal ---
+            // Check win condition based on level
+            const level = LEVELS[currentLevel];
+            let isCorrect = false;
+
+            // Strict sequence check for simplicity in this lesson
+            if(userSequence.length === level.expectedSequence.length) {
+                isCorrect = userSequence.every((val, index) => val === level.expectedSequence[index]);
+            }
+
+            if (eggState.isBoiled && isCorrect) {
+                setStatus("Sempurna! Telur Asin berhasil dibuat.", "text-green-600");
+                setTimeout(() => showModal("🏆 Kerja Bagus!", "Algoritma kamu benar. Pabrik berjalan lancar!", false), 1000);
+            } else if (eggState.isBoiled && !isCorrect) {
+                setStatus("Telur jadi, tapi urutan algoritma kurang tepat.", "text-orange-500");
+                setTimeout(() => showModal("🤔 Hampir Benar", "Hasil akhir benar, tapi coba ikuti petunjuk Misi agar algoritmanya efisien.", true), 1000);
+            } else {
+                 if(!eggState.isRuined) {
+                     setStatus("Proses belum selesai.", "text-red-500");
+                     setTimeout(() => showModal("❌ Belum Selesai", "Telur asinya belum jadi. Coba periksa urutan algoritmamu lagi.", true), 1000);
+                 } else {
+                     setTimeout(() => showModal("💥 Gagal", "Proses salah! Telur rusak. Perhatikan urutannya.", true), 1000);
+                 }
+            }
+
+            isRunning = false;
+            document.getElementById('run-btn').disabled = false;
+            document.getElementById('run-btn').classList.remove('opacity-50', 'cursor-not-allowed');
+        }
+
+
+        // --- STREAMING_CHUNK:Custom Modal Logic ---
+        function showModal(title, desc, isRetry) {
+            document.getElementById('modal-title').innerHTML = title;
+            document.getElementById('modal-desc').innerHTML = desc;
+            
+            const btnRetry = document.getElementById('modal-btn-retry');
+            const btnNext = document.getElementById('modal-btn-next');
+            const icon = document.getElementById('modal-icon');
+
+            if (isRetry) {
+                btnRetry.style.display = 'block';
+                btnNext.style.display = 'none';
+                icon.innerHTML = '⚙️';
+            } else {
+                btnRetry.style.display = 'none';
+                btnNext.style.display = 'block';
+                icon.innerHTML = '🏆';
+                if(currentLevel >= LEVELS.length -1) {
+                    btnNext.innerHTML = "Selesai";
+                    btnNext.onclick = () => window.location.reload();
+                } else {
+                    btnNext.innerHTML = "Level Selanjutnya";
+                    btnNext.onclick = nextLevel;
+                }
+            }
+
+            document.getElementById('custom-modal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('custom-modal').classList.remove('active');
+        }
+
+        function nextLevel() {
+            closeModal();
+            currentLevel++;
+            initLevel();
+        }
+
+        function showInstructions() {
+             showModal("📖 Cara Bermain", 
+             "<ul class='text-left list-disc pl-5 space-y-2 text-sm'><li>Pindahkan blok perintah dari kotak kiri (Tersedia) ke kotak kanan (Program Kamu).</li><li>Susun dari atas ke bawah.</li><li>Ingat prinsip Algoritma: <b>Urutan itu penting!</b></li><li>Klik 'Jalankan Pabrik' untuk melihat hasilnya.</li></ul>", 
+             true);
+        }
+
+        // Initialize game on load
+        window.onload = () => {
+            initLevel();
+            // Show welcome message briefly
+            setStatus("Selamat datang di Pabrik!", "text-teal-600");
+        };
+
+    </script>
+</body>
+</html>
