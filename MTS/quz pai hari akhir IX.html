@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis PAI: Meyakini Hari Akhir</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .option-label:hover { cursor: pointer; }
+        .radio-custom:checked + div {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .radio-custom:checked + div .circle {
+            background-color: #3b82f6;
+            border-color: #3b82f6;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen text-gray-800">
+
+    <!-- Header -->
+    <header class="bg-white shadow-md py-4">
+        <div class="max-w-5xl mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2 rounded-lg">
+                    <i class="fas fa-book-quran text-xl"></i>
+                </div>
+                <h1 class="text-xl font-bold text-gray-800">Kuis PAI Kelas IX</h1>
+            </div>
+            <div id="header-timer" class="hidden flex items-center gap-2 bg-red-100 text-red-700 px-4 py-2 rounded-full font-bold">
+                <i class="fas fa-clock"></i>
+                <span id="time-display">30:00</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-8">
+        
+        <!-- SECTION 1: LOBBY / FORM -->
+        <section id="screen-lobby" class="fade-in bg-white rounded-2xl shadow-xl overflow-hidden max-w-2xl mx-auto">
+            <div class="bg-blue-600 p-6 text-white text-center">
+                <h2 class="text-3xl font-bold mb-2">Uji Kompetensi</h2>
+                <p class="text-blue-100">Bab 2: Meyakini Hari Akhir dengan Mawas Diri</p>
+            </div>
+            <div class="p-8">
+                <div class="mb-6 text-center text-gray-600">
+                    <p>Kuis ini terdiri dari <strong>30 soal pilihan ganda</strong>. Waktu pengerjaan adalah <strong>30 menit</strong>. Silakan lengkapi data diri Anda sebelum memulai.</p>
+                </div>
+                <form id="start-form" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-user"></i></span>
+                            <input type="text" id="input-nama" required class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Masukkan nama Anda">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-users"></i></span>
+                            <input type="text" id="input-kelas" required class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Contoh: IX-A">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Nama Sekolah</label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400"><i class="fas fa-school"></i></span>
+                            <input type="text" id="input-sekolah" required class="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Asal sekolah">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 mt-4 flex justify-center items-center gap-2">
+                        <span>Mulai Kuis Sekarang</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- SECTION 2: QUIZ INTERFACE -->
+        <section id="screen-quiz" class="hidden fade-in max-w-3xl mx-auto">
+            <!-- Progress -->
+            <div class="mb-6">
+                <div class="flex justify-between text-sm font-medium text-gray-600 mb-2">
+                    <span id="question-counter">Soal 1 dari 30</span>
+                    <span id="progress-percent">0%</span>
+                </div>
+                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                    <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <!-- Question Card -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 md:p-8 mb-6">
+                <h3 id="question-text" class="text-xl md:text-2xl font-semibold text-gray-800 mb-6 leading-relaxed">
+                    Pertanyaan akan muncul di sini...
+                </h3>
+                <div id="options-container" class="space-y-4">
+                    <!-- Options injected by JS -->
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="flex justify-between items-center">
+                <button id="btn-prev" class="px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-arrow-left mr-2"></i> Sebelumnya
+                </button>
+                <button id="btn-next" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition">
+                    Selanjutnya <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+                <button id="btn-submit" class="hidden px-6 py-3 bg-green-500 hover:bg-green-600 text-white font-semibold rounded-lg transition">
+                    Selesai & Kumpulkan <i class="fas fa-check ml-2"></i>
+                </button>
+            </div>
+        </section>
+
+        <!-- SECTION 3: RESULT REPORT -->
+        <section id="screen-result" class="hidden fade-in max-w-2xl mx-auto text-center">
+            <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
+                <div class="bg-indigo-600 p-8 text-white">
+                    <i class="fas fa-award text-6xl mb-4 text-yellow-300"></i>
+                    <h2 class="text-3xl font-bold mb-1">Kuis Selesai!</h2>
+                    <p class="text-indigo-200">Terima kasih telah mengerjakan kuis dengan jujur.</p>
+                </div>
+                <div class="p-8">
+                    <div class="grid grid-cols-2 gap-4 mb-8 text-left bg-gray-50 p-4 rounded-lg border border-gray-100">
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Nama</p>
+                            <p id="res-nama" class="font-bold text-gray-800">-</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Kelas</p>
+                            <p id="res-kelas" class="font-bold text-gray-800">-</p>
+                        </div>
+                        <div class="col-span-2">
+                            <p class="text-xs text-gray-500 uppercase tracking-wider font-semibold">Sekolah</p>
+                            <p id="res-sekolah" class="font-bold text-gray-800">-</p>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center items-center mb-8 gap-8">
+                        <div class="text-center">
+                            <div class="text-5xl font-black text-blue-600 mb-1" id="res-score">0</div>
+                            <div class="text-sm font-medium text-gray-500 uppercase">Nilai Akhir</div>
+                        </div>
+                        <div class="h-16 w-px bg-gray-300"></div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-green-500 mb-1" id="res-correct">0</div>
+                            <div class="text-sm font-medium text-gray-500 uppercase">Benar</div>
+                        </div>
+                        <div class="h-16 w-px bg-gray-300"></div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold text-red-500 mb-1" id="res-wrong">0</div>
+                            <div class="text-sm font-medium text-gray-500 uppercase">Salah</div>
+                        </div>
+                    </div>
+
+                    <button id="btn-view-discussion" class="w-full bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200 font-bold py-3 px-4 rounded-lg transition duration-200 flex justify-center items-center gap-2">
+                        <i class="fas fa-list-check"></i>
+                        <span>Lihat Pembahasan Lengkap</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECTION 4: DISCUSSION -->
+        <section id="screen-discussion" class="hidden fade-in max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800">Pembahasan Soal</h2>
+                <button id="btn-back-result" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-medium transition">
+                    <i class="fas fa-arrow-left mr-2"></i> Kembali
+                </button>
+            </div>
+            <div id="discussion-container" class="space-y-6">
+                <!-- Discussion items injected by JS -->
+            </div>
+            <div class="mt-8 text-center">
+                <button onclick="location.reload()" class="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold transition shadow-lg">
+                    <i class="fas fa-redo mr-2"></i> Ulangi Kuis
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <script>
+        // --- DATA SOAL ---
+        const questions = [
+            {
+                q: "Beriman kepada hari akhir merupakan rukun iman yang ke-...",
+                options: ["Tiga", "Empat", "Lima", "Enam"],
+                correct: 2,
+                explanation: "Iman kepada hari akhir (kiamat) adalah rukun iman yang kelima. Urutannya: Allah, Malaikat, Kitab, Rasul, Hari Akhir, Qada dan Qadar."
+            },
+            {
+                q: "Hari dibangkitkannya manusia dari alam kubur disebut...",
+                options: ["Yaumul Barzakh", "Yaumul Ba'ats", "Yaumul Mahsyar", "Yaumul Hisab"],
+                correct: 1,
+                explanation: "Yaumul Ba'ats adalah hari kebangkitan, yaitu dihidupkannya kembali umat manusia dari alam kubur untuk mempertanggungjawabkan perbuatannya."
+            },
+            {
+                q: "Hancurnya sebagian alam semesta seperti terjadinya gunung meletus, banjir bandang, dan kematian seseorang termasuk dalam kategori...",
+                options: ["Kiamat Kubra", "Kiamat Sugra", "Yaumul Jaza", "Yaumul Mizan"],
+                correct: 1,
+                explanation: "Kiamat Sugra (kiamat kecil) adalah hancurnya sebagian alam seperti bencana alam atau kematian."
+            },
+            {
+                q: "Perhatikan firman Allah Swt.: 'Dan sungguh, hari Kiamat itu pasti datang, tidak ada keraguan padanya; dan sungguh, Allah akan membangkitkan siapa pun yang di dalam kubur.' Firman ini terdapat dalam Surah...",
+                options: ["Q.S. al-Hajj [22]: 7", "Q.S. al-Baqarah [2]: 255", "Q.S. az-Zumar [39]: 9", "Q.S. al-Mujadilah [58]: 11"],
+                correct: 0,
+                explanation: "Q.S. al-Hajj ayat 7 merupakan dalil naqli utama yang menegaskan bahwa hari kiamat pasti datang dan Allah akan membangkitkan manusia dari kubur."
+            },
+            {
+                q: "Setelah manusia dibangkitkan dari kubur, mereka akan dikumpulkan di sebuah padang yang sangat luas. Peristiwa ini disebut...",
+                options: ["Yaumul Hisab", "Yaumul Ba'ats", "Yaumul Mizan", "Yaumul Mahsyar"],
+                correct: 3,
+                explanation: "Yaumul Mahsyar adalah hari perkumpulan dimana seluruh manusia setelah dibangkitkan akan dikumpulkan di Padang Mahsyar."
+            },
+            {
+                q: "Hari penimbangan seluruh amal perbuatan manusia selama hidup di dunia untuk mengetahui berat ringannya kebaikan dan keburukan disebut...",
+                options: ["Yaumul Hisab", "Yaumul Mizan", "Yaumul Barzakh", "Yaumul Jaza'"],
+                correct: 1,
+                explanation: "Mizan berarti timbangan. Yaumul Mizan adalah hari dimana segala amal manusia ditimbang untuk menentukan balasannya."
+            },
+            {
+                q: "Alam pembatas antara dunia dan akhirat, yang juga dikenal sebagai alam kubur dinamakan...",
+                options: ["Yaumul Ba'ats", "Yaumul Mahsyar", "Yaumul Barzakh", "Surga"],
+                correct: 2,
+                explanation: "Barzakh artinya sekat/pembatas. Yaumul Barzakh adalah masa penantian di alam kubur sebelum kiamat tiba."
+            },
+            {
+                q: "Malaikat yang ditugaskan oleh Allah Swt. untuk meniup sangkakala (terompet) pertanda kiamat tiba dan kebangkitan adalah...",
+                options: ["Malaikat Jibril", "Malaikat Mikail", "Malaikat Israfil", "Malaikat Izrail"],
+                correct: 2,
+                explanation: "Malaikat Israfil memiliki tugas meniup sangkakala pada saat dimulainya kiamat dan saat manusia dibangkitkan."
+            },
+            {
+                q: "Menurut sains, prediksi kehancuran alam semesta masih sangat lama. Namun menurut pandangan Islam mengenai kapan tepatnya kiamat akan terjadi...",
+                options: ["Telah diprediksi oleh Nabi", "Bisa dihitung oleh ulama", "Hanya Allah Swt. yang mengetahuinya", "Terjadi 1000 tahun setelah kenabian"],
+                correct: 2,
+                explanation: "Menurut hadis dan Al-Qur'an, waktu pasti terjadinya hari kiamat adalah rahasia mutlak Allah Swt., bahkan Nabi Muhammad saw. pun tidak mengetahuinya."
+            },
+            {
+                q: "Salah satu sikap yang mencerminkan keimanan kepada hari akhir dalam kehidupan sehari-hari adalah...",
+                options: ["Mencari harta sebanyak-banyaknya tanpa peduli halal haram", "Bersikap mawas diri dan berhati-hati dalam bertindak", "Pesimis dalam menjalani hidup", "Menjauhi urusan dunia sepenuhnya"],
+                correct: 1,
+                explanation: "Keimanan kepada hari akhir akan memunculkan sikap mawas diri (berhati-hati), agar hidupnya senantiasa sesuai dengan aturan agama karena tahu ada pertanggungjawaban."
+            },
+            {
+                q: "Yaumul Hisab memiliki arti hari...",
+                options: ["Kebangkitan", "Penimbangan", "Perhitungan amal", "Pembalasan"],
+                correct: 2,
+                explanation: "Hisab berarti hitungan. Yaumul Hisab adalah hari dimana seluruh perbuatan manusia dihitung secara cermat oleh Allah Swt."
+            },
+            {
+                q: "Berikut ini yang merupakan contoh kiamat Kubra (Kiamat Besar) menurut Al-Qur'an adalah...",
+                options: ["Tsunami dan gempa bumi", "Langit terbelah dan gunung beterbangan", "Kecelakaan beruntun", "Meninggalnya para ulama"],
+                correct: 1,
+                explanation: "Kiamat Kubra digambarkan dalam Al-Qur'an dengan peristiwa dahsyat yang menghancurkan seluruh alam semesta, seperti langit terbelah dan bumi mengeluarkan isinya."
+            },
+            {
+                q: "Kehidupan manusia di dunia ini pada hakikatnya adalah...",
+                options: ["Kehidupan yang abadi", "Tempat bersenang-senang semata", "Ladang untuk mencari bekal amal akhirat", "Hukuman dari Tuhan"],
+                correct: 2,
+                explanation: "Dunia ibarat ladang pertanian bagi akhirat. Amal kebaikan yang ditanam di dunia akan dipanen pahalanya di akhirat kelak."
+            },
+            {
+                q: "Tahapan pembalasan atas segala amal manusia berupa surga bagi yang beramal baik dan neraka bagi yang berbuat jahat disebut...",
+                options: ["Yaumul Ba'ats", "Yaumul Mizan", "Yaumul Hisab", "Yaumul Jaza'"],
+                correct: 3,
+                explanation: "Jaza' artinya balasan. Yaumul Jaza' adalah hari pembalasan semua perbuatan manusia."
+            },
+            {
+                q: "Sikap mawas diri sebagai hikmah beriman kepada hari akhir membawa seseorang pada karakter...",
+                options: ["Sombong dan merasa suci", "Berintegritas dan jujur dalam kehidupan", "Mementingkan diri sendiri", "Malas berusaha"],
+                correct: 1,
+                explanation: "Dengan mawas diri, seseorang akan memiliki integritas dan kejujuran karena yakin Allah selalu mengawasi dan akan meminta pertanggungjawaban."
+            },
+            {
+                q: "Menurut hadis Rasulullah, amalan yang pahalanya akan terus mengalir (tidak terputus) meski seseorang sudah meninggal dunia adalah, kecuali...",
+                options: ["Sedekah jariyah", "Ilmu yang bermanfaat", "Harta yang diwariskan untuk foya-foya", "Anak saleh yang mendoakan orang tuanya"],
+                correct: 2,
+                explanation: "Tiga amalan yang pahalanya terus mengalir adalah: sedekah jariyah, ilmu yang bermanfaat, dan anak saleh yang mendoakan orangtuanya."
+            },
+            {
+                q: "Kata 'Mawas Diri' dalam konteks keimanan kepada hari akhir mengandung pengertian...",
+                options: ["Menilai kesalahan orang lain", "Melihat kemampuan fisik diri sendiri", "Kewaspadaan menjaga diri dari perbuatan dosa", "Menjauhi keramaian"],
+                correct: 2,
+                explanation: "Mawas diri (introspeksi) berarti kehati-hatian atau kewaspadaan dalam menjaga tindakan dan perkataan agar tidak melanggar syariat Islam."
+            },
+            {
+                q: "Perhatikan pernyataan berikut! (1) Gunung-gunung meletus, (2) Munculnya Ya'juj Ma'juj, (3) Tsunami, (4) Matahari terbit dari barat. Yang termasuk tanda-tanda Kiamat Kubra adalah...",
+                options: ["1 dan 2", "1 dan 3", "2 dan 4", "3 dan 4"],
+                correct: 2,
+                explanation: "Tanda kiamat kubra antara lain: munculnya Ya'juj Ma'juj, Dajjal, turunnya Nabi Isa, dan matahari terbit dari arah barat."
+            },
+            {
+                q: "Ayat Al-Qur'an yang menjelaskan bahwa setiap yang bernyawa pasti akan merasakan mati (Kiamat Sugra) terdapat dalam surah...",
+                options: ["Q.S. Ali Imran: 185", "Q.S. Al-Fatihah: 2", "Q.S. Al-Ikhlas: 1", "Q.S. Al-Baqarah: 183"],
+                correct: 0,
+                explanation: "'Kullu nafsin dzaaiqotul maut' (Setiap yang bernyawa pasti akan mati) termaktub dalam Q.S. Ali 'Imran ayat 185."
+            },
+            {
+                q: "Seseorang yang beriman kepada hari akhir tidak akan mudah berputus asa saat tertimpa musibah karena ia yakin bahwa...",
+                options: ["Dunia adalah tempat yang abadi", "Penderitaannya akan dibalas dengan harta esok hari", "Allah akan menggantinya dengan kebahagiaan di akhirat kelak", "Musibah adalah kutukan tak berujung"],
+                correct: 2,
+                explanation: "Orang beriman yakin bahwa musibah di dunia adalah ujian, dan kesabaran menghadapinya akan berbuah surga di Yaumul Jaza'."
+            },
+            {
+                q: "Sistem pengadilan Allah Swt. di hari kiamat sangatlah adil. Tidak ada satupun yang dirugikan. Hal ini karena Allah memiliki sifat...",
+                options: ["Maha Kaya", "Maha Adil (Al-'Adl)", "Maha Pencipta", "Maha Pengampun"],
+                correct: 1,
+                explanation: "Allah Swt. bersifat Al-'Adl (Maha Adil). Semua amal sekecil zarrah pun akan ditimbang dan dibalas tanpa kezaliman sedikitpun."
+            },
+            {
+                q: "Di padang Mahsyar, manusia akan berada dalam keadaan yang sangat sulit. Pertolongan khusus yang diberikan oleh Nabi Muhammad saw. atas izin Allah dinamakan...",
+                options: ["Mukjizat", "Karamah", "Syafa'at", "Hidayah"],
+                correct: 2,
+                explanation: "Syafa'at adalah pertolongan yang diberikan oleh Rasulullah saw. kepada umatnya di Padang Mahsyar untuk meringankan beban mereka."
+            },
+            {
+                q: "Saat kiamat kubra terjadi, bumi bergoncang dengan dahsyat dan mengeluarkan isi perutnya. Gambaran ini secara jelas disebutkan dalam surah...",
+                options: ["Q.S. Al-Zalzalah", "Q.S. Al-Qari'ah", "Q.S. Al-Fiil", "Q.S. An-Nas"],
+                correct: 0,
+                explanation: "Surah Al-Zalzalah menjelaskan tentang guncangan bumi yang dahsyat dan bumi mengeluarkan beban berat dari dalam perutnya."
+            },
+            {
+                q: "Di alam Barzakh, setiap manusia akan didatangi dan ditanya oleh dua malaikat, yaitu...",
+                options: ["Rakib dan Atid", "Jibril dan Mikail", "Munkar dan Nakir", "Malik dan Ridwan"],
+                correct: 2,
+                explanation: "Malaikat Munkar dan Nakir bertugas menanyai ruh manusia di alam kubur (Barzakh) mengenai Tuhannya, agamanya, dan Nabinya."
+            },
+            {
+                q: "Buku catatan amal perbuatan manusia selama di dunia yang dicatat oleh Malaikat Rakib dan Atid akan diberikan pada saat...",
+                options: ["Yaumul Ba'ats", "Yaumul Hisab", "Yaumul Jaza'", "Kiamat Sugra"],
+                correct: 1,
+                explanation: "Pada hari Yaumul Hisab (perhitungan), setiap manusia akan menerima buku catatan amalnya untuk diperhitungkan."
+            },
+            {
+                q: "Meyakini Hari Akhir dapat menghindari kebiasaan buruk karena...",
+                options: ["Takut dihukum oleh penegak hukum di dunia", "Malu kepada tetangga dan keluarga", "Yakin bahwa setiap amal buruk akan dihisab dan ada balasannya", "Agar mendapatkan pujian dari orang lain"],
+                correct: 2,
+                explanation: "Iman kepada hari akhir membentengi seseorang dari kebiasaan buruk karena kesadaran penuh akan adanya Yaumul Hisab dan Yaumul Mizan."
+            },
+            {
+                q: "Bagi orang yang lebih banyak amal keburukannya daripada amal kebaikannya saat ditimbang di Yaumul Mizan, tempat kembalinya adalah...",
+                options: ["Surga Firdaus", "Surga 'Adn", "Neraka", "Alam Barzakh"],
+                correct: 2,
+                explanation: "Timbangan amal yang lebih berat keburukannya (dosa) akan membawa pelakunya ke dalam Neraka sebagai balasan yang adil (Yaumul Jaza')."
+            },
+            {
+                q: "Batas waktu kehidupan manusia di dunia (ajal) merupakan contoh dari kiamat...",
+                options: ["Kubra", "Sugra", "Awal", "Akhir"],
+                correct: 1,
+                explanation: "Kematian setiap individu merupakan kiamat bagi dirinya sendiri, yang diistilahkan sebagai Kiamat Sugra (kiamat kecil)."
+            },
+            {
+                q: "Salah satu bukti beriman kepada hari akhir adalah rajin menuntut ilmu dan mengamalkannya. Hal ini sejalan dengan ajaran PAI Bab 1 karena...",
+                options: ["Ilmu membuat kaya raya di dunia", "Ilmu bisa dibawa mati sebagai amal jariyah", "Ilmu menjadikan kita ditakuti orang lain", "Dengan ilmu kita tidak akan pernah mati"],
+                correct: 1,
+                explanation: "Ilmu yang bermanfaat yang diajarkan dan diamalkan adalah salah satu dari tiga amalan yang pahalanya mengalir sampai ke akhirat."
+            },
+            {
+                q: "Fungsi iman kepada hari akhir bagi perilaku seorang pelajar adalah...",
+                options: ["Menjadi malas belajar karena dunia akan hancur", "Mendorong semangat belajar untuk ibadah dan masa depan", "Hanya fokus mengaji tanpa sekolah umum", "Sering bolos karena merasa waktu semakin singkat"],
+                correct: 1,
+                explanation: "Iman kepada hari akhir harusnya memotivasi pelajar untuk beribadah sekaligus berprestasi (belajar keras) sebagai bekal amal kebaikan di dunia dan akhirat."
+            }
+        ];
+
+        // --- STATE VARIABLES ---
+        let currentQuestionIndex = 0;
+        let userAnswers = new Array(questions.length).fill(null);
+        let userData = { nama: '', kelas: '', sekolah: '' };
+        let timerInterval;
+        let timeLeft = 30 * 60; // 30 minutes in seconds
+
+        // --- DOM ELEMENTS ---
+        const screenLobby = document.getElementById('screen-lobby');
+        const screenQuiz = document.getElementById('screen-quiz');
+        const screenResult = document.getElementById('screen-result');
+        const screenDiscussion = document.getElementById('screen-discussion');
+        
+        const headerTimer = document.getElementById('header-timer');
+        const timeDisplay = document.getElementById('time-display');
+        
+        const formStart = document.getElementById('start-form');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const questionCounter = document.getElementById('question-counter');
+        const progressBar = document.getElementById('progress-bar');
+        const progressPercent = document.getElementById('progress-percent');
+        
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const btnSubmit = document.getElementById('btn-submit');
+        const btnViewDiscussion = document.getElementById('btn-view-discussion');
+        const btnBackResult = document.getElementById('btn-back-result');
+
+        // --- EVENT LISTENERS ---
+        formStart.addEventListener('submit', function(e) {
+            e.preventDefault();
+            userData.nama = document.getElementById('input-nama').value;
+            userData.kelas = document.getElementById('input-kelas').value;
+            userData.sekolah = document.getElementById('input-sekolah').value;
+            
+            startQuiz();
+        });
+
+        btnNext.addEventListener('click', () => {
+            if (currentQuestionIndex < questions.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        });
+
+        btnPrev.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        });
+
+        btnSubmit.addEventListener('click', () => {
+            if(confirm("Apakah Anda yakin ingin mengumpulkan jawaban?")) {
+                finishQuiz();
+            }
+        });
+
+        btnViewDiscussion.addEventListener('click', () => {
+            screenResult.classList.add('hidden');
+            screenDiscussion.classList.remove('hidden');
+            renderDiscussion();
+        });
+
+        btnBackResult.addEventListener('click', () => {
+            screenDiscussion.classList.add('hidden');
+            screenResult.classList.remove('hidden');
+        });
+
+        // --- FUNCTIONS ---
+        function startQuiz() {
+            screenLobby.classList.add('hidden');
+            screenQuiz.classList.remove('hidden');
+            headerTimer.classList.remove('hidden');
+            
+            renderQuestion();
+            startTimer();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestionIndex];
+            questionText.innerText = `${currentQuestionIndex + 1}. ${q.q}`;
+            
+            optionsContainer.innerHTML = '';
+            const labels = ['A', 'B', 'C', 'D'];
+            
+            q.options.forEach((opt, index) => {
+                const isChecked = userAnswers[currentQuestionIndex] === index ? 'checked' : '';
+                
+                const html = `
+                    <label class="option-label block relative">
+                        <input type="radio" name="option" class="radio-custom sr-only" value="${index}" ${isChecked} onchange="selectOption(${index})">
+                        <div class="p-4 border-2 border-gray-200 rounded-xl transition duration-200 flex items-center gap-4 hover:border-blue-300 hover:bg-blue-50">
+                            <div class="circle w-8 h-8 rounded-full border-2 border-gray-300 flex items-center justify-center text-sm font-bold text-gray-500 transition-colors">
+                                ${labels[index]}
+                            </div>
+                            <span class="text-gray-700 font-medium text-lg">${opt}</span>
+                        </div>
+                    </label>
+                `;
+                optionsContainer.insertAdjacentHTML('beforeend', html);
+            });
+
+            // Update Progress & Nav
+            const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressPercent.innerText = `${Math.round(progress)}%`;
+            questionCounter.innerText = `Soal ${currentQuestionIndex + 1} dari ${questions.length}`;
+
+            btnPrev.disabled = currentQuestionIndex === 0;
+            
+            if (currentQuestionIndex === questions.length - 1) {
+                btnNext.classList.add('hidden');
+                btnSubmit.classList.remove('hidden');
+            } else {
+                btnNext.classList.remove('hidden');
+                btnSubmit.classList.add('hidden');
+            }
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestionIndex] = index;
+            // Update visual state of circles inside the label
+            document.querySelectorAll('.radio-custom').forEach(el => {
+                const circle = el.nextElementSibling.querySelector('.circle');
+                if(el.checked) {
+                    circle.classList.add('text-white');
+                    circle.classList.remove('text-gray-500');
+                } else {
+                    circle.classList.remove('text-white');
+                    circle.classList.add('text-gray-500');
+                }
+            });
+        }
+
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimeDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Waktu habis! Kuis akan dikumpulkan otomatis.");
+                    finishQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimeDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timeDisplay.innerText = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if(timeLeft < 300) { // under 5 minutes
+                headerTimer.classList.remove('bg-red-100', 'text-red-700');
+                headerTimer.classList.add('bg-red-600', 'text-white', 'animate-pulse');
+            }
+        }
+
+        function finishQuiz() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            userAnswers.forEach((ans, index) => {
+                if (ans === questions[index].correct) {
+                    correctCount++;
+                }
+            });
+
+            const score = Math.round((correctCount / questions.length) * 100);
+            const wrongCount = questions.length - correctCount;
+
+            document.getElementById('res-nama').innerText = userData.nama;
+            document.getElementById('res-kelas').innerText = userData.kelas;
+            document.getElementById('res-sekolah').innerText = userData.sekolah;
+            document.getElementById('res-score').innerText = score;
+            document.getElementById('res-correct').innerText = correctCount;
+            document.getElementById('res-wrong').innerText = wrongCount;
+
+            screenQuiz.classList.add('hidden');
+            headerTimer.classList.add('hidden');
+            screenResult.classList.remove('hidden');
+            window.scrollTo(0,0);
+        }
+
+        function renderDiscussion() {
+            const container = document.getElementById('discussion-container');
+            container.innerHTML = '';
+
+            questions.forEach((q, i) => {
+                const userAns = userAnswers[i];
+                const isCorrect = userAns === q.correct;
+                
+                let ansHtml = '';
+                const labels = ['A', 'B', 'C', 'D'];
+
+                if (userAns === null) {
+                    ansHtml = `<div class="mt-2 text-sm text-gray-500"><i class="fas fa-minus-circle mr-1"></i> Anda tidak menjawab soal ini.</div>`;
+                } else if (isCorrect) {
+                    ansHtml = `<div class="mt-2 text-sm font-bold text-green-600"><i class="fas fa-check-circle mr-1"></i> Jawaban Anda: ${labels[userAns]}. ${q.options[userAns]} (Benar)</div>`;
+                } else {
+                    ansHtml = `<div class="mt-2 text-sm font-bold text-red-500"><i class="fas fa-times-circle mr-1"></i> Jawaban Anda: ${labels[userAns]}. ${q.options[userAns]} (Salah)</div>
+                               <div class="mt-1 text-sm font-bold text-green-600"><i class="fas fa-check-circle mr-1"></i> Jawaban Benar: ${labels[q.correct]}. ${q.options[q.correct]}</div>`;
+                }
+
+                const html = `
+                    <div class="bg-white rounded-xl shadow border-l-4 ${isCorrect ? 'border-green-500' : 'border-red-500'} p-5 mb-4">
+                        <h4 class="font-bold text-gray-800 mb-3">${i + 1}. ${q.q}</h4>
+                        ${userAns === null || !isCorrect ? `<div class="mt-2 text-sm text-gray-700">Pilihan Benar: <strong>${labels[q.correct]}.${q.options[q.correct]}</strong></div>` : ''}
+                        ${ansHtml}
+                        <div class="mt-4 p-4 bg-blue-50 rounded-lg text-sm text-blue-900 border border-blue-100">
+                            <strong>Pembahasan:</strong><br>
+                            ${q.explanation}
+                        </div>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', html);
+            });
+            window.scrollTo(0,0);
+        }
+
+        // Initialize display
+        updateTimeDisplay();
+    </script>
+</body>
+</html>
+```eof
+
+Saya telah menghasilkan web aplikasi lengkap dalam satu file HTML. Aplikasi ini bisa langsung Anda simpan dengan ekstensi `.html` dan dijalankan di peramban web (browser) mana pun (seperti Chrome, Edge, atau Firefox). Semua yang Anda minta sudah tercakup: formulir pendaftaran, pengatur waktu (30 menit), antarmuka kuis berisi 30 soal seputar Meyakini Hari Akhir (Bab 2 PAI kelas IX), laporan hasil nilai yang bersih, dan rincian pembahasan untuk mengetahui jawaban yang benar maupun salah. Selamat mencoba!
