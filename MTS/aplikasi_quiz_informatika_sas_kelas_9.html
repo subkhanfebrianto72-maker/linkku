@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAS Informatika Kelas IX - 2026/2027</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .glass-panel { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Checkbox and Radio styling */
+        .option-label { cursor: pointer; transition: all 0.2s ease-in-out; }
+        .option-label:hover { background-color: #eff6ff; border-color: #bfdbfe; }
+        input[type="radio"]:checked + div, input[type="checkbox"]:checked + div {
+            background-color: #eff6ff; border-color: #3b82f6;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+    </style>
+</head>
+<body class="text-gray-800 h-screen flex flex-col overflow-hidden">
+
+    <header class="bg-indigo-700 text-white shadow-md p-4 flex justify-between items-center shrink-0 z-10">
+        <div>
+            <h1 class="font-bold text-lg md:text-xl">SAS Informatika Kelas IX</h1>
+            <p class="text-indigo-200 text-xs md:text-sm">MTs Negeri se-Kabupaten Brebes TA 2026/2027</p>
+        </div>
+        <div class="flex items-center space-x-4">
+            <div id="timer-display" class="hidden bg-indigo-800 px-4 py-2 rounded-lg font-mono text-lg font-bold shadow-inner">
+                90:00
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1 overflow-hidden relative w-full max-w-7xl mx-auto flex flex-col md:flex-row">
+        
+        <!-- Welcome / Start Screen -->
+        <div id="start-screen" class="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 overflow-y-auto glass-panel">
+            <div class="bg-white p-8 rounded-2xl shadow-xl max-w-2xl text-center border border-gray-100">
+                <div class="bg-indigo-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800 mb-2">Sumatif Akhir Semester (SAS) Ganjil</h2>
+                <h3 class="text-lg text-indigo-600 font-semibold mb-6">Mata Pelajaran: Informatika Kelas IX</h3>
+                
+                <div class="text-left text-sm text-gray-600 space-y-3 mb-8 bg-gray-50 p-6 rounded-xl border border-gray-200">
+                    <p><strong>Penyusun:</strong> Wahid Hasyim, S.Pd.I., S.Kom.</p>
+                    <p><strong>Waktu:</strong> 90 Menit</p>
+                    <p><strong>Jumlah Soal:</strong> 35 Butir</p>
+                    <ul class="list-disc pl-5 mt-2 space-y-1">
+                        <li>1-15: Pilihan Ganda Biasa (Pilih 1 jawaban)</li>
+                        <li>16-20: Pilihan Ganda Kompleks (Pilih 2 jawaban benar)</li>
+                        <li>21-25: Menjodohkan (Pilih pasangan yang tepat)</li>
+                        <li>26-30: Jawaban Singkat (Ketik kata kunci pendek)</li>
+                        <li>31-35: Analisis Studi Kasus HOTS (Pilih solusi dari kasus)</li>
+                    </ul>
+                    <p class="mt-4 text-red-500 font-medium">Perhatian: Waktu akan terus berjalan. Jawaban akan otomatis terkirim jika waktu habis.</p>
+                </div>
+                
+                <button onclick="startQuiz()" class="w-full sm:w-auto px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                    Mulai Mengerjakan
+                </button>
+            </div>
+        </div>
+
+        <aside id="sidebar" class="hidden md:flex w-full md:w-64 lg:w-72 bg-white border-r border-gray-200 flex-col h-full shrink-0 transition-all duration-300">
+            <div class="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                <h3 class="font-semibold text-gray-700">Navigasi Soal</h3>
+                <span id="answered-count" class="text-xs bg-indigo-100 text-indigo-800 px-2 py-1 rounded-full font-medium">0 / 35</span>
+            </div>
+            <div class="p-4 overflow-y-auto custom-scrollbar flex-1">
+                <div id="nav-grid" class="grid grid-cols-5 gap-2">
+                    <!-- Nav buttons injected by JS -->
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 bg-gray-50">
+                <button onclick="confirmSubmit()" class="w-full py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg shadow transition flex items-center justify-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                    Selesai & Kumpulkan
+                </button>
+            </div>
+        </aside>
+
+        <section id="question-area" class="hidden flex-1 flex-col h-full bg-white overflow-hidden">
+            <!-- Mobile Nav Toggle & Progress -->
+            <div class="md:hidden p-3 border-b border-gray-200 bg-gray-50 flex justify-between items-center">
+                <button onclick="toggleMobileNav()" class="text-gray-600 flex items-center gap-1 bg-white px-3 py-1.5 rounded border shadow-sm">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    Navigasi
+                </button>
+                <span id="mobile-answered-count" class="text-sm font-medium text-gray-600">0/35 Terjawab</span>
+            </div>
+
+            <!-- Question Content -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar p-4 md:p-8">
+                <div class="max-w-3xl mx-auto">
+                    <div class="flex items-center gap-3 mb-6">
+                        <span id="q-number" class="bg-indigo-100 text-indigo-800 font-bold w-10 h-10 rounded-full flex items-center justify-center shrink-0 border border-indigo-200">1</span>
+                        <h2 class="text-sm font-semibold text-gray-500 uppercase tracking-wider" id="q-type-label">Pilihan Ganda</h2>
+                    </div>
+                    
+                    <div id="q-text" class="text-lg text-gray-800 mb-6 font-medium leading-relaxed">
+                        <!-- Question text -->
+                    </div>
+                    
+                    <div id="q-svg-container" class="mb-6 hidden flex justify-center">
+                        <!-- Dynamic SVG injected here -->
+                    </div>
+
+                    <div id="q-options" class="space-y-3">
+                        <!-- Options injected by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Controls -->
+            <div class="p-4 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
+                <button onclick="prevQuestion()" id="btn-prev" class="px-5 py-2.5 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Sebelumnya
+                </button>
+                <button onclick="nextQuestion()" id="btn-next" class="px-5 py-2.5 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 transition shadow flex items-center gap-2">
+                    Selanjutnya
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+        </section>
+
+        <div id="result-screen" class="hidden absolute inset-0 z-30 flex flex-col items-center justify-center p-6 overflow-y-auto glass-panel">
+            <div class="bg-white p-8 rounded-2xl shadow-xl max-w-xl w-full text-center border border-gray-100">
+                <div class="w-24 h-24 mx-auto bg-green-100 rounded-full flex items-center justify-center mb-6">
+                    <svg class="w-12 h-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Ujian Selesai!</h2>
+                <p class="text-gray-500 mb-8">Terima kasih telah mengerjakan SAS Informatika Kelas IX.</p>
+                
+                <div class="grid grid-cols-2 gap-4 mb-8">
+                    <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                        <p class="text-sm text-indigo-600 font-semibold mb-1">Skor Akhir</p>
+                        <p id="final-score" class="text-4xl font-bold text-indigo-800">0</p>
+                    </div>
+                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                        <p class="text-sm text-gray-500 font-semibold mb-1">Benar / Total</p>
+                        <p class="text-2xl font-bold text-gray-700"><span id="correct-count">0</span> <span class="text-sm text-gray-400">/ 35</span></p>
+                    </div>
+                </div>
+
+                <div class="text-left text-sm text-gray-600 bg-blue-50 p-4 rounded-lg mb-6 border border-blue-100">
+                    <p>Catatan: Penilaian PG Kompleks, Menjodohkan, dan Jawaban Singkat menggunakan sistem pencocokan kata kunci dan logika *strict match* berbasis sistem.</p>
+                </div>
+
+                <button onclick="location.reload()" class="w-full px-6 py-3 bg-gray-800 hover:bg-gray-900 text-white font-semibold rounded-xl transition shadow">
+                    Kembali ke Halaman Awal
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Navigation Overlay -->
+        <div id="mobile-nav-overlay" class="hidden absolute inset-0 bg-black/50 z-40 md:hidden" onclick="toggleMobileNav()"></div>
+        <div id="mobile-nav-menu" class="hidden absolute left-0 top-0 bottom-0 w-3/4 max-w-sm bg-white z-50 flex flex-col shadow-2xl transition-transform transform -translate-x-full md:hidden">
+            <div class="p-4 border-b flex justify-between items-center bg-indigo-700 text-white">
+                <h3 class="font-bold">Navigasi Soal</h3>
+                <button onclick="toggleMobileNav()" class="p-1 hover:bg-indigo-600 rounded">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="p-4 overflow-y-auto flex-1 custom-scrollbar">
+                <div id="mobile-nav-grid" class="grid grid-cols-5 gap-2"></div>
+            </div>
+            <div class="p-4 border-t bg-gray-50">
+                <button onclick="confirmSubmit()" class="w-full py-3 bg-green-600 text-white font-bold rounded-lg shadow">Kumpulkan Ujian</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Konfirmasi -->
+    <div id="confirm-modal" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-2xl p-6 md:p-8 max-w-md w-full shadow-2xl transform transition-all scale-95 opacity-0" id="confirm-modal-content">
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Konfirmasi Pengumpulan</h3>
+            <p id="unanswered-warning" class="text-red-600 text-sm font-medium mb-4 bg-red-50 p-3 rounded-lg border border-red-100 hidden">
+                Ada <span id="unanswered-count-text"></span> soal yang belum dijawab!
+            </p>
+            <p class="text-gray-600 mb-6">Apakah Anda yakin ingin mengumpulkan ujian ini? Jawaban tidak dapat diubah setelah dikumpulkan.</p>
+            <div class="flex justify-end space-x-3">
+                <button onclick="closeConfirmModal()" class="px-5 py-2.5 text-gray-700 bg-gray-100 hover:bg-gray-200 font-medium rounded-lg transition">Batal</button>
+                <button onclick="submitQuiz()" class="px-5 py-2.5 text-white bg-indigo-600 hover:bg-indigo-700 font-medium rounded-lg shadow transition">Ya, Kumpulkan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const svgTree1 = `
+            <svg viewBox="0 0 300 200" class="w-full h-48 border border-gray-200 rounded-lg bg-gray-50">
+                <g stroke="#94a3b8" stroke-width="2">
+                    <line x1="150" y1="40" x2="80" y2="100" />
+                    <line x1="150" y1="40" x2="220" y2="100" />
+                    <line x1="80" y1="100" x2="40" y2="160" />
+                    <line x1="80" y1="100" x2="120" y2="160" />
+                    <line x1="220" y1="100" x2="180" y2="160" />
+                </g>
+                <g fill="#3b82f6" stroke="#2563eb" stroke-width="2">
+                    <circle cx="150" cy="40" r="18" />
+                    <circle cx="80" cy="100" r="18" />
+                    <circle cx="220" cy="100" r="18" />
+                    <circle cx="40" cy="160" r="18" />
+                    <circle cx="120" cy="160" r="18" />
+                    <circle cx="180" cy="160" r="18" />
+                </g>
+                <g fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">
+                    <text x="150" y="45">A</text>
+                    <text x="80" y="105">B</text>
+                    <text x="220" y="105">C</text>
+                    <text x="40" y="165">D</text>
+                    <text x="120" y="165">E</text>
+                    <text x="180" y="165">F</text>
+                </g>
+            </svg>`;
+
+        const svgGraph1 = `
+            <svg viewBox="0 0 300 200" class="w-full h-48 border border-gray-200 rounded-lg bg-gray-50">
+                <g stroke="#94a3b8" stroke-width="3">
+                    <line x1="50" y1="100" x2="150" y2="40" />
+                    <line x1="150" y1="40" x2="250" y2="100" />
+                    <line x1="50" y1="100" x2="150" y2="160" />
+                    <line x1="250" y1="100" x2="150" y2="160" />
+                    <line x1="50" y1="100" x2="250" y2="100" stroke-dasharray="5,5" />
+                </g>
+                <g fill="#10b981" stroke="#059669" stroke-width="2">
+                    <circle cx="50" cy="100" r="18" />
+                    <circle cx="150" cy="40" r="18" />
+                    <circle cx="250" cy="100" r="18" />
+                    <circle cx="150" cy="160" r="18" />
+                </g>
+                <g fill="#ffffff" font-family="sans-serif" font-size="14" font-weight="bold" text-anchor="middle">
+                    <text x="50" y="105">V1</text>
+                    <text x="150" y="45">V2</text>
+                    <text x="250" y="105">V3</text>
+                    <text x="150" y="165">V4</text>
+                </g>
+            </svg>`;
+
+        const questionsData = [
+            // --- PG BIASA (1-15) ---
+            { id: 1, type: "pg", label: "Pilihan Ganda", text: "Dalam ilmu komputer, struktur data Tree (pohon) didefinisikan sebagai...", options: ["A. Struktur data linear yang menyimpan elemen secara berurutan.", "B. Struktur data non-linear yang mengorganisasikan data secara hierarkis.", "C. Kumpulan tabel yang saling berelasi menggunakan kunci tamu.", "D. Jaringan komputer yang terhubung secara nirkabel."], answer: 1 },
+            { id: 2, type: "pg", label: "Pilihan Ganda", text: "Pada struktur data Tree, istilah untuk node yang tidak memiliki child (anak) sama sekali disebut...", options: ["A. Root", "B. Parent", "C. Sibling", "D. Leaf"], answer: 3 },
+            { id: 3, type: "pg", label: "Pilihan Ganda", text: "Perhatikan gambar Tree berikut. Berdasarkan jumlah maksimal anaknya, jenis tree ini diklasifikasikan sebagai...", svg: svgTree1, options: ["A. Binary Tree", "B. Ternary Tree", "C. Unordered Tree", "D. Graph Tree"], answer: 0 }, // It's binary because max 2 children (B has D,E. C has F)
+            { id: 4, type: "pg", label: "Pilihan Ganda", text: "Berdasarkan gambar Tree sebelumnya, hubungan antara Node A dan Node E adalah...", svg: svgTree1, options: ["A. Node A adalah parent langsung dari Node E", "B. Node E adalah root dari Node A", "C. Node A adalah ancestor (leluhur) dari Node E", "D. Node E adalah sibling dari Node A"], answer: 2 },
+            { id: 5, type: "pg", label: "Pilihan Ganda", text: "Dalam kehidupan sehari-hari maupun sistem komputer, implementasi struktur data Tree paling tepat digunakan untuk...", options: ["A. Mencari rute terpendek antar kota", "B. Mengatur sistem file atau direktori dalam folder", "C. Antrean pelanggan di kasir (Queue)", "D. Mengirim pesan email"], answer: 1 },
+            { id: 6, type: "pg", label: "Pilihan Ganda", text: "Konsep dasar dari struktur data Graph adalah sekumpulan titik yang saling terhubung. Titik-titik ini merepresentasikan suatu entitas. Istilah teknis untuk titik ini adalah...", options: ["A. Edge", "B. Vertex", "C. Root", "D. Leaf"], answer: 1 },
+            { id: 7, type: "pg", label: "Pilihan Ganda", text: "Garis yang menghubungkan dua buah titik (vertex) dalam struktur Graph disebut dengan...", options: ["A. Edge", "B. Node", "C. Branch", "D. Path"], answer: 0 },
+            { id: 8, type: "pg", label: "Pilihan Ganda", text: "Sebuah Graph yang setiap garis (edge) penghubungnya memiliki tanda panah untuk menunjukkan arah aliran informasi disebut...", options: ["A. Undirected Graph", "B. Directed Graph", "C. Weighted Graph", "D. Cyclic Graph"], answer: 1 },
+            { id: 9, type: "pg", label: "Pilihan Ganda", text: "Perhatikan gambar Graph di atas. Representasi yang paling tepat dari penggunaan graph model ini dalam kehidupan nyata adalah...", svg: svgGraph1, options: ["A. Silsilah keluarga bapak V1", "B. Struktur organisasi kelas", "C. Rute jalan yang menghubungkan 4 kota", "D. Hirarki penyimpanan file"], answer: 2 },
+            { id: 10, type: "pg", label: "Pilihan Ganda", text: "Berdasarkan Graph di atas, jika garis putus-putus mewakili jalan tol yang baru dibangun antara V1 dan V3, maka solusi tercepat menuju V3 dari V1 tanpa melalui kota lain adalah menggunakan prinsip...", svg: svgGraph1, options: ["A. Algoritma DFS (Depth First Search)", "B. Pencarian Node Parent", "C. Jalur Langsung (Direct Edge)", "D. Binary Search"], answer: 2 },
+            { id: 11, type: "pg", label: "Pilihan Ganda", text: "Dalam mengelola himpunan data terstruktur, langkah pertama yang paling benar sebelum melakukan visualisasi adalah...", options: ["A. Mempublikasikan data ke internet", "B. Menentukan tujuan analisis dan mengumpulkan data", "C. Mewarnai diagram dengan warna mencolok", "D. Menghapus semua data yang berupa angka"], answer: 1 },
+            { id: 12, type: "pg", label: "Pilihan Ganda", text: "Perilaku bertanggung jawab (Etika Data) yang wajib dilakukan oleh seorang siswa saat mengelola data dari responden kuesioner adalah...", options: ["A. Menjual data kontak responden", "B. Menjaga kerahasiaan identitas dan privasi responden", "C. Mengubah data asli agar hasilnya sesuai keinginan", "D. Membagikan seluruh identitas di media sosial"], answer: 1 },
+            { id: 13, type: "pg", label: "Pilihan Ganda", text: "Jika Anda ingin menunjukkan perbandingan komposisi pengguna internet berdasarkan usia (misal: remaja 50%, dewasa 30%, lansia 20%), bentuk visualisasi data yang paling sesuai adalah...", options: ["A. Diagram Garis (Line Chart)", "B. Diagram Lingkaran (Pie Chart)", "C. Diagram Pohon (Tree Map)", "D. Diagram Pencar (Scatter Plot)"], answer: 1 },
+            { id: 14, type: "pg", label: "Pilihan Ganda", text: "Seorang peneliti mempublikasikan dataset kesehatan yang berisi nama lengkap pasien dan riwayat penyakit kronisnya di forum terbuka. Berdasarkan etika publikasi data digital, analisis dari tindakan tersebut adalah...", options: ["A. Sangat baik karena mendukung transparansi informasi", "B. Pelanggaran berat karena menyebarkan informasi pribadi yang sensitif (privasi)", "C. Benar, asalkan data tersebut bisa diunduh secara gratis", "D. Tidak masalah karena internet adalah ruang publik"], answer: 1 },
+            { id: 15, type: "pg", label: "Pilihan Ganda", text: "Studi Kasus: Jika Anda diminta untuk memetakan \"Hubungan saling berteman antar siswa di Facebook\" dan \"Struktur silsilah keturunan raja\", struktur data apa yang secara berurutan paling tepat digunakan?", options: ["A. Graph dan Tree", "B. Tree dan Graph", "C. Graph dan Graph", "D. Tree dan Tree"], answer: 0 },
+
+            // --- PG KOMPLEKS (16-20) ---
+            { id: 16, type: "pgk", label: "PG Kompleks (Pilih 2)", text: "Pilihlah DUA pernyataan yang BENAR mengenai struktur data Tree!", options: ["Sebuah tree hanya boleh memiliki satu buah node Root (akar).", "Setiap child (anak) boleh memiliki lebih dari satu parent (induk).", "Node yang berada di ujung dan tidak memiliki turunan disebut Leaf.", "Struktur Tree sangat cocok untuk memetakan rute jalan raya dua arah."], answers: [0, 2] },
+            { id: 17, type: "pgk", label: "PG Kompleks (Pilih 2)", text: "Pilihlah DUA pernyataan yang BENAR mengenai terminologi struktur data Graph!", options: ["Vertex adalah garis yang menghubungkan antar titik.", "Graph memungkinkan adanya siklus tertutup (cycle).", "Edge berfungsi merepresentasikan hubungan antar Vertex.", "Dalam Graph terarah (Directed), rute A ke B selalu sama dengan B ke A."], answers: [1, 2] },
+            { id: 18, type: "pgk", label: "PG Kompleks (Pilih 2)", text: "Pilihlah DUA tindakan yang BENAR dalam tahapan pengelolaan data besar!", options: ["Data cleaning (pembersihan data) dilakukan untuk menghapus data yang ganda atau error.", "Semua data yang dikumpulkan langsung divisualisasikan tanpa perlu divalidasi.", "Data yang sudah dipublikasikan bebas untuk diubah-ubah kembali tanpa pemberitahuan.", "Keamanan data (enkripsi/password) penting dilakukan pada tahap penyimpanan."], answers: [0, 3] },
+            { id: 19, type: "pgk", label: "PG Kompleks (Pilih 2)", text: "Pilihlah DUA pernyataan yang BENAR tentang visualisasi data!", options: ["Tujuan visualisasi data adalah membuat data rumit menjadi pola visual yang mudah dipahami.", "Diagram garis (line chart) paling tepat digunakan untuk melihat tren perubahan data dari waktu ke waktu.", "Semua data teks lebih baik disajikan dalam bentuk diagram lingkaran.", "Visualisasi data tidak memerlukan software atau tools khusus."], answers: [0, 1] },
+            { id: 20, type: "pgk", label: "PG Kompleks (Pilih 2)", text: "Berdasarkan etika digital, DUA hal apa yang harus diperhatikan sebelum mempublikasikan data hasil penelitian ke internet?", options: ["Pastikan tidak mengandung unsur hoaks (berita bohong).", "Pastikan memuat semua nama asli narasumber meskipun mereka meminta anonim.", "Menyamarkan atau menghapus (anonimisasi) data identitas pribadi yang sensitif.", "Menambahkan data buatan (fiktif) agar grafik terlihat bagus."], answers: [0, 2] },
+
+            // --- MENJODOHKAN (21-25) ---
+            { id: 21, type: "jodoh", label: "Menjodohkan", text: "Pasangkan istilah pada struktur data Tree di bawah ini dengan definisi yang tepat!", 
+              pairs: [
+                  { q: "Root", opt: ["Node yang tidak memiliki anak", "Node paling atas / awal dari tree", "Node yang memiliki turunan"], a: "Node paling atas / awal dari tree" },
+                  { q: "Leaf", opt: ["Node yang tidak memiliki anak", "Node paling atas / awal dari tree", "Node penghubung"], a: "Node yang tidak memiliki anak" }
+              ] 
+            },
+            { id: 22, type: "jodoh", label: "Menjodohkan", text: "Jodohkan terminologi struktur Graph berikut dengan fungsinya dalam dunia nyata!", 
+              pairs: [
+                  { q: "Vertex (Simpul)", opt: ["Jalan Raya penghubung", "Titik Lokasi (Kota/Gedung)", "Rambu Lalu Lintas"], a: "Titik Lokasi (Kota/Gedung)" },
+                  { q: "Edge (Sisi/Garis)", opt: ["Jalan Raya penghubung", "Titik Lokasi (Kota/Gedung)", "Area Parkir"], a: "Jalan Raya penghubung" }
+              ] 
+            },
+            { id: 23, type: "jodoh", label: "Menjodohkan", text: "Pasangkan tahapan pengelolaan data komputasional dengan aktivitas yang sesuai!", 
+              pairs: [
+                  { q: "Pengumpulan Data", opt: ["Menyebarkan kuesioner ke siswa", "Menghapus data kosong (Null)", "Membuat grafik batang"], a: "Menyebarkan kuesioner ke siswa" },
+                  { q: "Pembersihan Data", opt: ["Menyebarkan kuesioner ke siswa", "Menghapus data ganda atau salah ketik", "Mempublikasi ke web"], a: "Menghapus data ganda atau salah ketik" }
+              ] 
+            },
+            { id: 24, type: "jodoh", label: "Menjodohkan", text: "Pasangkan jenis visualisasi (diagram) dengan fungsi utamanya!", 
+              pairs: [
+                  { q: "Bar Chart (Batang)", opt: ["Melihat tren suhu harian selama seminggu", "Membandingkan jumlah siswa antar kelas", "Melihat persentase suara pilkada"], a: "Membandingkan jumlah siswa antar kelas" },
+                  { q: "Line Chart (Garis)", opt: ["Membandingkan jumlah siswa antar kelas", "Melihat tren atau perubahan dari waktu ke waktu", "Proporsi makanan kesukaan"], a: "Melihat tren atau perubahan dari waktu ke waktu" }
+              ] 
+            },
+            { id: 25, type: "jodoh", label: "Menjodohkan", text: "Jodohkan konsep Berpikir Komputasional dengan penerapannya saat menyelesaikan masalah Graph!", 
+              pairs: [
+                  { q: "Dekomposisi", opt: ["Memecah masalah pencarian rute panjang menjadi rute-rute kota kecil", "Mengabaikan warna mobil saat mencari jarak antar kota", "Membuat algoritma Dijkstra"], a: "Memecah masalah pencarian rute panjang menjadi rute-rute kota kecil" },
+                  { q: "Abstraksi", opt: ["Membagi tugas tim", "Mengabaikan detail peta seperti pohon/gedung dan hanya fokus pada jarak jalan", "Menulis kode program"], a: "Mengabaikan detail peta seperti pohon/gedung dan hanya fokus pada jarak jalan" }
+              ] 
+            },
+
+            // --- JAWABAN SINGKAT (26-30) ---
+            { id: 26, type: "isian", label: "Jawaban Singkat", text: "Istilah untuk titik atau node yang berada pada posisi paling puncak (level tertinggi) dalam struktur data Tree disebut dengan...", keys: ["root", "akar"] },
+            { id: 27, type: "isian", label: "Jawaban Singkat", text: "Dalam aplikasi seperti Google Maps, struktur data Graph digunakan untuk menghitung jarak terpendek suatu...", keys: ["rute", "jalan", "jalur", "path", "jarak"] },
+            { id: 28, type: "isian", label: "Jawaban Singkat", text: "Kumpulan data yang diorganisasikan dalam format tabel dengan baris dan kolom yang jelas disebut sebagai data yang bersifat...", keys: ["terstruktur", "struktur"] },
+            { id: 29, type: "isian", label: "Jawaban Singkat", text: "Untuk menampilkan persentase pembagian anggaran kegiatan OSIS (misal: dekorasi 30%, konsumsi 50%), jenis diagram yang paling tepat digunakan adalah diagram...", keys: ["lingkaran", "pie", "pie chart"] },
+            { id: 30, type: "isian", label: "Jawaban Singkat", text: "Sebuah Tree di mana setiap parent node memiliki maksimal 2 (dua) buah child node disebut dengan istilah tree...", keys: ["binary", "biner", "binary tree"] },
+
+            // --- ESSAY/URAIAN -> ANALISIS KASUS HOTS (31-35) ---
+            { id: 31, type: "analisis", label: "Analisis Studi Kasus HOTS", text: "Struktur Organisasi Sekolah (Konsep Tree)<br/><br/>Kepala Sekolah memiliki 2 Wakil (Waka Kurikulum dan Waka Kesiswaan). Waka Kesiswaan membawahi Pembina OSIS dan Pembina Pramuka. Jika struktur ini digambar sebagai Tree, manakah pernyataan analisis di bawah ini yang PALING TEPAT menunjukkan identifikasi 'Leaf'?", options: ["A. Kepala Sekolah adalah Leaf karena posisinya paling atas.", "B. Waka Kesiswaan adalah Leaf karena membawahi pembina.", "C. Pembina OSIS dan Pembina Pramuka adalah Leaf karena mereka tidak membawahi siapa pun dalam hirarki ini.", "D. Semua jabatan dalam struktur adalah Leaf."], answer: 2 },
+            { id: 32, type: "analisis", label: "Analisis Studi Kasus HOTS", text: "Analisis Rute Perjalanan (Konsep Graph)<br/><br/>Sebuah kurir paket berada di Titik A. Ia harus mengantar paket ke Titik D. Jarak jalan tercatat sebagai berikut: A ke B = 2km, B ke D = 5km, A ke C = 4km, C ke D = 2km, B ke C = 1km.<br/>Berdasarkan analisis Graph (mencari rute terpendek), rute manakah yang harus dipilih kurir agar total jaraknya paling sedikit?", options: ["A. A -> B -> D (Total 7km)", "B. A -> C -> D (Total 6km)", "C. A -> B -> C -> D (Total 5km)", "D. A -> D langsung (Tetapi tidak ada jalan langsung)"], answer: 2 }, // A-B(2) + B-C(1) + C-D(2) = 5
+            { id: 33, type: "analisis", label: "Analisis Studi Kasus HOTS", text: "Visualisasi Data Pemanasan Global<br/><br/>Anda memiliki dataset berisi angka rata-rata suhu bumi setiap tahun dari tahun 2000 hingga 2026. Anda ingin mempresentasikan data tersebut di depan kelas agar teman-teman melihat dengan jelas 'kenaikan suhu yang terus menerus'. Visualisasi terbaik beserta alasannya adalah...", options: ["A. Diagram Batang (Bar Chart), karena bisa menghitung total suhu.", "B. Diagram Garis (Line Chart), karena sangat efektif merepresentasikan tren perubahan nilai berkesinambungan (waktu).", "C. Diagram Lingkaran (Pie Chart), karena suhu bumi adalah satu kesatuan.", "D. Tabel biasa, karena angka lebih valid daripada gambar."], answer: 1 },
+            { id: 34, type: "analisis", label: "Analisis Studi Kasus HOTS", text: "Representasi Graph pada Masalah Jaringan<br/><br/>Lima buah komputer (K1, K2, K3, K4, K5) di laboratorium terhubung pada satu switch pusat jaringan. Jika kabel yang menghubungkan K3 ke switch terputus karena digigit tikus, bagaimana analisis representasi masalah ini dalam konsep Graph?", options: ["A. Node K3 menghilang dari jaringan (Vertex terhapus).", "B. Switch rusak dan semua node kehilangan Edge.", "C. Edge (garis penghubung) antara Vertex K3 dan Vertex Switch terputus, sehingga K3 terisolasi dari graph utama.", "D. Graph berubah menjadi struktur Tree."], answer: 2 },
+            { id: 35, type: "analisis", label: "Analisis Studi Kasus HOTS", text: "Identifikasi Komponen Graph pada Kasus Nyata<br/><br/>Pada aplikasi transportasi online (ojek online), driver harus menjemput penumpang dari 'Rumah' melewati 'Jalan Diponegoro' dan 'Jalan Sudirman' menuju ke 'Stasiun Kereta'. Dalam penerapan berpikir komputasional menggunakan struktur Graph, bagaimana Anda mengidentifikasi komponennya?", options: ["A. Rumah dan Stasiun = Edge, Jalan Diponegoro = Vertex", "B. Rumah, Stasiun, dan Jalan = semuanya adalah Vertex", "C. Rumah dan Stasiun = Vertex (Simpul), sedangkan Jalan yang dilewati = Edge (Garis Koneksi)", "D. Ojek online menggunakan konsep Tree, bukan Graph."], answer: 2 }
+        ];
+
+        let currentIdx = 0;
+        const totalQuestions = questionsData.length;
+        let userAnswers = {}; // Store answers. Format depends on type.
+        let timerSeconds = 90 * 60; // 90 minutes
+        let timerInterval;
+        let quizActive = false;
+
+        // Elements
+        const startScreen = document.getElementById('start-screen');
+        const questionArea = document.getElementById('question-area');
+        const sidebar = document.getElementById('sidebar');
+        const resultScreen = document.getElementById('result-screen');
+        const timerDisplay = document.getElementById('timer-display');
+        const confirmModal = document.getElementById('confirm-modal');
+        
+        function startQuiz() {
+            startScreen.classList.add('hidden');
+            questionArea.classList.remove('hidden');
+            questionArea.classList.add('flex');
+            sidebar.classList.remove('hidden');
+            timerDisplay.classList.remove('hidden');
+            
+            quizActive = true;
+            initNavGrid();
+            renderQuestion(currentIdx);
+            
+            timerInterval = setInterval(() => {
+                if (timerSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    forceSubmit();
+                } else {
+                    timerSeconds--;
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+            const s = (timerSeconds % 60).toString().padStart(2, '0');
+            timerDisplay.innerText = `${m}:${s}`;
+            if(timerSeconds < 300) { // Last 5 mins
+                timerDisplay.classList.remove('bg-indigo-800');
+                timerDisplay.classList.add('bg-red-600', 'animate-pulse');
+            }
+        }
+
+        function initNavGrid() {
+            const gridDesktop = document.getElementById('nav-grid');
+            const gridMobile = document.getElementById('mobile-nav-grid');
+            gridDesktop.innerHTML = '';
+            gridMobile.innerHTML = '';
+            
+            for (let i = 0; i < totalQuestions; i++) {
+                const btn = document.createElement('button');
+                btn.className = `w-full aspect-square rounded font-medium text-sm transition border focus:outline-none flex items-center justify-center nav-btn-${i}`;
+                btn.innerText = i + 1;
+                btn.onclick = () => {
+                    if(window.innerWidth < 768) toggleMobileNav(); // Close mobile nav if open
+                    goToQuestion(i);
+                };
+                
+                const btnMobile = btn.cloneNode(true);
+                btnMobile.onclick = btn.onclick; // cloneNode doesn't clone event listeners
+                
+                gridDesktop.appendChild(btn);
+                gridMobile.appendChild(btnMobile);
+            }
+            updateNavUI();
+        }
+
+        function handleRadioChange(qId, val) {
+            userAnswers[qId] = val;
+            updateNavUI();
+        }
+
+        function handleCheckboxChange(qId, val, isChecked) {
+            if (!userAnswers[qId]) userAnswers[qId] = [];
+            
+            if (isChecked) {
+                // Limit to 2 for PGK (Optional UX strictness, but we'll allow selection and grade based on exactly 2 correct)
+                if (userAnswers[qId].length >= 2) {
+                    event.preventDefault();
+                    return; // Prevent 3rd check visually
+                }
+                userAnswers[qId].push(val);
+            } else {
+                userAnswers[qId] = userAnswers[qId].filter(v => v !== val);
+            }
+            if(userAnswers[qId].length === 0) delete userAnswers[qId];
+            updateNavUI();
+        }
+
+        function handleSelectChange(qId, pairIndex, val) {
+            if (!userAnswers[qId]) userAnswers[qId] = {};
+            userAnswers[qId][pairIndex] = val;
+            updateNavUI();
+        }
+
+        function handleTextChange(qId, val) {
+            if (val.trim() === "") {
+                delete userAnswers[qId];
+            } else {
+                userAnswers[qId] = val.trim();
+            }
+            updateNavUI();
+        }
+
+        function renderQuestion(index) {
+            currentIdx = index;
+            const q = questionsData[index];
+            
+            document.getElementById('q-number').innerText = index + 1;
+            document.getElementById('q-type-label').innerText = q.label;
+            document.getElementById('q-text').innerHTML = q.text;
+            
+            const svgContainer = document.getElementById('q-svg-container');
+            if (q.svg) {
+                svgContainer.innerHTML = q.svg;
+                svgContainer.classList.remove('hidden');
+            } else {
+                svgContainer.innerHTML = '';
+                svgContainer.classList.add('hidden');
+            }
+
+            const optionsContainer = document.getElementById('q-options');
+            optionsContainer.innerHTML = '';
+
+            // Generate UI based on question type
+            if (q.type === 'pg' || q.type === 'analisis') {
+                q.options.forEach((opt, i) => {
+                    const isChecked = userAnswers[q.id] === i;
+                    const html = `
+                        <label class="option-label flex items-start p-4 border rounded-xl mb-3 relative">
+                            <input type="radio" name="q_${q.id}" value="${i}" class="peer hidden" onchange="handleRadioChange(${q.id}, ${i})" ${isChecked ? 'checked' : ''}>
+                            <div class="w-5 h-5 rounded-full border-2 border-gray-300 mr-3 mt-0.5 peer-checked:border-indigo-600 peer-checked:bg-indigo-600 flex items-center justify-center transition shrink-0">
+                                <div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100"></div>
+                            </div>
+                            <span class="text-gray-700 font-medium">${opt}</span>
+                        </label>
+                    `;
+                    optionsContainer.insertAdjacentHTML('beforeend', html);
+                });
+            } else if (q.type === 'pgk') {
+                q.options.forEach((opt, i) => {
+                    const isChecked = userAnswers[q.id] && userAnswers[q.id].includes(i);
+                    const html = `
+                        <label class="option-label flex items-start p-4 border rounded-xl mb-3 relative">
+                            <input type="checkbox" name="q_${q.id}" value="${i}" class="peer hidden" onchange="handleCheckboxChange(${q.id}, ${i}, this.checked)" ${isChecked ? 'checked' : ''}>
+                            <div class="w-5 h-5 rounded border-2 border-gray-300 mr-3 mt-0.5 peer-checked:border-indigo-600 peer-checked:bg-indigo-600 flex items-center justify-center transition shrink-0">
+                                <svg class="w-3.5 h-3.5 text-white opacity-0 peer-checked:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                            </div>
+                            <span class="text-gray-700 font-medium">${opt}</span>
+                        </label>
+                    `;
+                    optionsContainer.insertAdjacentHTML('beforeend', html);
+                });
+            } else if (q.type === 'jodoh') {
+                q.pairs.forEach((pair, i) => {
+                    const selectedVal = (userAnswers[q.id] && userAnswers[q.id][i]) || "";
+                    let optsHtml = `<option value="" disabled ${selectedVal===""?'selected':''}>-- Pilih Pasangan --</option>`;
+                    pair.opt.forEach(o => {
+                        optsHtml += `<option value="${o}" ${selectedVal===o?'selected':''}>${o}</option>`;
+                    });
+                    
+                    const html = `
+                        <div class="flex flex-col sm:flex-row sm:items-center gap-2 p-3 bg-gray-50 border rounded-lg mb-3">
+                            <div class="sm:w-1/2 font-semibold text-gray-800">${pair.q}</div>
+                            <div class="sm:w-1/2">
+                                <select onchange="handleSelectChange(${q.id}, ${i}, this.value)" class="w-full p-2.5 bg-white border border-gray-300 rounded focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                                    ${optsHtml}
+                                </select>
+                            </div>
+                        </div>
+                    `;
+                    optionsContainer.insertAdjacentHTML('beforeend', html);
+                });
+            } else if (q.type === 'isian') {
+                const currentVal = userAnswers[q.id] || "";
+                const html = `
+                    <div class="mt-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Ketik jawaban Anda di bawah ini:</label>
+                        <input type="text" value="${currentVal}" onkeyup="handleTextChange(${q.id}, this.value)" onchange="handleTextChange(${q.id}, this.value)" placeholder="Jawaban singkat..." class="w-full p-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-lg">
+                    </div>
+                `;
+                optionsContainer.insertAdjacentHTML('beforeend', html);
+            }
+
+            // Update buttons
+            document.getElementById('btn-prev').disabled = index === 0;
+            if (index === totalQuestions - 1) {
+                document.getElementById('btn-next').innerHTML = `Selesai <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>`;
+                document.getElementById('btn-next').classList.replace('bg-indigo-600', 'bg-green-600');
+                document.getElementById('btn-next').classList.replace('hover:bg-indigo-700', 'hover:bg-green-700');
+                document.getElementById('btn-next').onclick = confirmSubmit;
+            } else {
+                document.getElementById('btn-next').innerHTML = `Selanjutnya <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>`;
+                document.getElementById('btn-next').classList.replace('bg-green-600', 'bg-indigo-600');
+                document.getElementById('btn-next').classList.replace('hover:bg-green-700', 'hover:bg-indigo-700');
+                document.getElementById('btn-next').onclick = nextQuestion;
+            }
+
+            updateNavUI();
+        }
+
+        function goToQuestion(idx) {
+            if (idx >= 0 && idx < totalQuestions) renderQuestion(idx);
+        }
+        function nextQuestion() { goToQuestion(currentIdx + 1); }
+        function prevQuestion() { goToQuestion(currentIdx - 1); }
+
+        function checkAnswerStatus(qId) {
+            const q = questionsData.find(x => x.id === qId);
+            const ans = userAnswers[qId];
+            if (ans === undefined) return false;
+            
+            if (q.type === 'pg' || q.type === 'analisis') return ans !== null;
+            if (q.type === 'pgk') return ans.length > 0;
+            if (q.type === 'isian') return ans.trim() !== "";
+            if (q.type === 'jodoh') return Object.keys(ans).length === q.pairs.length; // Need all pairs answered
+            
+            return false;
+        }
+
+        function updateNavUI() {
+            let answeredCount = 0;
+            
+            for (let i = 0; i < totalQuestions; i++) {
+                const qId = questionsData[i].id;
+                const isAnswered = checkAnswerStatus(qId);
+                const isCurrent = i === currentIdx;
+                
+                if (isAnswered) answeredCount++;
+
+                // Update desktop and mobile grid buttons
+                const btnClasses = document.querySelectorAll(`.nav-btn-${i}`);
+                btnClasses.forEach(btn => {
+                    // Reset classes
+                    btn.className = `w-full aspect-square rounded font-medium text-sm transition border focus:outline-none flex items-center justify-center nav-btn-${i} `;
+                    
+                    if (isCurrent) {
+                        btn.className += 'bg-indigo-600 text-white border-indigo-700 shadow-md transform scale-105';
+                    } else if (isAnswered) {
+                        btn.className += 'bg-blue-100 text-blue-800 border-blue-200';
+                    } else {
+                        btn.className += 'bg-white text-gray-500 border-gray-200 hover:bg-gray-50';
+                    }
+                });
+            }
+
+            document.getElementById('answered-count').innerText = `${answeredCount} / ${totalQuestions}`;
+            document.getElementById('mobile-answered-count').innerText = `${answeredCount}/${totalQuestions} Terjawab`;
+        }
+
+        function toggleMobileNav() {
+            const overlay = document.getElementById('mobile-nav-overlay');
+            const menu = document.getElementById('mobile-nav-menu');
+            
+            if(overlay.classList.contains('hidden')) {
+                overlay.classList.remove('hidden');
+                menu.classList.remove('hidden');
+                setTimeout(() => menu.classList.remove('-translate-x-full'), 10);
+            } else {
+                menu.classList.add('-translate-x-full');
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                    menu.classList.add('hidden');
+                }, 300);
+            }
+        }
+
+        function confirmSubmit() {
+            if(window.innerWidth < 768) toggleMobileNav(); // Close mobile nav if open
+            let answeredCount = 0;
+            questionsData.forEach(q => { if(checkAnswerStatus(q.id)) answeredCount++; });
+            
+            const unanswered = totalQuestions - answeredCount;
+            const warningEl = document.getElementById('unanswered-warning');
+            
+            if(unanswered > 0) {
+                document.getElementById('unanswered-count-text').innerText = unanswered;
+                warningEl.classList.remove('hidden');
+            } else {
+                warningEl.classList.add('hidden');
+            }
+
+            const modal = document.getElementById('confirm-modal');
+            const modalContent = document.getElementById('confirm-modal-content');
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+            }, 10);
+        }
+
+        function closeConfirmModal() {
+            const modal = document.getElementById('confirm-modal');
+            const modalContent = document.getElementById('confirm-modal-content');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        }
+
+        function forceSubmit() {
+            closeConfirmModal();
+            alert("Waktu habis! Jawaban Anda otomatis dikumpulkan.");
+            submitQuiz();
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            quizActive = false;
+            closeConfirmModal();
+            
+            let correct = 0;
+
+            questionsData.forEach(q => {
+                const ans = userAnswers[q.id];
+                if (!ans && ans !== 0) return; // Skip if no answer
+
+                if (q.type === 'pg' || q.type === 'analisis') {
+                    if (ans === q.answer) correct++;
+                } 
+                else if (q.type === 'pgk') {
+                    // PGK correct if exactly matched array elements
+                    if (ans.length === q.answers.length) {
+                        const sortedUser = [...ans].sort();
+                        const sortedCorrect = [...q.answers].sort();
+                        const isMatch = sortedUser.every((val, index) => val === sortedCorrect[index]);
+                        if(isMatch) correct++;
+                    }
+                } 
+                else if (q.type === 'jodoh') {
+                    // Jodoh correct if all pairs match
+                    let allPairsCorrect = true;
+                    q.pairs.forEach((pair, i) => {
+                        if (ans[i] !== pair.a) allPairsCorrect = false;
+                    });
+                    if (allPairsCorrect) correct++;
+                } 
+                else if (q.type === 'isian') {
+                    // Isian correct if input matches any key (case insensitive, trimmed)
+                    const userText = ans.toLowerCase().trim();
+                    const isCorrect = q.keys.some(k => userText.includes(k.toLowerCase()));
+                    if (isCorrect) correct++;
+                }
+            });
+
+            // Calculate final score (Scale to 100)
+            const finalScore = Math.round((correct / totalQuestions) * 100);
+
+            // Hide Question area, Show result screen
+            document.getElementById('question-area').classList.add('hidden');
+            document.getElementById('sidebar').classList.add('hidden');
+            document.getElementById('timer-display').classList.add('hidden');
+            
+            const resScreen = document.getElementById('result-screen');
+            resScreen.classList.remove('hidden');
+            
+            // Animate score counting
+            let currentDisplay = 0;
+            const scoreEl = document.getElementById('final-score');
+            const scoreInterval = setInterval(() => {
+                if(currentDisplay >= finalScore) {
+                    clearInterval(scoreInterval);
+                    scoreEl.innerText = finalScore;
+                } else {
+                    currentDisplay += 2;
+                    if(currentDisplay > finalScore) currentDisplay = finalScore;
+                    scoreEl.innerText = currentDisplay;
+                }
+            }, 30);
+
+            document.getElementById('correct-count').innerText = correct;
+        }
+    </script>
+</body>
+</html>
