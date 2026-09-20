@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Fikih MTs Kelas IX - Reguler</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .option-btn { transition: all 0.2s ease; }
+        .option-btn:hover:not(:disabled) { border-color: #3b82f6; background-color: #eff6ff; }
+        .option-selected { border-color: #3b82f6 !important; background-color: #eff6ff !important; ring: 2px solid #3b82f6; }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2 rounded-lg">
+                    <i class="fa-solid fa-book-quran"></i>
+                </div>
+                <h1 class="text-lg md:text-xl font-bold text-slate-800">Ujian Fikih Kelas IX (Reguler)</h1>
+            </div>
+            <div id="header-timer" class="hidden flex items-center gap-2 bg-rose-50 text-rose-600 px-3 py-1.5 rounded-full font-semibold border border-rose-100">
+                <i class="fa-regular fa-clock"></i>
+                <span id="time-display">60:00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-4xl mx-auto p-4 md:p-6 flex flex-col justify-center">
+        
+        <!-- Screen 1: Setup / Form -->
+        <div id="screen-setup" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 fade-in w-full max-w-lg mx-auto">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Selamat Datang</h2>
+                <p class="text-slate-500 text-sm">Silakan lengkapi data diri Anda sebelum memulai kuis Pemahaman Konsep (Semester 1).</p>
+            </div>
+            <form id="setup-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="input-nama" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Masukkan nama Anda">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Kelas</label>
+                    <select id="input-kelas" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                        <option value="" disabled selected>Pilih Kelas</option>
+                        <option value="IX-A">IX-A</option>
+                        <option value="IX-B">IX-B</option>
+                        <option value="IX-C">IX-C</option>
+                        <option value="IX-D">IX-D</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Asal Sekolah</label>
+                    <input type="text" id="input-sekolah" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Contoh: MTsN 1 Kota...">
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 flex gap-3 text-sm text-blue-800 mt-6">
+                    <i class="fa-solid fa-circle-info mt-0.5"></i>
+                    <div>
+                        <p class="font-semibold mb-1">Informasi Kuis:</p>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Jumlah soal: 40 Butir (Pilihan Ganda)</li>
+                            <li>Waktu pengerjaan: 60 Menit</li>
+                            <li>Pembahasan tersedia di akhir kuis.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-md shadow-blue-500/30">
+                    Mulai Kuis <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Screen 2: Quiz -->
+        <div id="screen-quiz" class="hidden fade-in w-full">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+                <!-- Progress & Info -->
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                    <div>
+                        <p class="text-sm text-slate-500 mb-1">Peserta: <span id="display-nama" class="font-semibold text-slate-700"></span></p>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-lg font-bold text-slate-800">Soal <span id="current-question-num">1</span> dari <span id="total-questions">40</span></h3>
+                        </div>
+                    </div>
+                    <div class="w-24 md:w-32 bg-slate-100 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 2.5%"></div>
+                    </div>
+                </div>
+
+                <!-- Question Area -->
+                <div class="mb-8">
+                    <p id="question-text" class="text-slate-800 text-base md:text-lg leading-relaxed text-justify"></p>
+                </div>
+
+                <!-- Options -->
+                <div id="options-container" class="space-y-3">
+                    <!-- Buttons injected via JS -->
+                </div>
+
+                <!-- Navigation -->
+                <div class="flex justify-between mt-8 pt-6 border-t border-slate-100">
+                    <button id="btn-prev" class="px-5 py-2.5 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Sebelumnya
+                    </button>
+                    <button id="btn-next" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm shadow-blue-500/30">
+                        Selanjutnya <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                    <button id="btn-finish" class="hidden px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors shadow-sm shadow-emerald-500/30">
+                        Selesai & Kumpulkan <i class="fa-solid fa-check ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Result Summary -->
+        <div id="screen-result" class="hidden fade-in w-full max-w-xl mx-auto">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Kuis Selesai!</h2>
+                <p class="text-slate-500 mb-6">Terima kasih <span id="result-nama" class="font-semibold"></span> telah menyelesaikan ujian ini.</p>
+                
+                <div class="bg-slate-50 rounded-xl p-6 mb-8 border border-slate-100">
+                    <p class="text-sm text-slate-500 uppercase tracking-wider font-semibold mb-2">Nilai Akhir</p>
+                    <div class="text-5xl font-black text-blue-600 mb-4" id="result-score">0</div>
+                    
+                    <div class="grid grid-cols-3 gap-4 text-sm mt-4 pt-4 border-t border-slate-200">
+                        <div>
+                            <p class="text-slate-500">Benar</p>
+                            <p class="font-bold text-emerald-600 text-lg" id="result-correct">0</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500">Salah</p>
+                            <p class="font-bold text-rose-600 text-lg" id="result-wrong">0</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500">Kosong</p>
+                            <p class="font-bold text-slate-600 text-lg" id="result-empty">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-review" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-list-check"></i> Lihat Pembahasan Soal
+                </button>
+            </div>
+        </div>
+
+        <!-- Screen 4: Review -->
+        <div id="screen-review" class="hidden fade-in w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Pembahasan Soal</h2>
+                <button id="btn-back-result" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium">
+                    <i class="fa-solid fa-xmark mr-1"></i> Tutup
+                </button>
+            </div>
+            <div id="review-container" class="space-y-6">
+                <!-- Review items injected via JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-sm text-slate-500">
+        &copy; 2026 Kuis Fikih MTs Kelas IX - Dibuat untuk Evaluasi Pembelajaran.
+    </footer>
+
+    <script>
+        // === QUIZ DATA (40 Regular/Concept Questions) ===
+        const quizData = [
+            // PENYEMBELIHAN
+            {
+                question: "Kata penyembelihan dalam bahasa Arab disebut *Adz-Dzakah* yang secara bahasa bermakna...",
+                options: ["Memotong urat nadi", "Baik dan suci", "Mengalirkan darah", "Mendekatkan diri"],
+                answer: 1,
+                explanation: "Secara etimologi (bahasa), kata *adz-dzakah* (penyembelihan) berarti 'baik dan suci'. Artinya, hewan yang disembelih sesuai syariat akan menjadi baik, suci, dan halal untuk dimakan."
+            },
+            {
+                question: "Berikut ini yang bukan merupakan syarat bagi orang yang menyembelih binatang adalah...",
+                options: ["Beragama Islam atau Ahli Kitab", "Berakal sehat", "Berjenis kelamin laki-laki", "Baligh atau Mumayyiz"],
+                answer: 2,
+                explanation: "Laki-laki bukanlah syarat penyembelih. Perempuan, baik yang sedang suci maupun haid, diperbolehkan untuk menyembelih hewan asalkan memenuhi syarat beragama Islam/ahli kitab, berakal, dan mumayyiz (bisa membedakan yang baik dan buruk)."
+            },
+            {
+                question: "Dua saluran pada leher hewan yang wajib diputus saat penyembelihan agar sembelihannya sah adalah...",
+                options: ["Saluran pernapasan (hulqum) dan saluran makanan (mari')", "Saluran makanan (mari') dan urat nadi", "Saluran pernapasan (hulqum) dan tulang leher", "Urat nadi kanan dan urat nadi kiri"],
+                answer: 0,
+                explanation: "Menurut syariat, penyembelihan yang sah wajib memutuskan dua saluran utama di leher, yaitu saluran pernapasan (hulqum) dan saluran makanan/minuman (mari'). Memutus dua urat nadi (wadajain) hukumnya sunnah untuk mempercepat kematian."
+            },
+            {
+                question: "Alat yang digunakan untuk menyembelih haruslah benda yang tajam. Bahan yang diharamkan untuk dijadikan alat penyembelihan adalah...",
+                options: ["Besi dan baja", "Batu dan kaca", "Tulang dan kuku/gigi", "Bambu dan kayu"],
+                answer: 2,
+                explanation: "Berdasarkan hadis riwayat Bukhari dan Muslim, Nabi Muhammad SAW melarang menyembelih menggunakan alat yang terbuat dari gigi/tulang dan kuku."
+            },
+            {
+                question: "Hukum membaca lafal *Basmalah* (Bismillah) ketika akan menyembelih hewan menurut mayoritas ulama adalah...",
+                options: ["Wajib mutlak, lupa membatalkan sembelihan", "Sunnah", "Mubah", "Makruh"],
+                answer: 1,
+                explanation: "Mayoritas ulama (Jumhur, termasuk mazhab Syafii) berpendapat bahwa membaca basmalah saat menyembelih adalah sunnah. Jika sengaja atau lupa ditinggalkan, sembelihan muslim tetap halal."
+            },
+            {
+                question: "Posisi badan hewan yang disunnahkan saat disembelih adalah membaringkannya pada posisi...",
+                options: ["Rusuk kiri menempel di tanah", "Rusuk kanan menempel di tanah", "Telentang menghadap ke atas", "Berdiri (khusus untuk sapi)"],
+                answer: 0,
+                explanation: "Disunnahkan membaringkan hewan sembelihan (seperti kambing dan sapi) di atas rusuk kirinya, agar memudahkan penyembelih (yang umumnya menggunakan tangan kanan) dalam memegang kepala dan menyembelih."
+            },
+            {
+                question: "Menyembelih hewan dengan memotong lehernya dari arah belakang (tengkuk) terlebih dahulu hukumnya adalah...",
+                options: ["Haram", "Makruh", "Sunnah", "Mubah"],
+                answer: 1,
+                explanation: "Memotong leher dari arah belakang (tengkuk) hukumnya makruh karena menambah rasa sakit dan menyiksa hewan, meskipun sembelihannya tetap sah jika akhirnya saluran nafas dan makanannya terputus."
+            },
+            {
+                question: "Menyembelih hewan semata-mata untuk sesajen atau persembahan kepada makhluk halus (selain Allah) hukumnya adalah...",
+                options: ["Haram dan perbuatan syirik", "Makruh karena membuang harta", "Mubah jika tujuannya menolak bala", "Sunnah untuk melestarikan budaya"],
+                answer: 0,
+                explanation: "Menyembelih untuk selain Allah (seperti untuk roh halus, pohon keramat, atau sesajen) adalah perbuatan syirik besar. Daging hewan tersebut haram dimakan karena termasuk persembahan untuk selain Allah (Q.S. Al-Maidah: 3)."
+            },
+            {
+                question: "Hal yang dimakruhkan setelah hewan disembelih (saat hewan belum benar-benar mati) adalah...",
+                options: ["Membiarkannya meronta-ronta", "Membersihkan darah di lehernya", "Memutus kepalanya atau mengulitinya", "Menghadapkannya ke arah kiblat"],
+                answer: 2,
+                explanation: "Sangat dimakruhkan memutus leher hewan sampai putus kepalanya, mematahkan lehernya, atau mulai mengulitinya sebelum hewan tersebut dipastikan benar-benar telah mati hilangnya nyawa secara sempurna."
+            },
+            {
+                question: "Bagi hewan buruan liar yang sulit ditangkap, cara penyembelihannya adalah dengan cara...",
+                options: ["Menjerat kakinya sampai mati", "Melukai bagian tubuh mana saja yang dapat mematikan dengan benda tajam", "Memukul kepalanya dengan benda tumpul", "Menenggelamkannya ke dalam air"],
+                answer: 1,
+                explanation: "Untuk hewan buruan liar (Ghairu Maqdur Alaih), penyembelihannya sah dengan cara melukai (menusuk/memanah/menembak peluru tajam) di bagian tubuh mana saja yang bisa mengalirkan darah dan mematikan, disertai bacaan basmalah."
+            },
+
+            // KURBAN
+            {
+                question: "Secara bahasa, kurban (Qurban) berasal dari kata *Qaruba* yang memiliki arti...",
+                options: ["Menebus", "Menyucikan", "Dekat", "Darah"],
+                answer: 2,
+                explanation: "Qurban berasal dari bahasa Arab *qaruba-yaqrubu-qurbanan* yang berarti dekat. Maksudnya adalah ibadah menyembelih hewan tertentu untuk mendekatkan diri (taqarrub) kepada Allah SWT."
+            },
+            {
+                question: "Hukum asal melaksanakan ibadah kurban bagi seorang muslim yang sudah mampu/memiliki kelapangan rezeki adalah...",
+                options: ["Fardu Ain", "Fardu Kifayah", "Sunnah Muakkad", "Mubah"],
+                answer: 2,
+                explanation: "Mayoritas ulama (Jumhur) menghukumi ibadah kurban sebagai Sunnah Muakkad (sunnah yang sangat dianjurkan) bagi muslim yang mampu secara finansial. Namun bagi mazhab Hanafi, hukumnya wajib."
+            },
+            {
+                question: "Syarat minimal umur hewan kambing atau domba agar sah dijadikan hewan kurban adalah...",
+                options: ["Berumur 6 bulan", "Berumur 1 tahun (musinnah) atau sudah berganti gigi (poel)", "Berumur 2 tahun", "Berumur 3 tahun"],
+                answer: 1,
+                explanation: "Syarat umur untuk hewan kambing adalah telah berusia 1 tahun masuk tahun ke-2, atau ditandai dengan tanggalnya gigi depan (poel/musinnah). Untuk domba, sebagian ulama membolehkan usia 6 bulan (jadza'ah) jika badannya sudah besar."
+            },
+            {
+                question: "Satu ekor sapi, kerbau, atau unta boleh dijadikan hewan kurban secara patungan maksimal untuk... orang.",
+                options: ["3 orang", "5 orang", "7 orang", "9 orang"],
+                answer: 2,
+                explanation: "Sesuai dengan hadis Nabi SAW (dari Jabir bin Abdullah), satu ekor sapi atau unta dapat diperuntukkan sebagai hewan kurban untuk maksimal 7 orang (patungan 7 bagian)."
+            },
+            {
+                question: "Berikut ini adalah cacat pada hewan yang menyebabkan hewan tersebut TIDAK SAH dijadikan hewan kurban, KECUALI...",
+                options: ["Buta sebelah matanya yang terlihat jelas", "Pincang kakinya yang sangat jelas", "Telinganya sobek atau terpotong sedikit", "Sakit parah yang terlihat jelas"],
+                answer: 2,
+                explanation: "Ada 4 cacat yang membuat hewan tidak sah dikurbankan: Buta (sebelah/total) yang jelas, sakit parah, pincang parah, dan sangat kurus tidak bersumsum. Telinga yang terpotong sedikit atau tidak bertanduk tetap SAH dijadikan kurban."
+            },
+            {
+                question: "Waktu pelaksanaan penyembelihan hewan kurban dimulai setelah shalat Idul Adha (10 Dzulhijjah) dan berakhir pada...",
+                options: ["Tanggal 11 Dzulhijjah sebelum maghrib", "Tanggal 12 Dzulhijjah sebelum maghrib", "Tanggal 13 Dzulhijjah sebelum matahari terbenam (maghrib)", "Tanggal 14 Dzulhijjah pagi hari"],
+                answer: 2,
+                explanation: "Waktu penyembelihan kurban adalah 4 hari: Hari Nahar (10 Dzulhijjah) setelah shalat Id, dan 3 hari Tasyriq (11, 12, dan 13 Dzulhijjah). Batas akhirnya adalah sebelum matahari terbenam pada tanggal 13 Dzulhijjah."
+            },
+            {
+                question: "Hari-hari di mana umat Islam dilarang berpuasa dan disunnahkan untuk menyembelih kurban (tanggal 11, 12, 13 Dzulhijjah) disebut...",
+                options: ["Hari Tarwiyah", "Hari Arafah", "Hari Tasyriq", "Hari Nahar"],
+                answer: 2,
+                explanation: "Tanggal 11, 12, dan 13 Dzulhijjah disebut Hari Tasyriq (hari menjemur daging di masa lalu). Pada hari-hari ini, umat Islam diharamkan berpuasa karena merupakan hari makan dan minum serta berzikir."
+            },
+            {
+                question: "Bagi orang yang melaksanakan kurban sunnah, hukum memakan daging kurbannya sendiri adalah...",
+                options: ["Haram", "Makruh", "Sunnah (Dianjurkan memakan sebagian, maksimal 1/3)", "Wajib memakan semuanya"],
+                answer: 2,
+                explanation: "Bagi yang berkurban secara sunnah (bukan karena nazar), disunnahkan baginya untuk memakan sebagian dari daging kurbannya (maksimal sepertiga) untuk mendapatkan tabarruk (keberkahan), sisanya dibagikan ke fakir miskin dan dihadiahkan."
+            },
+            {
+                question: "Jika seseorang melaksanakan kurban karena pernah bernazar, maka hukum memakan daging kurban tersebut bagi dirinya dan keluarganya adalah...",
+                options: ["Haram, seluruh daging harus disedekahkan", "Sunnah", "Mubah", "Makruh"],
+                answer: 0,
+                explanation: "Kurban yang diwajibkan karena nazar memiliki aturan khusus: seluruh daging kurban nazar wajib disedekahkan kepada fakir miskin. Orang yang berkurban (shohibul qurban) beserta orang yang nafkahnya menjadi tanggungannya diharamkan memakannya."
+            },
+            {
+                question: "Dalam pembagian daging kurban, disunnahkan membagikannya kepada penerima (fakir miskin) dalam wujud...",
+                options: ["Daging mentah", "Daging matang (sudah dimasak)", "Dicampur bumbu dapur", "Daging kering"],
+                answer: 0,
+                explanation: "Berbeda dengan akikah, daging kurban disunnahkan untuk dibagikan dalam kondisi mentah agar si penerima (fakir miskin) memiliki kebebasan untuk mengolah, menyimpan, atau bahkan menjualnya untuk kebutuhan lain."
+            },
+
+            // AKIKAH
+            {
+                question: "Secara etimologi (bahasa), kata Akikah (Aqiqah) berarti...",
+                options: ["Menumpahkan darah", "Rambut bayi yang dibawa sejak lahir / memutus", "Pemberian nama", "Mencukur rambut"],
+                answer: 1,
+                explanation: "Secara bahasa, aqiqah berarti 'rambut yang tumbuh di kepala bayi sejak ia lahir', atau dari kata *aqqa* yang berarti membelah/memutus."
+            },
+            {
+                question: "Hukum melaksanakan akikah bagi orang tua yang diberikan karunia anak dan mampu secara finansial adalah...",
+                options: ["Fardu Ain", "Fardu Kifayah", "Sunnah Muakkad", "Mubah"],
+                answer: 2,
+                explanation: "Hukum aqiqah adalah sunnah muakkad (sangat dianjurkan) bagi orang tua yang memiliki kemampuan. Hal ini berdasarkan sabda Nabi: 'Setiap anak tergadaikan dengan aqiqahnya...'"
+            },
+            {
+                question: "Waktu yang paling utama (afdhal) untuk menyembelih hewan akikah adalah pada...",
+                options: ["Hari ketiga dari kelahiran", "Hari ketujuh dari kelahiran bayi", "Hari keempat belas dari kelahiran", "Kapan saja sebelum bayi baligh"],
+                answer: 1,
+                explanation: "Berdasarkan hadis riwayat Samurah bin Jundub, Rasulullah SAW bersabda: 'Setiap anak tergadai dengan aqiqahnya, disembelihkan (hewan) untuknya pada hari ketujuh, dicukur rambutnya, dan diberi nama.'"
+            },
+            {
+                question: "Jumlah minimal hewan akikah (kambing/domba) yang disunnahkan untuk bayi perempuan adalah...",
+                options: ["1 ekor", "2 ekor", "3 ekor", "Tidak ada ketentuan hewan"],
+                answer: 0,
+                explanation: "Ketentuan hewan akikah adalah 2 ekor kambing/domba yang sepadan untuk bayi laki-laki, dan 1 ekor kambing/domba untuk bayi perempuan."
+            },
+            {
+                question: "Kondisi daging akikah yang disunnahkan ketika dibagikan kepada tetangga dan fakir miskin adalah dalam wujud...",
+                options: ["Daging mentah beserta kulitnya", "Daging mentah potong kecil", "Daging matang (sudah dimasak) lengkap dengan kuahnya yang manis", "Daging yang diawetkan"],
+                answer: 2,
+                explanation: "Disunnahkan membagikan daging aqiqah dalam keadaan sudah dimasak matang. Selain itu, disunnahkan memasaknya dengan bumbu yang manis dengan harapan akhlak anak kelak menjadi manis (baik)."
+            },
+            {
+                question: "Amalan-amalan sunnah yang mengiringi penyembelihan aqiqah pada hari ketujuh kelahiran adalah sebagai berikut, KECUALI...",
+                options: ["Memberikan nama yang baik kepada bayi", "Mencukur rambut bayi", "Bersedekah emas/perak seberat rambut bayi yang dicukur", "Mengkhitan bayi pada hari itu juga"],
+                answer: 3,
+                explanation: "Khitan adalah syariat yang memiliki ketentuan tersendiri dan tidak wajib dibarengkan di hari ketujuh (meski boleh dilakukan). Amalan sunnah khusus akikah adalah memotong hewan, mencukur rambut, sedekah senilai berat rambut, dan memberi nama."
+            },
+            {
+                question: "Bagaimana hukum aqiqah bagi seorang anak yang orang tuanya sangat miskin sehingga belum diaqiqahi hingga anak tersebut mencapai usia baligh (dewasa)?",
+                options: ["Tanggung jawab aqiqah orang tua menjadi wajib dilunasi", "Tanggung jawab orang tua gugur, disunnahkan bagi anak mengaqiqahi dirinya sendiri", "Aqiqahnya menjadi haram", "Batal hukum aqiqahnya"],
+                answer: 1,
+                explanation: "Menurut mazhab Syafii, jika sampai anak baligh belum diaqiqahi, maka gugurlah kesunnahan atas orang tuanya. Namun, disunnahkan bagi anak tersebut (jika sudah mampu/dewasa) untuk mengaqiqahi dirinya sendiri."
+            },
+
+            // JUAL BELI
+            {
+                question: "Secara bahasa, jual beli (Al-Ba'i) bermakna...",
+                options: ["Menyerahkan barang tanpa ganti", "Menukar sesuatu dengan sesuatu yang lain", "Menitipkan barang", "Meminjamkan harta"],
+                answer: 1,
+                explanation: "Secara bahasa, Al-Ba'i artinya menukar sesuatu dengan sesuatu. Secara istilah, menukar barang dengan alat tukar yang sah (uang) atau barang dengan barang (barter) dengan cara tertentu (akad)."
+            },
+            {
+                question: "Rukun jual beli meliputi hal-hal di bawah ini, KECUALI...",
+                options: ["Penjual dan Pembeli (Aqidain)", "Saksi dan Notaris", "Barang yang diperjualbelikan (Ma'qud Alaih)", "Ijab dan Qabul (Shighat)"],
+                answer: 1,
+                explanation: "Rukun jual beli ada 3 kelompok (5 rukun rinci): 1) Penjual, 2) Pembeli, 3) Barang, 4) Alat tukar/Harga, 5) Ijab dan Qabul. Kehadiran saksi/notaris bukan rukun dalam jual beli biasa."
+            },
+            {
+                question: "Syarat barang yang diperjualbelikan haruslah suci. Oleh karena itu, hukum memperjualbelikan barang najis seperti bangkai babi atau khamr (minuman keras) adalah...",
+                options: ["Sah asal bermanfaat", "Makruh", "Batal / Tidak Sah", "Mubah"],
+                answer: 2,
+                explanation: "Barang yang diperjualbelikan harus benda yang suci secara fiqih. Menjual benda najis mutlak (seperti bangkai, babi, anjing, khamr) hukum akad jual belinya batal (fasid)."
+            },
+            {
+                question: "Jual beli buah-buahan yang masih sangat muda (pentil) di pohon atau yang belum tampak kematangannya (sistem ijon) hukumnya dilarang karena...",
+                options: ["Mengandung unsur riba", "Mengandung unsur gharar (ketidakpastian dan penipuan)", "Merupakan barang haram", "Tidak ada ijab qabul"],
+                answer: 1,
+                explanation: "Nabi SAW melarang menjual buah-buahan sebelum tampak kelayakannya (matang). Hal ini karena buah yang masih kecil rentan terkena hama atau rontok, sehingga mengandung gharar (ketidakpastian) yang merugikan pembeli."
+            },
+            {
+                question: "Jual beli dengan cara saling menyerahkan barang dan uang (misalnya berbelanja di swalayan) tanpa mengucapkan akad lisan 'saya jual' dan 'saya beli' disebut...",
+                options: ["Jual beli Salam", "Jual beli Inah", "Jual beli Mu'athah", "Jual beli Najsy"],
+                answer: 2,
+                explanation: "Mu'athah adalah transaksi jual beli di mana penjual menyerahkan barang dan pembeli menyerahkan uang berdasarkan kebiasaan/kerelaan tanpa melafadzkan ijab qabul lisan. Hal ini sah menurut ulama modern."
+            },
+            {
+                question: "Menimbun barang kebutuhan pokok rakyat pada saat harganya murah dan barangnya berlimpah, dengan tujuan untuk menjualnya kembali ketika harga melambung tinggi karena masyarakat kesulitan mencarinya. Praktik ini disebut...",
+                options: ["Gharar", "Ihtikar (Penimbunan)", "Tadlis", "Riba Fadhl"],
+                answer: 1,
+                explanation: "Praktik ini disebut Ihtikar. Hukumnya haram karena menzalimi dan memanfaatkan penderitaan masyarakat demi keuntungan pribadi yang berlipat."
+            },
+            {
+                question: "Anak kecil yang belum *mumayyiz* (belum bisa membedakan baik dan buruk) atau orang gila termasuk golongan yang di-*hijr* (dilarang/dibatasi) dalam muamalah. Hukum jual beli yang mereka lakukan adalah...",
+                options: ["Sah tanpa syarat", "Tidak sah / Batal", "Makruh", "Sah jika harganya murah"],
+                answer: 1,
+                explanation: "Syarat penjual dan pembeli adalah berakal sehat dan baligh (atau minimal mumayyiz dengan izin orang tua). Transaksi besar oleh anak kecil yang belum mumayyiz atau orang gila hukumnya tidak sah."
+            },
+
+            // KHIYAR
+            {
+                question: "Hak kebebasan bagi penjual dan pembeli untuk memilih antara meneruskan akad jual beli atau membatalkannya disebut...",
+                options: ["Wadi'ah", "Qirad", "Khiyar", "Hiwalah"],
+                answer: 2,
+                explanation: "Khiyar secara bahasa berarti 'memilih'. Dalam jual beli, khiyar adalah hak yang dimiliki oleh pihak-pihak yang berakad untuk memilih antara melangsungkan jual beli atau membatalkannya demi menghindari penyesalan."
+            },
+            {
+                question: "Khiyar yang berlaku selama penjual dan pembeli masih berada di tempat transaksi (belum berpisah secara fisik) disebut...",
+                options: ["Khiyar Syarat", "Khiyar Majlis", "Khiyar Aib", "Khiyar Waktu"],
+                answer: 1,
+                explanation: "Khiyar majlis adalah hak membatalkan jual beli selama keduanya masih berada dalam satu majlis (tempat akad) dan belum berpisah badan."
+            },
+            {
+                question: "Budi membeli sebuah kemeja di toko. Sampai di rumah, ternyata ia menemukan kancing kemeja tersebut hilang satu dan jahitannya sobek. Budi berhak mengembalikan kemeja tersebut. Hak ini disebut...",
+                options: ["Khiyar Majlis", "Khiyar Syarat", "Khiyar Aib (Cacat)", "Khiyar Ru'yah"],
+                answer: 2,
+                explanation: "Khiyar Aib adalah hak untuk membatalkan akad jual beli karena ditemukannya cacat (aib) pada barang yang tidak diketahui pembeli saat akad berlangsung."
+            },
+            {
+                question: "Menurut kesepakatan ulama, batas waktu maksimal berlakunya *Khiyar Syarat* (jual beli dengan syarat masa percobaan) pada umumnya adalah...",
+                options: ["1 hari", "3 hari 3 malam", "7 hari", "1 bulan"],
+                answer: 1,
+                explanation: "Khiyar Syarat adalah kesepakatan memberi waktu berpikir untuk melanjutkan/membatalkan. Nabi SAW menetapkan batas maksimal khiyar syarat adalah 3 hari 3 malam agar status barang tidak terkatung-katung lama."
+            },
+
+            // QIRAD
+            {
+                question: "Penyerahan modal uang dari seseorang (shahibul mal) kepada orang lain (mudharib) untuk didagangkan/diusahakan, di mana keuntungan dibagi menurut kesepakatan bersama, disebut...",
+                options: ["Qirad / Mudharabah", "Musyarakah", "Wadi'ah", "Ariyah"],
+                answer: 0,
+                explanation: "Qirad (menurut istilah ulama Hijaz) atau Mudharabah (menurut istilah ulama Irak) adalah akad kerja sama bagi hasil antara pemilik modal dan pengelola usaha."
+            },
+            {
+                question: "Rukun Qirad (Mudharabah) terdiri dari hal-hal berikut, KECUALI...",
+                options: ["Pemilik modal dan pengelola", "Modal (uang) dan pekerjaan", "Keuntungan (Nisbah/Persentase) yang disepakati", "Gaji bulanan tetap (Ujrah) untuk pengelola"],
+                answer: 3,
+                explanation: "Dalam Qirad, pengelola tidak boleh digaji tetap (ujrah/fix income), melainkan ia mendapatkan 'nisbah' (persentase) dari keuntungan bersih usaha. Jika dipatok gaji tetap, akad qiradnya menjadi batal/fasad."
+            },
+            {
+                question: "Dalam akad Qirad, jika terjadi kerugian finansial akibat kondisi pasar (bukan karena kecurangan atau kelalaian pengelola), maka pihak yang menanggung kerugian materi uang tersebut adalah...",
+                options: ["Pengelola usaha sepenuhnya", "Pemilik modal dan pengelola (dibagi dua)", "Pemilik modal (Shahibul Mal) sepenuhnya", "Pemerintah"],
+                answer: 2,
+                explanation: "Prinsip keadilan dalam Mudharabah: Jika rugi tanpa kelalaian, pemilik modal menanggung kerugian uang (materi), sedangkan pengelola menanggung kerugian waktu dan tenaganya yang tidak mendapat hasil. Pengelola tidak mengganti uang yang rugi."
+            },
+
+            // RIBA
+            {
+                question: "Secara etimologi, Riba berasal dari kata *Ziyadah* yang artinya...",
+                options: ["Pengurangan", "Tambahan / Kelebihan", "Penipuan", "Paksaan"],
+                answer: 1,
+                explanation: "Riba secara bahasa berarti tambahan (ziyadah), tumbuh, dan membesar. Secara istilah berarti tambahan yang disyaratkan dalam transaksi bisnis atau utang piutang tanpa adanya padanan pengganti yang sah."
+            },
+            {
+                question: "Hukum praktik Riba dalam syariat Islam secara mutlak adalah...",
+                options: ["Haram dan termasuk dosa besar", "Makruh Tahrim", "Mubah dalam keadaan terdesak", "Sunnah"],
+                answer: 0,
+                explanation: "Al-Quran (Q.S. Al-Baqarah: 275) secara tegas menyebutkan 'Allah menghalalkan jual beli dan mengharamkan riba'. Riba adalah salah satu dari 7 dosa besar yang membinasakan."
+            },
+            {
+                question: "Tambahan atau kelebihan pertukaran pada barang-barang ribawi yang sejenis (seperti emas ditukar emas, beras ditukar beras) namun berbeda berat/timbangannya disebut...",
+                options: ["Riba Nasi'ah", "Riba Fadhl", "Riba Qardh", "Riba Yad"],
+                answer: 1,
+                explanation: "Riba Fadhl adalah riba yang terjadi karena adanya kelebihan kuantitas/takaran dalam pertukaran barang ribawi sejenis secara tunai (misal: menukar emas 10 gram dengan emas 12 gram)."
+            },
+            {
+                question: "Riba yang terjadi karena adanya tambahan jumlah pembayaran hutang akibat penundaan waktu pelunasan disebut...",
+                options: ["Riba Fadhl", "Riba Qardh", "Riba Nasi'ah (Jahiliyah)", "Riba Yad"],
+                answer: 2,
+                explanation: "Riba Nasi'ah adalah penambahan hutang yang muncul akibat perpanjangan waktu. Kaidahnya pada zaman Jahiliyah: 'Lunasi hutangmu sekarang, atau tunda (waktunya) namun tambah (jumlah hutangnya)'."
+            },
+            {
+                question: "Seseorang meminjamkan uang Rp 1.000.000 dengan perjanjian peminjam harus mengembalikannya bulan depan sebesar Rp 1.100.000. Tambahan Rp 100.000 yang disyaratkan di awal ini termasuk kategori...",
+                options: ["Riba Qardh", "Riba Nasi'ah", "Riba Fadhl", "Riba Yad"],
+                answer: 0,
+                explanation: "Riba Qardh adalah suatu manfaat atau tingkat kelebihan tertentu yang disyaratkan oleh pemberi utang (muqridh) terhadap orang yang berutang (muqtaridh) di awal akad utang-piutang."
+            },
+            {
+                question: "Riba Yad terjadi akibat adanya perpisahan dari tempat transaksi (majlis) sebelum terjadinya...",
+                options: ["Tawar menawar barang", "Serah terima (taqabudh) barang yang ditukarkan", "Pencatatan saksi", "Pembatalan akad"],
+                answer: 1,
+                explanation: "Riba Yad terjadi ketika dua orang melakukan pertukaran valuta asing atau barang ribawi (seperti uang rupiah dengan dolar), namun mereka berpisah dari majelis sebelum menyerahkan barang secara tunai."
+            }
+        ];
+
+        // === APP LOGIC ===
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+        let timeRemaining = 60 * 60; // 60 minutes in seconds
+        let timerInterval;
+
+        // Elements
+        const screens = {
+            setup: document.getElementById('screen-setup'),
+            quiz: document.getElementById('screen-quiz'),
+            result: document.getElementById('screen-result'),
+            review: document.getElementById('screen-review')
+        };
+        const setupForm = document.getElementById('setup-form');
+        const optionsContainer = document.getElementById('options-container');
+        const questionText = document.getElementById('question-text');
+        const currentQNum = document.getElementById('current-question-num');
+        const progressBar = document.getElementById('progress-bar');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const btnFinish = document.getElementById('btn-finish');
+        const timeDisplay = document.getElementById('time-display');
+        const headerTimer = document.getElementById('header-timer');
+
+        // Initialize Total Questions
+        document.getElementById('total-questions').textContent = quizData.length;
+
+        // Start Quiz
+        setupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nama = document.getElementById('input-nama').value;
+            document.getElementById('display-nama').textContent = nama;
+            document.getElementById('result-nama').textContent = nama;
+            
+            switchScreen('quiz');
+            headerTimer.classList.remove('hidden');
+            headerTimer.classList.add('flex');
+            
+            startTimer();
+            loadQuestion(0);
+        });
+
+        // Switch Screen Logic
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(screen => {
+                screen.classList.add('hidden');
+                screen.classList.remove('block');
+            });
+            screens[screenName].classList.remove('hidden');
+            screens[screenName].classList.add('block');
+            window.scrollTo(0,0);
+        }
+
+        // Timer Logic
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if(timeRemaining <= 300) { // 5 minutes left
+                    headerTimer.classList.replace('bg-rose-50', 'bg-red-600');
+                    headerTimer.classList.replace('text-rose-600', 'text-white');
+                    headerTimer.classList.add('animate-pulse');
+                }
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    finishQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+            const s = (timeRemaining % 60).toString().padStart(2, '0');
+            timeDisplay.textContent = `${m}:${s}`;
+        }
+
+        // Load Question
+        function loadQuestion(index) {
+            currentQuestionIndex = index;
+            const q = quizData[index];
+            
+            // Update UI
+            currentQNum.textContent = index + 1;
+            progressBar.style.width = `${((index + 1) / quizData.length) * 100}%`;
+            questionText.textContent = q.question;
+            
+            // Generate Options
+            optionsContainer.innerHTML = '';
+            q.options.forEach((optText, i) => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn w-full text-left p-4 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium hover:border-blue-500 flex gap-4 ${userAnswers[index] === i ? 'option-selected' : ''}`;
+                
+                // Labels A, B, C, D
+                const label = String.fromCharCode(65 + i);
+                
+                btn.innerHTML = `
+                    <span class="flex-shrink-0 w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slate-500 btn-label">${label}</span>
+                    <span class="mt-1 leading-relaxed">${optText}</span>
+                `;
+                
+                if (userAnswers[index] === i) {
+                    const labelSpan = btn.querySelector('.btn-label');
+                    labelSpan.classList.replace('bg-slate-100', 'bg-blue-600');
+                    labelSpan.classList.replace('text-slate-500', 'text-white');
+                }
+
+                btn.onclick = () => selectOption(i, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Button Visibility
+            btnPrev.disabled = index === 0;
+            
+            if (index === quizData.length - 1) {
+                btnNext.classList.add('hidden');
+                btnFinish.classList.remove('hidden');
+            } else {
+                btnNext.classList.remove('hidden');
+                btnFinish.classList.add('hidden');
+            }
+        }
+
+        // Select Option
+        function selectOption(optIndex, btnElement) {
+            userAnswers[currentQuestionIndex] = optIndex;
+            
+            // Reset visual states
+            const allBtns = optionsContainer.querySelectorAll('button');
+            allBtns.forEach(b => {
+                b.classList.remove('option-selected');
+                const lbl = b.querySelector('.btn-label');
+                lbl.classList.replace('bg-blue-600', 'bg-slate-100');
+                lbl.classList.replace('text-white', 'text-slate-500');
+            });
+            
+            // Set active state
+            btnElement.classList.add('option-selected');
+            const activeLbl = btnElement.querySelector('.btn-label');
+            activeLbl.classList.replace('bg-slate-100', 'bg-blue-600');
+            activeLbl.classList.replace('text-slate-500', 'text-white');
+        }
+
+        // Navigation
+        btnNext.addEventListener('click', () => {
+            if (currentQuestionIndex < quizData.length - 1) loadQuestion(currentQuestionIndex + 1);
+        });
+        
+        btnPrev.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) loadQuestion(currentQuestionIndex - 1);
+        });
+
+        // Finish Quiz
+        btnFinish.addEventListener('click', () => {
+            const unanswered = userAnswers.filter(a => a === null).length;
+            if(unanswered > 0) {
+                const conf = confirm(`Anda masih memiliki ${unanswered} soal yang belum dijawab. Yakin ingin menyelesaikan kuis?`);
+                if(!conf) return;
+            }
+            clearInterval(timerInterval);
+            finishQuiz();
+        });
+
+        function finishQuiz() {
+            headerTimer.classList.add('hidden');
+            let correct = 0;
+            let wrong = 0;
+            let empty = 0;
+
+            userAnswers.forEach((ans, idx) => {
+                if (ans === null) empty++;
+                else if (ans === quizData[idx].answer) correct++;
+                else wrong++;
+            });
+
+            // Calculate Score (Scale to 100)
+            const finalScore = Math.round((correct / quizData.length) * 100);
+
+            document.getElementById('result-score').textContent = finalScore;
+            document.getElementById('result-correct').textContent = correct;
+            document.getElementById('result-wrong').textContent = wrong;
+            document.getElementById('result-empty').textContent = empty;
+
+            buildReview();
+            switchScreen('result');
+        }
+
+        // Review Logic
+        function buildReview() {
+            const container = document.getElementById('review-container');
+            container.innerHTML = '';
+
+            quizData.forEach((q, idx) => {
+                const uAns = userAnswers[idx];
+                const isCorrect = uAns === q.answer;
+                const isSkipped = uAns === null;
+                
+                let badgeClass = isCorrect ? 'bg-emerald-100 text-emerald-700 border-emerald-200' 
+                               : (isSkipped ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-rose-100 text-rose-700 border-rose-200');
+                
+                let badgeIcon = isCorrect ? '<i class="fa-solid fa-check"></i> Benar' 
+                              : (isSkipped ? '<i class="fa-solid fa-minus"></i> Kosong' : '<i class="fa-solid fa-xmark"></i> Salah');
+
+                const itemHtml = `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                            <h4 class="font-bold text-slate-700">Soal ${idx + 1}</h4>
+                            <div class="px-3 py-1 rounded-full text-xs font-bold border ${badgeClass}">
+                                ${badgeIcon}
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-slate-800 mb-4 text-justify">${q.question}</p>
+                            <div class="space-y-2 mb-4">
+                                ${q.options.map((opt, i) => {
+                                    let bg = 'bg-slate-50 border-slate-200 text-slate-600';
+                                    let icon = '';
+                                    if(i === q.answer) {
+                                        bg = 'bg-emerald-50 border-emerald-300 text-emerald-800 font-medium';
+                                        icon = '<i class="fa-solid fa-check text-emerald-600 mr-2"></i>';
+                                    } else if (i === uAns && !isCorrect) {
+                                        bg = 'bg-rose-50 border-rose-300 text-rose-800 line-through opacity-70';
+                                        icon = '<i class="fa-solid fa-xmark text-rose-600 mr-2"></i>';
+                                    }
+                                    return `<div class="p-3 border rounded-lg ${bg} text-sm flex items-start">
+                                        <span class="mt-0.5">${icon}</span> 
+                                        <span>${opt}</span>
+                                    </div>`;
+                                }).join('')}
+                            </div>
+                            <div class="bg-blue-50 border border-blue-100 p-4 rounded-lg">
+                                <h5 class="text-xs font-bold text-blue-800 uppercase mb-1 flex items-center gap-1"><i class="fa-solid fa-lightbulb"></i> Pembahasan:</h5>
+                                <p class="text-sm text-blue-900 leading-relaxed">${q.explanation}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += itemHtml;
+            });
+        }
+
+        document.getElementById('btn-review').addEventListener('click', () => {
+            switchScreen('review');
+        });
+
+        document.getElementById('btn-back-result').addEventListener('click', () => {
+            switchScreen('result');
+        });
+
+    </script>
+</body>
+</html>

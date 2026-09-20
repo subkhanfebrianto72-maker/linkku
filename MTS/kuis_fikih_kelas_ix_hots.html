@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Fikih MTs Kelas IX - HOTS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .option-btn { transition: all 0.2s ease; }
+        .option-btn:hover:not(:disabled) { border-color: #3b82f6; background-color: #eff6ff; }
+        .option-selected { border-color: #3b82f6 !important; background-color: #eff6ff !important; ring: 2px solid #3b82f6; }
+    </style>
+</head>
+<body class="text-slate-800 flex flex-col min-h-screen">
+
+    <!-- Header -->
+    <header class="bg-white shadow-sm sticky top-0 z-10">
+        <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 text-white p-2 rounded-lg">
+                    <i class="fa-solid fa-book-quran"></i>
+                </div>
+                <h1 class="text-lg md:text-xl font-bold text-slate-800">Ujian Fikih Kelas IX</h1>
+            </div>
+            <div id="header-timer" class="hidden flex items-center gap-2 bg-rose-50 text-rose-600 px-3 py-1.5 rounded-full font-semibold border border-rose-100">
+                <i class="fa-regular fa-clock"></i>
+                <span id="time-display">45:00</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="flex-grow w-full max-w-4xl mx-auto p-4 md:p-6 flex flex-col justify-center">
+        
+        <!-- Screen 1: Setup / Form -->
+        <div id="screen-setup" class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 fade-in w-full max-w-lg mx-auto">
+            <div class="text-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Selamat Datang</h2>
+                <p class="text-slate-500 text-sm">Silakan lengkapi data diri Anda sebelum memulai kuis (Materi Semester 1).</p>
+            </div>
+            <form id="setup-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="input-nama" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Masukkan nama Anda">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Kelas</label>
+                    <select id="input-kelas" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                        <option value="" disabled selected>Pilih Kelas</option>
+                        <option value="IX-A">IX-A</option>
+                        <option value="IX-B">IX-B</option>
+                        <option value="IX-C">IX-C</option>
+                        <option value="IX-D">IX-D</option>
+                        <option value="Lainnya">Lainnya</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Asal Sekolah</label>
+                    <input type="text" id="input-sekolah" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all" placeholder="Contoh: MTsN 1 Kota...">
+                </div>
+                
+                <div class="bg-blue-50 p-4 rounded-lg border border-blue-100 flex gap-3 text-sm text-blue-800 mt-6">
+                    <i class="fa-solid fa-circle-info mt-0.5"></i>
+                    <div>
+                        <p class="font-semibold mb-1">Informasi Kuis:</p>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Jumlah soal: 30 Butir (HOTS)</li>
+                            <li>Waktu pengerjaan: 45 Menit</li>
+                            <li>Pembahasan tersedia di akhir kuis.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-md shadow-blue-500/30">
+                    Mulai Kuis <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </form>
+        </div>
+
+        <!-- Screen 2: Quiz -->
+        <div id="screen-quiz" class="hidden fade-in w-full">
+            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
+                <!-- Progress & Info -->
+                <div class="flex justify-between items-center mb-6 pb-4 border-b border-slate-100">
+                    <div>
+                        <p class="text-sm text-slate-500 mb-1">Peserta: <span id="display-nama" class="font-semibold text-slate-700"></span></p>
+                        <div class="flex items-center gap-2">
+                            <h3 class="text-lg font-bold text-slate-800">Soal <span id="current-question-num">1</span> dari <span id="total-questions">30</span></h3>
+                        </div>
+                    </div>
+                    <div class="w-24 md:w-32 bg-slate-100 rounded-full h-2.5">
+                        <div id="progress-bar" class="bg-blue-600 h-2.5 rounded-full" style="width: 3.33%"></div>
+                    </div>
+                </div>
+
+                <!-- Question Area -->
+                <div class="mb-8">
+                    <p id="question-text" class="text-slate-800 text-base md:text-lg leading-relaxed text-justify"></p>
+                </div>
+
+                <!-- Options -->
+                <div id="options-container" class="space-y-3">
+                    <!-- Buttons injected via JS -->
+                </div>
+
+                <!-- Navigation -->
+                <div class="flex justify-between mt-8 pt-6 border-t border-slate-100">
+                    <button id="btn-prev" class="px-5 py-2.5 border border-slate-300 text-slate-600 rounded-lg hover:bg-slate-50 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                        <i class="fa-solid fa-arrow-left mr-2"></i> Sebelumnya
+                    </button>
+                    <button id="btn-next" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors shadow-sm shadow-blue-500/30">
+                        Selanjutnya <i class="fa-solid fa-arrow-right ml-2"></i>
+                    </button>
+                    <button id="btn-finish" class="hidden px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-medium transition-colors shadow-sm shadow-emerald-500/30">
+                        Selesai & Kumpulkan <i class="fa-solid fa-check ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen 3: Result Summary -->
+        <div id="screen-result" class="hidden fade-in w-full max-w-xl mx-auto">
+            <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 text-center">
+                <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-800 mb-2">Kuis Selesai!</h2>
+                <p class="text-slate-500 mb-6">Terima kasih <span id="result-nama" class="font-semibold"></span> telah menyelesaikan ujian ini.</p>
+                
+                <div class="bg-slate-50 rounded-xl p-6 mb-8 border border-slate-100">
+                    <p class="text-sm text-slate-500 uppercase tracking-wider font-semibold mb-2">Nilai Akhir</p>
+                    <div class="text-5xl font-black text-blue-600 mb-4" id="result-score">0</div>
+                    
+                    <div class="grid grid-cols-3 gap-4 text-sm mt-4 pt-4 border-t border-slate-200">
+                        <div>
+                            <p class="text-slate-500">Benar</p>
+                            <p class="font-bold text-emerald-600 text-lg" id="result-correct">0</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500">Salah</p>
+                            <p class="font-bold text-rose-600 text-lg" id="result-wrong">0</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-500">Kosong</p>
+                            <p class="font-bold text-slate-600 text-lg" id="result-empty">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="btn-review" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-semibold py-3 px-6 rounded-lg transition-colors flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-list-check"></i> Lihat Pembahasan Soal
+                </button>
+            </div>
+        </div>
+
+        <!-- Screen 4: Review -->
+        <div id="screen-review" class="hidden fade-in w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-slate-800">Pembahasan Soal</h2>
+                <button id="btn-back-result" class="px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-sm font-medium">
+                    <i class="fa-solid fa-xmark mr-1"></i> Tutup
+                </button>
+            </div>
+            <div id="review-container" class="space-y-6">
+                <!-- Review items injected via JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-auto py-4 text-center text-sm text-slate-500">
+        &copy; 2026 Kuis Fikih MTs Kelas IX - Dibuat untuk Evaluasi Pembelajaran.
+    </footer>
+
+    <script>
+        // === QUIZ DATA (30 HOTS Questions) ===
+        const quizData = [
+            // BAB I: Penyembelihan, Kurban, Akikah
+            {
+                question: "Pak Ahmad menyembelih ayam dengan pisau baja yang sangat tajam. Namun, karena terburu-buru mengejar waktu buka puasa, ia lupa membaca basmalah saat menyembelih. Setelah ayam mati dan dibersihkan, ia baru teringat. Berdasarkan ketentuan fikih penyembelihan, bagaimana status kehalalan daging ayam tersebut?",
+                options: [
+                    "Haram dimakan, karena membaca basmalah adalah rukun penyembelihan yang mutlak tidak boleh ditinggalkan.",
+                    "Makruh dimakan, sebaiknya diberikan kepada hewan peliharaan saja untuk berhati-hati.",
+                    "Halal dimakan, karena lupa membaca basmalah dimaafkan bagi seorang muslim yang menyembelih.",
+                    "Boleh dimakan asalkan sebelum dagingnya dimasak dibacakan basmalah terlebih dahulu."
+                ],
+                answer: 2,
+                explanation: "Syarat penyembelih adalah muslim atau ahli kitab. Membaca basmalah disyariatkan saat menyembelih. Namun, mayoritas ulama (termasuk Syafiiyah) berpendapat jika seorang muslim lupa (tidak sengaja meninggalkan) membaca basmalah saat menyembelih, sembelihannya tetap sah dan dagingnya halal dimakan."
+            },
+            {
+                question: "Di daerah pedalaman, sekelompok anggota pramuka tersesat dan harus bertahan hidup. Mereka menangkap seekor unggas liar. Karena tidak membawa pisau atau alat potong berbahan logam, mereka menggunakan potongan bambu (sembilu) yang ditajamkan ujungnya untuk menyembelih unggas tersebut hingga memutus saluran nafas dan makanannya. Hukum memakan unggas tersebut adalah...",
+                options: [
+                    "Haram, karena bambu berasal dari tumbuhan, bukan dari bahan logam seperti besi atau baja.",
+                    "Halal, karena bambu tajam tersebut memenuhi syarat alat pemotong yang bisa melukai dan mengalirkan darah.",
+                    "Haram, karena dalam keadaan darurat menyembelih hewan liar membutuhkan perlakuan khusus.",
+                    "Makruh, karena tidak menggunakan alat yang lazim digunakan oleh jagal."
+                ],
+                answer: 1,
+                explanation: "Syarat alat penyembelihan adalah benda yang tajam dan dapat melukai/mengalirkan darah, terbuat dari bahan apa saja (besi, tembaga, batu, kaca, bambu/sembilu), KECUALI yang dilarang yaitu terbuat dari tulang (termasuk gigi) dan kuku."
+            },
+            {
+                question: "Menjelang Idul Adha, Pak Zaid membeli seekor kambing besar dan gemuk dari pasar hewan. Namun, saat diturunkan dari mobil pickup di halaman masjid, kambing tersebut terjatuh dan kakinya patah sehingga ia berjalan sangat pincang dan kesulitan mengikuti hewan lain. Bagaimana status kambing tersebut jika diteruskan menjadi hewan kurban?",
+                options: [
+                    "Sah, karena cacatnya terjadi setelah dibeli (akibat kecelakaan) dan bukan bawaan dari lahir.",
+                    "Sah, asalkan daging kambing tersebut tetap banyak dan semuanya dibagikan kepada fakir miskin.",
+                    "Makruh, lebih baik tetap disembelih namun Pak Zaid tidak boleh memakan dagingnya.",
+                    "Tidak sah, karena pincang yang sangat parah merupakan cacat yang menghalangi sahnya hewan kurban."
+                ],
+                answer: 3,
+                explanation: "Salah satu syarat hewan kurban adalah harus sehat dan bebas dari cacat fisik yang signifikan. Ada 4 cacat yang menyebabkan hewan TIDAK SAH dikurbankan: 1) Buta sebelah yang jelas, 2) Sakit yang jelas, 3) Pincang yang sangat jelas (parah), 4) Sangat kurus hingga tidak bersumsum. Kejadian patah kaki membuat kurbannya tidak sah dan harus diganti jika ingin dinilai sebagai kurban sunnah."
+            },
+            {
+                question: "Panitia kurban Masjid Al-Ikhlas mengumpulkan kulit-kulit sapi hasil penyembelihan kurban. Karena kulit tersebut sulit didistribusikan, ketua panitia berinisiatif menjual seluruh kulit sapi tersebut ke pabrik penyamakan kulit. Uang hasil penjualannya kemudian dimasukkan ke dalam kas masjid untuk biaya operasional. Bagaimana hukum tindakan panitia tersebut dalam pandangan fikih?",
+                options: [
+                    "Boleh dan dianjurkan, karena bertujuan memakmurkan masjid.",
+                    "Tidak boleh (haram), karena hewan kurban beserta seluruh bagian tubuhnya dilarang untuk diperjualbelikan.",
+                    "Makruh, sebaiknya uang hasil penjualan dibelikan daging kembali.",
+                    "Mubah, asalkan panitia sudah mendapat izin dari orang yang berkurban (shohibul qurban)."
+                ],
+                answer: 1,
+                explanation: "Hukum menjual bagian apapun dari hewan kurban (daging, kulit, tulang, kepala) adalah haram. Nabi SAW bersabda: 'Barangsiapa menjual kulit hewan kurbannya, maka tidak ada kurban baginya' (HR. Al-Hakim). Kulit harus disedekahkan atau dimanfaatkan secara langsung."
+            },
+            {
+                question: "Pak Umar menyembelih seekor sapi betina secara syar'i. Setelah perutnya dibelah, ternyata di dalamnya terdapat janin sapi yang sudah mati. Bagaimana hukum mengonsumsi daging janin sapi tersebut?",
+                options: [
+                    "Haram, karena janin tersebut berstatus bangkai yang mati di dalam perut sebelum sempat disembelih.",
+                    "Makruh, karena daging janin biasanya belum terbentuk secara sempurna dan rentan penyakit.",
+                    "Halal, asalkan janin tersebut disembelih ulang meskipun sudah dalam keadaan mati.",
+                    "Halal, karena sembelihan janin yang ada dalam kandungan mengikuti sembelihan induknya."
+                ],
+                answer: 3,
+                explanation: "Menurut jumhur ulama (mayoritas), sembelihan janin yang masih berada di dalam kandungan mengikuti sembelihan induknya. Jika induknya disembelih secara sah dan kemudian janin ditemukan mati di dalam perut, maka janin tersebut berstatus halal dimakan tanpa perlu disembelih lagi."
+            },
+            {
+                question: "Keluarga Bu Fatimah dikaruniai bayi perempuan pada hari Rabu sore (sebelum masuk waktu Maghrib). Sesuai sunnah, penyembelihan hewan akikah sebaiknya dilaksanakan pada hari ketujuh kelahiran. Hari apakah keluarga Bu Fatimah disunnahkan melaksanakan penyembelihan akikah tersebut?",
+                options: [
+                    "Senin",
+                    "Selasa",
+                    "Rabu",
+                    "Kamis"
+                ],
+                answer: 1,
+                explanation: "Perhitungan hari ketujuh akikah dimulai sejak hari kelahiran (jika lahir sebelum Maghrib, hari tersebut dihitung hari pertama). Hari 1 = Rabu, Hari 2 = Kamis, Hari 3 = Jumat, Hari 4 = Sabtu, Hari 5 = Minggu, Hari 6 = Senin, Hari 7 = Selasa."
+            },
+            {
+                question: "Dalam pelaksanaan pembagian daging, terdapat perbedaan antara ibadah Kurban dan Akikah. Pernyataan di bawah ini yang paling tepat menggambarkan perbedaan distribusi daging kedua ibadah tersebut adalah...",
+                options: [
+                    "Daging kurban wajib dibagikan matang, sedangkan akikah wajib dibagikan mentah.",
+                    "Daging kurban disunnahkan dibagikan mentah, sedangkan daging akikah disunnahkan dibagikan dalam keadaan sudah dimasak (matang).",
+                    "Daging kurban hanya untuk fakir miskin, sedangkan daging akikah boleh untuk orang kaya saja.",
+                    "Daging kurban boleh dijual sebagian, sedangkan daging akikah tidak boleh dijual sama sekali."
+                ],
+                answer: 1,
+                explanation: "Sunnah pembagian daging kurban adalah dalam keadaan mentah agar penerima bebas memanfaatkannya (disimpan, dijual oleh penerima, atau dimasak). Sedangkan daging akikah disunnahkan dibagikan dalam keadaan sudah dimasak (matang) siap makan sebagai bentuk rasa syukur dan menjamu tetangga/saudara."
+            },
+            {
+                question: "Pak Budi bernazar, 'Jika anak saya lulus ujian kedokteran, saya akan berkurban satu ekor kambing.' Alhamdulillah anaknya lulus. Pak Budi pun menyembelih kambing kurban nazarnya. Karena istrinya sangat ingin mencoba sate kambing tersebut, Pak Budi menyisihkan sebagian kecil daging untuk dimakan keluarganya, sisanya dibagikan ke fakir miskin. Hukum tindakan Pak Budi memakan daging kurban tersebut adalah...",
+                options: [
+                    "Haram, karena kurban nazar berstatus wajib, sehingga seluruh dagingnya wajib disedekahkan dan shohibul qurban tidak boleh memakannya.",
+                    "Mubah, karena shohibul qurban tetap memiliki hak maksimal sepertiga dari bagian daging kurban nazarnya.",
+                    "Sunnah, agar shohibul qurban mendapat keberkahan dari hewan yang ia kurbankan kepada Allah.",
+                    "Makruh, sebaiknya keluarga menahan diri dan memberikan semuanya kepada tetangga sekitar."
+                ],
+                answer: 0,
+                explanation: "Kurban yang hukum asalnya sunnah menjadi wajib apabila dinazarkan. Aturan kurban wajib (nazar) adalah seluruh dagingnya wajib disedekahkan kepada fakir miskin. Orang yang berkurban (shohibul qurban) beserta keluarga yang ditanggung nafkahnya diharamkan memakan daging kurban nazarnya walau sedikitpun."
+            },
+            {
+                question: "Pak Ridwan bertugas sebagai algojo (penyembelih) kurban di kampungnya. Ia memotong urat nadi, kerongkongan, dan tenggorokan hewan dengan sangat cepat dari arah belakang leher (tengkuk) hewan. Bagaimana pandangan fikih terhadap tata cara penyembelihan yang dilakukan Pak Ridwan?",
+                options: [
+                    "Sembelihannya tidak sah dan dagingnya haram karena rukunnya tidak terpenuhi.",
+                    "Sembelihannya sah dan halal, namun perbuatannya dihukumi makruh karena menyiksa hewan.",
+                    "Sembelihannya sah dan disunnahkan karena dapat mempercepat kematian hewan kurban.",
+                    "Sembelihannya batal secara otomatis karena melanggar syarat mutlak arah penyembelihan."
+                ],
+                answer: 1,
+                explanation: "Memotong leher hewan dari arah belakang (tengkuk) hukumnya makruh karena menambah rasa sakit dan menyiksa hewan. Namun, jika akhirnya 3 saluran utama (nafas, makanan, dan dua urat nadi) terputus, sembelihannya tetap dinilai sah dan dagingnya halal."
+            },
+            {
+                question: "Bolehkah aqiqah digabungkan dengan niat kurban? Pak Andi menyembelih satu ekor kambing pada tanggal 10 Dzulhijjah dengan niat untuk kurban dirinya sekaligus niat aqiqah untuk anak laki-lakinya yang baru lahir awal bulan. Menurut pandangan ulama yang kuat (seperti Imam Ramli dari Syafiiyah), hukum penggabungan niat ini adalah...",
+                options: [
+                    "Boleh dan sah keduanya mendapat pahala secara penuh karena sama-sama ibadah sunnah.",
+                    "Tidak sah keduanya, hewan tersebut hanya menjadi sedekah biasa.",
+                    "Sah sebagai kurban saja, sedangkan aqiqahnya dianggap batal.",
+                    "Sah untuk salah satunya saja tergantung niat mana yang paling kuat diucapkan, namun tidak sah digabungkan."
+                ],
+                answer: 3,
+                explanation: "Sebagian besar ulama Syafiiyah (seperti Imam Ibnu Hajar Al-Haitami) berpendapat bahwa menggabungkan niat kurban dan akikah pada satu hewan tidak sah untuk keduanya. Sebagian lain (seperti Imam Ramli) membolehkan, namun pandangan yang lebih berhati-hati adalah keduanya adalah ibadah yang memiliki sebab (karena Idul Adha dan kelahiran bayi) dan tujuan berbeda, sehingga harus dipisah hewannya atau diniatkan salah satu saja."
+            },
+            // BAB II: Jual Beli, Khiyar, Qirad, Riba
+            {
+                question: "Andi membuka toko online dengan sistem dropship. Ia memajang foto sepatu bermerek di media sosialnya, padahal barang tersebut masih berada di tangan distributor utama dan Andi belum membelinya. Ketika Budi mentransfer uang ke Andi, barulah Andi memesan ke distributor dan memintanya mengirim barang langsung ke alamat Budi. Dalam fikih muamalah klasik, praktik jual beli ini bermasalah karena...",
+                options: [
+                    "Barang yang dijual tidak memiliki spesifikasi yang jelas (gharar).",
+                    "Andi menjual barang yang belum sepenuhnya dimiliki dan dikuasai (Ba'i Ma'dum).",
+                    "Terjadi ketidakadilan harga antara distributor dan pembeli akhir.",
+                    "Adanya unsur paksaan dari pihak distributor terhadap penjual eceran."
+                ],
+                answer: 1,
+                explanation: "Syarat sah barang yang diperjualbelikan adalah harus milik penuh penjual (milkiyah tamah) atau penjual berstatus wakil/agen. Menjual barang yang belum dibeli/dimiliki dilarang oleh Nabi SAW: 'Janganlah engkau menjual sesuatu yang tidak ada padamu' (HR. Abu Daud). Solusinya adalah akad Salam (pesanan dimuka) atau menjadi makelar/agen resmi."
+            },
+            {
+                question: "Ibu Sarah membeli panci presto di pasar raya. Setelah membayar lunas dan menerima barang, ia masih asyik mengobrol dengan penjualnya di dalam toko tersebut tentang resep masakan. Tiba-tiba ia teringat bahwa di rumahnya sudah ada panci dengan fungsi yang sama. Ia pun membatalkan pembelian dan meminta uangnya kembali saat itu juga. Tindakan Ibu Sarah dalam fikih jual beli...",
+                options: [
+                    "Tidak dibenarkan, karena uang sudah diserahkan dan barang sudah berpindah tangan.",
+                    "Dibenarkan, karena panci tersebut tidak memiliki garansi resmi dari toko.",
+                    "Tidak dibenarkan, kecuali panci tersebut cacat atau bocor.",
+                    "Dibenarkan, karena masih berlakunya hak khiyar majlis sebelum mereka berpisah dari tempat transaksi."
+                ],
+                answer: 3,
+                explanation: "Khiyar Majlis adalah hak pembeli dan penjual untuk melanjutkan atau membatalkan akad jual beli selama keduanya masih berada di satu majlis (tempat) akad dan belum berpisah secara fisik. Karena Ibu Sarah masih di dalam toko, ia berhak membatalkan."
+            },
+            {
+                question: "Pak Hasan memberikan modal Rp 20.000.000 kepada Riki untuk membuka usaha kedai mie ayam dengan kesepakatan bagi hasil 60% keuntungan untuk Riki dan 40% untuk Pak Hasan. Di bulan keempat, kedai tersebut terbakar habis akibat korsleting listrik dari tiang jalan raya (bukan kelalaian Riki). Berdasarkan hukum Qirad (Mudharabah), penyelesaian kerugian ini adalah...",
+                options: [
+                    "Riki harus mengganti seluruh uang Rp 20.000.000 karena ia bertindak sebagai pengelola usaha.",
+                    "Kerugian finansial ditanggung sepenuhnya oleh Pak Hasan, sedangkan Riki menanggung kerugian tenaga dan waktu.",
+                    "Kerugian dibagi rata, Riki dan Pak Hasan menanggung masing-masing Rp 10.000.000.",
+                    "Riki menanggung 60% kerugian dan Pak Hasan menanggung 40% kerugian sesuai nisbah awal."
+                ],
+                answer: 1,
+                explanation: "Dalam akad Qirad (Mudharabah), jika terjadi kerugian finansial akibat kondisi force majeure (bencana/bukan karena kelalaian pengelola), maka kerugian materi/modal ditanggung 100% oleh Shahibul Mal (pemilik modal). Mudharib (pengelola) menanggung kerugian berupa hilangnya waktu dan jerih payahnya yang tidak menghasilkan."
+            },
+            {
+                question: "Ibu Aminah ingin menukarkan cincin emas lamanya seberat 10 gram (kadar 18 karat) dengan gelang emas baru seberat 8 gram (kadar 24 karat). Pemilik toko setuju melakukan pertukaran tersebut secara langsung di tempat tanpa ada tambahan uang. Hukum transaksi penukaran emas ini adalah...",
+                options: [
+                    "Halal, karena nilai ekonomis 10 gram 18 karat sepadan dengan 8 gram 24 karat.",
+                    "Riba Nasi'ah, karena terdapat perbedaan kualitas emas yang ditukarkan.",
+                    "Riba Fadhl, karena menukar barang ribawi sejenis (emas) harus sama timbangannya, terlepas dari perbedaan kualitas.",
+                    "Mubah, asalkan penjual dan pembeli sama-sama rida tanpa ada unsur paksaan."
+                ],
+                answer: 2,
+                explanation: "Emas ditukar dengan emas adalah pertukaran barang ribawi sejenis. Syarat mutlaknya harus tunai (saat itu juga) dan berat/timbangannya harus SAMA (tamatsul), tidak boleh mempertimbangkan perbedaan kualitas atau karat. Kelebihan berat pada satu sisi disebut Riba Fadhl. Solusinya: Emas lama dijual dulu menjadi uang, lalu uangnya digunakan membeli emas baru."
+            },
+            {
+                question: "Menjelang musim panen, seorang tengkulak membeli buah mangga milik Pak Tani yang saat itu bunganya baru saja gugur dan buahnya masih sangat kecil (pentil) di pohon. Tengkulak membayar tunai dengan harapan saat besar nanti harganya naik. Transaksi yang dikenal dengan sistem 'ijon' ini hukumnya tidak sah karena mengandung unsur...",
+                options: [
+                    "Gharar (ketidakjelasan), karena buah tersebut belum jelas apakah akan panen dengan selamat atau rontok terkena hama.",
+                    "Riba Nasi'ah, karena terjadi penundaan waktu penyerahan barang.",
+                    "Ikrah (paksaan), karena petani biasanya terpaksa menjual saat butuh uang.",
+                    "Ihtikar (penimbunan), karena tengkulak akan menimbun buah tersebut."
+                ],
+                answer: 0,
+                explanation: "Jual beli buah-buahan yang belum tampak kematangannya (masih sangat muda/pentil) dilarang oleh Nabi SAW karena berisiko sangat tinggi terkena hama, angin, atau penyakit (Gharar/ketidakpastian). Hal ini merugikan salah satu pihak."
+            },
+            {
+                question: "Pak Anton sedang kesulitan biaya pendaftaran sekolah anaknya. Ia meminjam uang Rp 2.000.000 kepada tetangganya. Tetangganya memberikan pinjaman dengan syarat tertulis bahwa bulan depan Pak Anton harus mengembalikan sebesar Rp 2.200.000. Tambahan uang Rp 200.000 dalam transaksi utang piutang ini dikategorikan sebagai...",
+                options: [
+                    "Riba Fadhl",
+                    "Riba Yad",
+                    "Riba Nasi'ah",
+                    "Riba Qardh"
+                ],
+                answer: 3,
+                explanation: "Riba Qardh adalah riba (tambahan/bunga) yang terjadi dalam akad hutang piutang, di mana orang yang meminjamkan (muqridh) mensyaratkan keuntungan/tambahan di awal kepada orang yang berhutang (muqtaridh) saat pengembalian."
+            },
+            {
+                question: "Dalam akad Jual Beli Bersyarat (Khiyar Syarat), Anton membeli sebuah laptop bekas dari Budi. Anton berkata, 'Saya beli laptop ini dengan harga 3 juta, dengan syarat saya bawa pulang dulu untuk dicoba selama 2 hari. Jika sering mati sendiri, saya kembalikan.' Budi menyetujuinya. Transaksi ini...",
+                options: [
+                    "Batal, karena jual beli tidak boleh digantungkan pada syarat waktu.",
+                    "Sah, karena Khiyar Syarat diperbolehkan maksimal selama tiga hari.",
+                    "Fasad, karena Anton belum membayar lunas di awal.",
+                    "Makruh, karena menunjukkan ketidakpercayaan antara pembeli dan penjual."
+                ],
+                answer: 1,
+                explanation: "Khiyar Syarat adalah hak memilih untuk meneruskan atau membatalkan jual beli dengan syarat tertentu yang disepakati bersama. Dalam fikih, batas maksimal khiyar syarat umumnya adalah tiga hari tiga malam agar status kepemilikan barang tidak terkatung-katung terlalu lama."
+            },
+            {
+                question: "Seorang importir menimbun minyak goreng di gudang miliknya dalam jumlah sangat besar saat terjadi krisis pasokan di masyarakat. Tujuannya adalah menunggu harga di pasar melonjak drastis, barulah ia menjualnya sedikit demi sedikit dengan harga berlipat ganda. Praktik ini disebut Ihtikar. Hukum dan dampaknya secara muamalah adalah...",
+                options: [
+                    "Mubah, karena ia berhak melakukan strategi bisnis di pasar bebas.",
+                    "Makruh, karena mengurangi rasa empati sosial kepada masyarakat miskin.",
+                    "Haram, karena tindakan zalim yang mengeksploitasi penderitaan dan kebutuhan pokok masyarakat luas.",
+                    "Boleh, asalkan ia tetap membayar zakat perniagaan setiap tahunnya."
+                ],
+                answer: 2,
+                explanation: "Ihtikar (menimbun barang kebutuhan pokok saat masyarakat membutuhkan untuk mempermainkan harga) hukumnya mutlak haram. Nabi SAW bersabda: 'Tidaklah orang yang menimbun barang kecuali ia berdosa' (HR. Muslim)."
+            },
+            {
+                question: "Riba Yad sering terjadi dalam transaksi pertukaran valuta asing atau jual beli barang ribawi yang tidak dilakukan secara tunai. Contoh nyata dari Riba Yad adalah...",
+                options: [
+                    "Menukar uang Rp 100.000 dengan lembaran Rp 10.000 yang jumlahnya Rp 90.000.",
+                    "Membeli dolar AS dengan rupiah hari ini, namun fisik uang dolar baru diserahkan oleh money changer besok lusa.",
+                    "Membayar hutang beras 10 kg dengan mengembalikan beras 12 kg.",
+                    "Membeli motor secara kredit dengan harga yang lebih mahal dari harga tunai."
+                ],
+                answer: 1,
+                explanation: "Riba Yad adalah riba yang terjadi akibat perpisahan dari tempat transaksi (majlis akad) sebelum terjadinya serah terima (taqabudh) barang ribawi yang ditukarkan secara tunai. Menukar uang (rupiah dan dolar) harus tunai saat itu juga. Jika ada penundaan penyerahan salah satu, terjadilah Riba Yad."
+            },
+            {
+                question: "Pak Rahmat dan Johan melakukan akad Qirad untuk usaha peternakan lele. Pak Rahmat sebagai pemodal setuju memberikan uang Rp 10 Juta, dengan syarat Johan harus memberikan keuntungan tetap (fix income) kepada Pak Rahmat sebesar Rp 1.000.000 setiap bulannya, tidak peduli ternaknya untung besar atau sedang rugi. Ketentuan pembagian hasil seperti ini hukumnya...",
+                options: [
+                    "Sah, karena menjamin kepastian balik modal bagi Pak Rahmat.",
+                    "Batal (Fasad), karena bagi hasil Qirad harus berupa persentase (nisbah) dari keuntungan nyata, bukan nominal pasti.",
+                    "Makruh, sebaiknya nominal yang ditetapkan tidak terlalu membebani pengelola.",
+                    "Sah, asalkan Johan mampu memenuhi kesepakatan tersebut dengan rida."
+                ],
+                answer: 1,
+                explanation: "Syarat sah bagi hasil dalam Mudharabah/Qirad adalah harus menggunakan sistem nisbah (persentase), misalnya 50:50, 60:40 dari keuntungan bersih aktual. Menetapkan nominal pasti (misal Rp 1 juta/bulan) di awal membatalkan akad Qirad karena menghilangkan unsur keadilan menanggung risiko (bisa jadi untungnya bulan itu hanya 500 ribu, sehingga pengelola harus nombok dari uang pribadinya, yang menyerupai pinjaman berbunga)."
+            },
+            // TAMBAHAN 10 SOAL CAMPURAN HOTS
+            {
+                question: "Sebuah panitia kurban menyembelih 5 ekor sapi. Untuk menghemat biaya kas masjid, panitia berinisiatif tidak memberikan honor berupa uang kepada para jagal (tukang sembelih) bayaran, melainkan menggantinya dengan memberikan masing-masing 5 kg daging kualitas terbaik dan kepala sapi. Hukum memberikan upah jagal dari daging kurban adalah...",
+                options: [
+                    "Haram, karena daging kurban tidak boleh dijadikan sebagai alat tukar atau upah jasa.",
+                    "Sunnah, karena memberi daging kurban adalah sedekah yang utama.",
+                    "Mubah, asalkan si jagal memang dari kalangan fakir miskin.",
+                    "Makruh, sebaiknya upah ditambah dengan sedikit uang transport."
+                ],
+                answer: 0,
+                explanation: "Memberikan upah/bayaran kepada tukang jagal (penyembelih) dengan mengambil bagian dari daging, kulit, atau organ hewan kurban hukumnya haram. Ali bin Abi Thalib berkata: 'Rasulullah memerintahkan aku... agar tidak memberikan kepada tukang jagal sedikitpun dari hewan kurban itu (sebagai upah).' Upah harus dari uang kas tersendiri, namun jagal tetap boleh diberi daging statusnya sebagai sedekah/hadiah."
+            },
+            {
+                question: "Pak Budi menyembelih hewan aqiqah. Berbeda dengan kurban, salah satu anjuran khusus dalam menyembelih hewan aqiqah menurut sunnah Rasulullah berkaitan dengan cara memotong bagian tubuh hewannya agar...",
+                options: [
+                    "Tulang-tulangnya tidak dipotong/dihancurkan, melainkan dipisahkan pada persendiannya sebagai tafa'ul (harapan baik) atas keselamatan tubuh bayi.",
+                    "Kepala hewannya segera dikubur untuk menghindari penyakit menular.",
+                    "Dagingnya dipotong sekecil mungkin agar merata ke seluruh warga desa.",
+                    "Dagingnya dikeringkan dahulu sebelum dibagikan."
+                ],
+                answer: 0,
+                explanation: "Dalam aqiqah, disunnahkan untuk tidak memecahkan/mematahkan tulang hewan aqiqah, melainkan memotongnya tepat pada persendian. Ini adalah bentuk tafa'ul (pengharapan nasib baik) agar bayi tumbuh sehat dengan anggota tubuh dan tulang yang kuat, tidak mudah patah."
+            },
+            {
+                question: "Zaid membeli sepeda motor di dealer secara kredit (mencicil). Jika bayar tunai harganya Rp 20 juta, tetapi karena dicicil 2 tahun total harganya menjadi Rp 25 juta. Apakah selisih Rp 5 juta ini termasuk Riba Nasi'ah?",
+                options: [
+                    "Ya, karena ada penambahan harga yang dikaitkan dengan perpanjangan waktu pembayaran.",
+                    "Tidak, jual beli kredit dengan penambahan harga (mark-up) diperbolehkan asal harga disepakati dan diputuskan fix satu nominal di awal majlis akad.",
+                    "Ya, ini adalah bentuk riba modern yang diharamkan semua ulama.",
+                    "Tidak, karena sepeda motor bukan termasuk barang ribawi."
+                ],
+                answer: 1,
+                explanation: "Jual beli secara kredit/cicilan (Ba'i Bitsaman Ajil) dengan harga yang lebih mahal dari harga tunai diperbolehkan oleh mayoritas ulama dan bukan termasuk riba, asalkan di akhir majlis akad kedua belah pihak SUDAH MEMILIH satu harga yang pasti (misal deal di harga 25 juta) dan barang langsung diserahterimakan."
+            },
+            {
+                question: "Dalam jual beli, ada hak untuk membatalkan akad jika ditemukan cacat pada barang (Khiyar Aib). Budi membeli handphone seken. Setelah di rumah, ia baru sadar baterainya bocor parah (hanya tahan 10 menit). Budi segera kembali ke toko untuk mengembalikannya, namun penjual menolak dengan alasan 'Barang yang sudah dibeli tidak dapat ditukar'. Apakah pembelaan penjual ini dibenarkan secara fikih?",
+                options: [
+                    "Dibenarkan, karena tulisan 'tidak dapat ditukar' membatalkan hak khiyar secara sepihak.",
+                    "Dibenarkan, karena Budi lalai tidak mengeceknya di dalam toko (khiyar majlis sudah habis).",
+                    "Tidak dibenarkan, pembeli berhak mengembalikan barang (khiyar aib) jika terbukti ada cacat tersembunyi saat di tangan penjual.",
+                    "Tidak dibenarkan, asalkan Budi mau membayar biaya administrasi pengembalian."
+                ],
+                answer: 2,
+                explanation: "Klausul 'barang tidak dapat ditukar/dikembalikan' yang dipasang penjual tidak menggugurkan hak Khiyar Aib (hak membatalkan karena cacat barang). Jika cacat tersebut (yang mengurangi nilai/fungsi barang) memang sudah ada sebelum barang diserahkan dan disembunyikan oleh penjual, pembeli mutlak berhak mengembalikannya."
+            },
+            {
+                question: "Seorang peternak ayam potong menggunakan mesin pemotong otomatis (mekanik) yang berjalan di atas rel untuk menyembelih ribuan ayam per jam. Pisau bundar berputar memotong leher ayam yang lewat. Bagaimana hukum penyembelihan menggunakan mesin otomatis menurut fatwa MUI?",
+                options: [
+                    "Haram mutlak, karena penyembelihan wajib dilakukan langsung oleh tangan manusia per ekor.",
+                    "Sah dan Halal, asalkan operator (muslim) membaca basmalah saat menghidupkan tombol mesin pemotong.",
+                    "Makruh, karena menghilangkan unsur kesakralan dalam menyembelih makhluk bernyawa.",
+                    "Halal tanpa syarat, karena pisau mesin sangat tajam sehingga hewan tidak menderita."
+                ],
+                answer: 1,
+                explanation: "MUI memfatwakan penyembelihan hewan unggas secara mekanik/mesin diperbolehkan (halal). Syaratnya: mesin dikendalikan oleh operator muslim, pisau tajam memutuskan 3 saluran, dan operator membaca basmalah saat menekan tombol penyalaan mesin (dianjurkan juga terus berdzikir selama mesin beroperasi)."
+            },
+            {
+                question: "Toni berhutang uang Rp 500.000 kepada Doni dan berjanji mengembalikannya tanggal 15 bulan depan. Saat jatuh tempo, Toni belum punya uang. Doni berkata, 'Saya beri waktu 1 bulan lagi, tapi hutangmu jadi Rp 550.000 ya'. Toni terpaksa setuju. Praktik ini pada zaman Jahiliyah sangat umum dan diharamkan Islam. Ini disebut...",
+                options: [
+                    "Riba Qardh",
+                    "Riba Fadhl",
+                    "Riba Yad",
+                    "Riba Nasi'ah (Riba Jahiliyah)"
+                ],
+                answer: 3,
+                explanation: "Riba Nasi'ah (sering disebut Riba Jahiliyah dalam konteks ini) adalah riba yang timbul akibat penundaan waktu pembayaran utang yang sudah jatuh tempo dengan kompensasi penambahan jumlah utang. Kaidahnya: 'Tunda waktunya, tambah bayarannya'."
+            },
+            {
+                question: "Sebuah perusahaan perikanan (pengelola) meminjam dana segar Mudarabah dari Bank Syariah (pemodal) untuk memperluas tambak. Di tengah jalan, pengelola menggunakan dana tersebut untuk berspekulasi di pasar saham (di luar kesepakatan akad) dan rugi besar. Siapa yang menanggung kerugian materi tersebut?",
+                options: [
+                    "Pihak Bank Syariah sepenuhnya menanggung kerugian materi.",
+                    "Pengelola tambak harus menanggung seluruh kerugian dan mengembalikan modal secara penuh.",
+                    "Kerugian dibagi rata antara Bank dan pengelola.",
+                    "Pemerintah yang memberikan izin usaha harus memberikan subsidi silang."
+                ],
+                answer: 1,
+                explanation: "Pengecualian dalam Qirad/Mudharabah: Jika kerugian terjadi BUKAN karena force majeure, melainkan karena KELALAIAN (taqshir) atau PELANGGARAN KESEPAKATAN/penyimpangan dari akad awal (ta'addi) yang dilakukan oleh pengelola (mudharib), maka pengelola harus menanggung kerugian tersebut sepenuhnya dan mengganti modal shahibul mal."
+            },
+            {
+                question: "Bu RT membagikan daging kurban dalam bentuk kornet kalengan yang diproses pabrik agar awet disimpan berbulan-bulan untuk persiapan masa paceklik. Apakah pengolahan daging kurban menjadi kornet kalengan ini menyalahi aturan kurban?",
+                options: [
+                    "Menyalahi, karena daging kurban wajib segera habis dalam waktu 3 hari (tasyriq).",
+                    "Tidak menyalahi, mengawetkan daging kurban untuk dimanfaatkan di kemudian hari bagi fakir miskin diperbolehkan dan justru membawa maslahat.",
+                    "Menyalahi, karena daging yang dibagikan harus terlihat bentuk fisiknya yang mentah.",
+                    "Tidak menyalahi, asalkan kalengnya bergambar sapi."
+                ],
+                answer: 1,
+                explanation: "Larangan menyimpan daging kurban lebih dari 3 hari pernah berlaku di awal Islam saat terjadi paceklik hebat agar segera terbagi, namun larangan itu telah dihapus/dinasakh oleh Rasulullah SAW (HR. Bukhari Muslim: 'Makanlah, simpanlah, dan bersedekahlah'). Mengolah daging menjadi kornet sangat sesuai dengan maslahat kemanusiaan untuk distribusi jangka panjang."
+            },
+            {
+                question: "Pak Joko memiliki sapi kurban. Saat sapi tersebut disembelih, leher sapi bergerak memberontak kuat sehingga pisau terlepas dari tangan Pak Joko, leher belum terputus sempurna. Sapi lari tertatih. Pak Joko kemudian mengejarnya dan menebaskan parang ke kaki sapi tersebut hingga sapi itu jatuh mati. Status hukum daging sapi itu adalah...",
+                options: [
+                    "Halal, karena niat awal menyembelih adalah kurban.",
+                    "Bangkai (Haram), karena kematian sapi bukan disebabkan oleh penyembelihan di leher, melainkan karena tebasan di kaki yang mematikan.",
+                    "Halal dalam keadaan darurat, karena susah mengejar sapi.",
+                    "Makruh, tidak berdosa dimakan tapi tidak mendapat pahala kurban."
+                ],
+                answer: 1,
+                explanation: "Syarat sah penyembelihan hewan yang jinak (maqdur alaih) adalah harus memutus hulqum, mari', dan wajadain di area leher. Jika hewan belum mati sempurna akibat sembelihan di leher, namun ia mati karena dilukai di bagian tubuh lain (yang bukan area sembelihan), maka matinya tidak syar'i dan hewan tersebut berstatus mubah (haram)."
+            },
+            {
+                question: "Seorang muslimah yang kaya raya ingin menyembelih hewan aqiqah. Karena anak laki-lakinya sudah berumur 25 tahun dan dulunya keluarga mereka sangat miskin sehingga belum diaqiqahi, maka muslimah ini berniat melaksanakan aqiqah untuk anaknya tersebut sekarang. Hukum aqiqah bagi anak yang sudah dewasa adalah...",
+                options: [
+                    "Tidak ada kesunnahan lagi, aqiqah otomatis gugur setelah anak lewat masa baligh (menurut mazhab Syafii, gugur tanggung jawab ayah).",
+                    "Haram, karena aqiqah hanya untuk bayi berumur di bawah satu bulan.",
+                    "Sunnah yang dianjurkan (Gugur bagi orang tua, tetapi disunnahkan bagi anak itu sendiri untuk mengaqiqahi dirinya sendiri setelah baligh/dewasa).",
+                    "Wajib, sebagai penebus utang orang tuanya di masa lalu."
+                ],
+                answer: 2,
+                explanation: "Menurut Mazhab Syafii, tanggung jawab orang tua untuk mengaqiqahi anak gugur jika anak sudah memasuki usia baligh. Namun, sangat disunnahkan bagi anak tersebut (jika sudah mampu/dewasa) untuk melaksanakan aqiqah atas dirinya sendiri, mengikuti perbuatan Nabi SAW yang mengaqiqahi dirinya sendiri setelah beliau diangkat menjadi Nabi (HR. Baihaqi)."
+            },
+            
+            // EXTENSION 10 QUESTIONS (Bringing to 30)
+            {
+                question: "Dalam jual beli, syarat sah penjual dan pembeli adalah harus baligh dan berakal sehat. Namun dalam praktik sehari-hari, anak kecil (belum baligh) sering disuruh orang tuanya ke warung untuk membeli barang ringan seperti garam atau sabun. Menurut mayoritas ulama fiqih, jual beli semacam ini hukumnya...",
+                options: [
+                    "Batal demi hukum karena melanggar syarat mutlak transaksi keuangan.",
+                    "Sah, ini dikategorikan sebagai jual beli 'Mu'athah' (saling menyerahkan) untuk barang-barang remeh/bernilai kecil yang sudah menjadi kebiasaan masyarakat.",
+                    "Sah asalkan sang anak membawa surat kuasa tertulis dari orang tua.",
+                    "Fasad, barang harus segera dikembalikan kepada penjual."
+                ],
+                answer: 1,
+                explanation: "Jual beli oleh anak kecil (mumayyiz) untuk barang-barang remeh/kecil (muhaqqarat) yang diizinkan orang tuanya diperbolehkan secara adat dan dianggap sah menurut pandangan fiqih kontemporer dan sebagian ulama klasik, karena jika dilarang akan sangat menyulitkan masyarakat."
+            },
+            {
+                question: "Pak Arman menjual kebun rambutan. Ia mensyaratkan kepada pembelinya: 'Kebun ini saya jual kepadamu, namun saya masih punya hak memanen buah rambutan yang ada di pohon untuk panen musim ini.' Pembeli setuju. Jual beli dengan syarat seperti ini...",
+                options: [
+                    "Gharar, karena jumlah buah yang dipanen tidak bisa dipastikan.",
+                    "Batal, karena syarat tersebut bertentangan dengan konsekuensi akad jual beli yang seharusnya memindahkan seluruh hak milik secara mutlak.",
+                    "Sah, ini dibenarkan selama syarat tersebut diketahui, jelas batas waktunya, dan disepakati kedua belah pihak di awal (Syurut fi al-Bai').",
+                    "Riba Fadhl, karena ada keuntungan ganda."
+                ],
+                answer: 2,
+                explanation: "Syarat dalam jual beli (Asy-Syurut fi al-Bai') yang mengandung maslahat dan tidak bertentangan dengan esensi syariat (misalnya menjual rumah tapi syarat menempatinya sebulan lagi, atau menjual kebun tapi memanen buah yang sedang matang) diperbolehkan menurut pendapat kuat (seperti mazhab Hanbali) asalkan disepakati secara jelas dan rida."
+            },
+            {
+                question: "Apa perbedaan paling mendasar antara Riba Nasi'ah dengan Jual Beli Kredit (Cicilan) yang dibenarkan Islam, padahal keduanya sama-sama memiliki penambahan harga karena faktor waktu (keterlambatan)?",
+                options: [
+                    "Riba Nasi'ah barangnya berwujud, kredit barangnya tidak berwujud.",
+                    "Riba Nasi'ah penambahan bayarannya tidak disepakati, kredit disepakati.",
+                    "Riba Nasi'ah terjadi dari perpanjangan UTANG UANG akibat menunda tempo yang bertambah terus seiring waktu, sedangkan Kredit adalah penambahan harga BARANG dari awal transaksi dan nominalnya fix/terkunci tidak bertambah meski telat bayar.",
+                    "Tidak ada bedanya, keduanya sama-sama diharamkan."
+                ],
+                answer: 2,
+                explanation: "Perbedaan utamanya: Kredit adalah jual beli barang di mana 'margin' sudah disepakati fix di awal (harganya dikunci jadi 1). Sedangkan Riba Nasi'ah adalah akad Utang Piutang (uang), di mana tambahan tersebut berjalan dinamis sesuai lamanya penundaan, sehingga memberatkan peminjam berlipat ganda."
+            },
+            {
+                question: "Sebuah keluarga berkurban sapi. Di tengah pengerjaan, panitia kehabisan kantong kresek. Panitia meminjam uang dari kas yatim piatu masjid untuk membeli kresek, dengan rencana menukar (menjual) sebagian kecil daging kurban (sekitar 3 kg) ke pasar untuk mengganti uang kas yatim tersebut. Tindakan ini...",
+                options: [
+                    "Sangat rasional dan dibolehkan karena darurat.",
+                    "Boleh, karena niatnya mengganti uang kas yatim yang suci.",
+                    "Haram mutlak, panitia tidak boleh menjual secuil pun daging/bagian kurban untuk biaya operasional atau mengganti dana apapun.",
+                    "Makruh, sebaiknya dihindari."
+                ],
+                answer: 2,
+                explanation: "Segala macam biaya operasional kurban (termasuk biaya bungkus, potong, dll) TIDAK BOLEH diambil dari hasil menjual bagian hewan kurban (daging, kulit, tulang). Biaya operasional harus disiapkan dari dana khusus panitia atau patungan sohibul qurban. Menjual bagian kurban membatalkan kurban."
+            },
+            {
+                question: "Seseorang berburu rusa di hutan dengan senapan angin tajam (peluru timah lancip). Ia menembak rusa sambil mengucapkan bismillah. Rusa itu berlari, lalu ditemukan 1 jam kemudian dalam keadaan sudah mati kehabisan darah karena tertembus peluru tajam tersebut. Hukum memakan daging rusa itu...",
+                options: [
+                    "Haram, karena berstatus bangkai yang tidak disembelih lehernya.",
+                    "Halal, karena syarat berburu (mengucapkan bismillah dan alat yang melukai hingga menembus/mengalirkan darah) telah terpenuhi, hewan liar (ghairu maqdur alaih) boleh dilukai di bagian mana saja.",
+                    "Makruh, harus dipastikan dulu apakah pelurunya mengenai jantung atau tidak.",
+                    "Haram, senjata api dilarang digunakan untuk berburu."
+                ],
+                answer: 1,
+                explanation: "Untuk hewan buruan liar (Ghairu Maqdur Alaih) yang sulit ditangkap, cara 'menyembelihnya' cukup dengan melukainya di bagian tubuh mana saja yang bisa mematikan menggunakan senjata tajam (panah, tombak, peluru runcing/tajam yang menembus badan) disertai bacaan Bismillah saat menembak/melempar."
+            },
+            {
+                question: "Ibu Siti meminjamkan uang Rp 5 juta kepada keponakannya untuk modal buka toko baju. Tanpa diminta, setahun kemudian keponakannya sukses, lalu ia mengembalikan uang Rp 5 juta ditambah hadiah baju koko sutra seharga Rp 500 ribu sebagai tanda terima kasih. Ibu Siti menerimanya. Apakah baju koko tersebut termasuk Riba Qardh?",
+                options: [
+                    "Ya, karena Ibu Siti mendapat tambahan/manfaat dari uang yang dipinjamkannya.",
+                    "Tidak, ini disebut Husnul Qadha (membayar utang dengan cara lebih baik) yang dianjurkan Nabi, karena TIDAK DISYARATKAN oleh Ibu Siti di awal perjanjian.",
+                    "Ya, riba tetaplah riba meskipun dalam bentuk barang (baju).",
+                    "Makruh, Ibu Siti harus mengembalikan baju tersebut."
+                ],
+                answer: 1,
+                explanation: "Tambahan saat pelunasan utang BUKAN Riba jika tambahan itu murni inisiatif/kerelaan dari pihak yang berutang sebagai tanda terima kasih (tanpa ada syarat, perjanjian, atau kebiasaan yang mengikat di awal dari pihak peminjam). Ini justru dipuji oleh Rasulullah sebagai bentuk sebaik-baik pelunasan hutang (Husnul Qadha)."
+            },
+            {
+                question: "Bagaimana hukum melakukan akad Jual Beli setelah terdengarnya Adzan kedua pada hari Jumat bagi laki-laki muslim yang wajib melaksanakan shalat Jumat?",
+                options: [
+                    "Mubah (boleh) asalkan penjual dan pembeli mendengarkan khutbah dari toko.",
+                    "Makruh Tahrim, tapi sah.",
+                    "Haram dan berdosa, serta sebagian ulama menganggap akad jual belinya batal (tidak sah) karena melanggar larangan tegas Al-Quran Surat Al-Jumu'ah.",
+                    "Haram bagi penjual saja, pembeli tidak berdosa."
+                ],
+                answer: 2,
+                explanation: "Al-Quran (Q.S. Al-Jumu'ah: 9) secara tegas melarang: 'Hai orang-orang beriman, apabila diseru untuk menunaikan shalat Jumat, maka bersegeralah kamu... dan tinggalkanlah jual beli.' Melakukan jual beli saat waktu tersebut diharamkan bagi laki-laki yang wajib shalat Jumat."
+            },
+            {
+                question: "Seekor hewan ternak tertabrak mobil hingga sekarat (nyawanya berada di kerongkongan / harakat al-madzbuh) dan dipastikan akan mati sebentar lagi. Pemiliknya segera mengambil pisau dan menyembelihnya dengan syar'i sebelum hewan itu benar-benar mati. Apakah daging hewan tersebut halal?",
+                options: [
+                    "Haram, karena hewan itu sejatinya sedang dalam proses menjadi bangkai akibat kecelakaan.",
+                    "Haram, karena hewan yang cacat akibat tabrakan tidak boleh dimakan.",
+                    "Halal, asalkan nyawanya (hayah mustaqirrah) masih ada saat disembelih, ditandai dengan masih memancarnya darah atau adanya pergerakan kuat saat lehernya dipotong.",
+                    "Makruh."
+                ],
+                answer: 2,
+                explanation: "Hewan sekarat karena tercekik, terpukul, jatuh, atau ditanduk (tertabrak), hukumnya HALAL dimakan apabila sempat disembelih secara syar'i SEBELUM ia mati. Syarat utamanya: saat disembelih, hewan itu masih memiliki 'Hayah Mustaqirrah' (tanda kehidupan stabil, seperti darah masih memancar kuat atau hewan masih meronta saat disembelih)."
+            },
+            {
+                question: "Dalam mudharabah, Budi (pengelola) diam-diam mencampurkan modal uang dari Pak Joko dengan modal dari Pak Amir tanpa memberitahu keduanya untuk sebuah proyek besar. Proyek itu gagal dan rugi besar. Siapa yang bertanggung jawab?",
+                options: [
+                    "Pak Joko dan Pak Amir menanggung rugi sesuai porsi modal.",
+                    "Budi harus mengganti seluruh modal (bertanggung jawab penuh) karena ia melanggar amanah dengan mencampur modal tanpa izin/persetujuan pemilik modal awal.",
+                    "Kerugian dibagi tiga secara merata.",
+                    "Negara."
+                ],
+                answer: 1,
+                explanation: "Pengelola (mudharib) dipegangi prinsip amanah. Jika ia melakukan pelanggaran (ta'addi) seperti mencampur modal tanpa izin (yang bisa mengubah struktur risiko), atau melanggar kesepakatan tempat/jenis usaha, maka statusnya berubah menjadi dlaman (penjamin). Jika rugi, pengelola yang menanggung dan wajib mengganti modal utuh."
+            },
+            {
+                question: "Untuk meramaikan toko bajunya, Rina menggunakan teknik 'Najsy'. Ia menyuruh teman-temannya pura-pura menawar barang dengan harga tinggi di depan pelanggan sungguhan, agar pelanggan sungguhan merasa terprovokasi dan ikut membeli dengan harga mahal karena takut kehabisan. Hukum praktik Ba'i An-Najsy ini adalah...",
+                options: [
+                    "Haram, karena mengandung unsur penipuan pasar dan rekayasa harga (manipulasi) yang merugikan pembeli asli.",
+                    "Boleh, itu bagian dari strategi marketing modern (hype).",
+                    "Makruh, karena terkesan membohongi meski barangnya bagus.",
+                    "Mubah, asalkan barang yang dijual memang berkualitas."
+                ],
+                answer: 0,
+                explanation: "Jual beli An-Najsy (merekayasa permintaan dengan menawar palsu untuk menaikkan harga jual) secara mutlak diharamkan dalam Islam. Rasulullah bersabda: 'Janganlah kalian saling melakukan najsy (penawaran palsu).' (HR. Bukhari Muslim). Ini merupakan bentuk penipuan/ghisy."
+            }
+        ];
+
+        // === APP LOGIC ===
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let userAnswers = new Array(quizData.length).fill(null);
+        let timeRemaining = 45 * 60; // 45 minutes in seconds
+        let timerInterval;
+
+        // Elements
+        const screens = {
+            setup: document.getElementById('screen-setup'),
+            quiz: document.getElementById('screen-quiz'),
+            result: document.getElementById('screen-result'),
+            review: document.getElementById('screen-review')
+        };
+        const setupForm = document.getElementById('setup-form');
+        const optionsContainer = document.getElementById('options-container');
+        const questionText = document.getElementById('question-text');
+        const currentQNum = document.getElementById('current-question-num');
+        const progressBar = document.getElementById('progress-bar');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const btnFinish = document.getElementById('btn-finish');
+        const timeDisplay = document.getElementById('time-display');
+        const headerTimer = document.getElementById('header-timer');
+
+        // Initialize Total Questions
+        document.getElementById('total-questions').textContent = quizData.length;
+
+        // Start Quiz
+        setupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nama = document.getElementById('input-nama').value;
+            document.getElementById('display-nama').textContent = nama;
+            document.getElementById('result-nama').textContent = nama;
+            
+            switchScreen('quiz');
+            headerTimer.classList.remove('hidden');
+            headerTimer.classList.add('flex');
+            
+            startTimer();
+            loadQuestion(0);
+        });
+
+        // Switch Screen Logic
+        function switchScreen(screenName) {
+            Object.values(screens).forEach(screen => {
+                screen.classList.add('hidden');
+                screen.classList.remove('block');
+            });
+            screens[screenName].classList.remove('hidden');
+            screens[screenName].classList.add('block');
+            window.scrollTo(0,0);
+        }
+
+        // Timer Logic
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeRemaining--;
+                updateTimerDisplay();
+                
+                if(timeRemaining <= 300) { // 5 minutes left
+                    headerTimer.classList.replace('bg-rose-50', 'bg-red-600');
+                    headerTimer.classList.replace('text-rose-600', 'text-white');
+                    headerTimer.classList.add('animate-pulse');
+                }
+
+                if (timeRemaining <= 0) {
+                    clearInterval(timerInterval);
+                    finishQuiz();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timeRemaining / 60).toString().padStart(2, '0');
+            const s = (timeRemaining % 60).toString().padStart(2, '0');
+            timeDisplay.textContent = `${m}:${s}`;
+        }
+
+        // Load Question
+        function loadQuestion(index) {
+            currentQuestionIndex = index;
+            const q = quizData[index];
+            
+            // Update UI
+            currentQNum.textContent = index + 1;
+            progressBar.style.width = `${((index + 1) / quizData.length) * 100}%`;
+            questionText.textContent = q.question;
+            
+            // Generate Options
+            optionsContainer.innerHTML = '';
+            q.options.forEach((optText, i) => {
+                const btn = document.createElement('button');
+                btn.className = `option-btn w-full text-left p-4 rounded-xl border border-slate-200 bg-white text-slate-700 font-medium hover:border-blue-500 flex gap-4 ${userAnswers[index] === i ? 'option-selected' : ''}`;
+                
+                // Labels A, B, C, D
+                const label = String.fromCharCode(65 + i);
+                
+                btn.innerHTML = `
+                    <span class="flex-shrink-0 w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-slate-500 btn-label">${label}</span>
+                    <span class="mt-1 leading-relaxed">${optText}</span>
+                `;
+                
+                if (userAnswers[index] === i) {
+                    const labelSpan = btn.querySelector('.btn-label');
+                    labelSpan.classList.replace('bg-slate-100', 'bg-blue-600');
+                    labelSpan.classList.replace('text-slate-500', 'text-white');
+                }
+
+                btn.onclick = () => selectOption(i, btn);
+                optionsContainer.appendChild(btn);
+            });
+
+            // Button Visibility
+            btnPrev.disabled = index === 0;
+            
+            if (index === quizData.length - 1) {
+                btnNext.classList.add('hidden');
+                btnFinish.classList.remove('hidden');
+            } else {
+                btnNext.classList.remove('hidden');
+                btnFinish.classList.add('hidden');
+            }
+        }
+
+        // Select Option
+        function selectOption(optIndex, btnElement) {
+            userAnswers[currentQuestionIndex] = optIndex;
+            
+            // Reset visual states
+            const allBtns = optionsContainer.querySelectorAll('button');
+            allBtns.forEach(b => {
+                b.classList.remove('option-selected');
+                const lbl = b.querySelector('.btn-label');
+                lbl.classList.replace('bg-blue-600', 'bg-slate-100');
+                lbl.classList.replace('text-white', 'text-slate-500');
+            });
+            
+            // Set active state
+            btnElement.classList.add('option-selected');
+            const activeLbl = btnElement.querySelector('.btn-label');
+            activeLbl.classList.replace('bg-slate-100', 'bg-blue-600');
+            activeLbl.classList.replace('text-slate-500', 'text-white');
+        }
+
+        // Navigation
+        btnNext.addEventListener('click', () => {
+            if (currentQuestionIndex < quizData.length - 1) loadQuestion(currentQuestionIndex + 1);
+        });
+        
+        btnPrev.addEventListener('click', () => {
+            if (currentQuestionIndex > 0) loadQuestion(currentQuestionIndex - 1);
+        });
+
+        // Finish Quiz
+        btnFinish.addEventListener('click', () => {
+            const unanswered = userAnswers.filter(a => a === null).length;
+            if(unanswered > 0) {
+                const conf = confirm(`Anda masih memiliki ${unanswered} soal yang belum dijawab. Yakin ingin menyelesaikan kuis?`);
+                if(!conf) return;
+            }
+            clearInterval(timerInterval);
+            finishQuiz();
+        });
+
+        function finishQuiz() {
+            headerTimer.classList.add('hidden');
+            let correct = 0;
+            let wrong = 0;
+            let empty = 0;
+
+            userAnswers.forEach((ans, idx) => {
+                if (ans === null) empty++;
+                else if (ans === quizData[idx].answer) correct++;
+                else wrong++;
+            });
+
+            // Calculate Score (Scale to 100)
+            const finalScore = Math.round((correct / quizData.length) * 100);
+
+            document.getElementById('result-score').textContent = finalScore;
+            document.getElementById('result-correct').textContent = correct;
+            document.getElementById('result-wrong').textContent = wrong;
+            document.getElementById('result-empty').textContent = empty;
+
+            buildReview();
+            switchScreen('result');
+        }
+
+        // Review Logic
+        function buildReview() {
+            const container = document.getElementById('review-container');
+            container.innerHTML = '';
+
+            quizData.forEach((q, idx) => {
+                const uAns = userAnswers[idx];
+                const isCorrect = uAns === q.answer;
+                const isSkipped = uAns === null;
+                
+                let badgeClass = isCorrect ? 'bg-emerald-100 text-emerald-700 border-emerald-200' 
+                               : (isSkipped ? 'bg-slate-100 text-slate-600 border-slate-200' : 'bg-rose-100 text-rose-700 border-rose-200');
+                
+                let badgeIcon = isCorrect ? '<i class="fa-solid fa-check"></i> Benar' 
+                              : (isSkipped ? '<i class="fa-solid fa-minus"></i> Kosong' : '<i class="fa-solid fa-xmark"></i> Salah');
+
+                const itemHtml = `
+                    <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+                            <h4 class="font-bold text-slate-700">Soal ${idx + 1}</h4>
+                            <div class="px-3 py-1 rounded-full text-xs font-bold border ${badgeClass}">
+                                ${badgeIcon}
+                            </div>
+                        </div>
+                        <div class="p-5">
+                            <p class="text-slate-800 mb-4 text-justify">${q.question}</p>
+                            <div class="space-y-2 mb-4">
+                                ${q.options.map((opt, i) => {
+                                    let bg = 'bg-slate-50 border-slate-200 text-slate-600';
+                                    let icon = '';
+                                    if(i === q.answer) {
+                                        bg = 'bg-emerald-50 border-emerald-300 text-emerald-800 font-medium';
+                                        icon = '<i class="fa-solid fa-check text-emerald-600 mr-2"></i>';
+                                    } else if (i === uAns && !isCorrect) {
+                                        bg = 'bg-rose-50 border-rose-300 text-rose-800 line-through opacity-70';
+                                        icon = '<i class="fa-solid fa-xmark text-rose-600 mr-2"></i>';
+                                    }
+                                    return `<div class="p-3 border rounded-lg ${bg} text-sm flex items-start">
+                                        <span class="mt-0.5">${icon}</span> 
+                                        <span>${opt}</span>
+                                    </div>`;
+                                }).join('')}
+                            </div>
+                            <div class="bg-blue-50 border border-blue-100 p-4 rounded-lg">
+                                <h5 class="text-xs font-bold text-blue-800 uppercase mb-1 flex items-center gap-1"><i class="fa-solid fa-lightbulb"></i> Pembahasan:</h5>
+                                <p class="text-sm text-blue-900 leading-relaxed">${q.explanation}</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                container.innerHTML += itemHtml;
+            });
+        }
+
+        document.getElementById('btn-review').addEventListener('click', () => {
+            switchScreen('review');
+        });
+
+        document.getElementById('btn-back-result').addEventListener('click', () => {
+            switchScreen('result');
+        });
+
+    </script>
+</body>
+</html>
