@@ -1,0 +1,850 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz TKA/HOTS Bahasa Indonesia - Bab II</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Confetti JS for result screen -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .hidden-screen { display: none !important; }
+        .option-label { cursor: pointer; transition: all 0.2s ease; }
+        .option-label:hover { background-color: #e5e7eb; }
+        .selected-option { background-color: #dbeafe !important; border-color: #3b82f6 !important; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px;}
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="bg-indigo-600 text-white shadow-md p-4 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tight">E-Quiz Kls IX: Buku-Buku Berbicara</h1>
+            <div id="nav-timer" class="hidden-screen font-mono text-lg bg-indigo-800 px-3 py-1 rounded-md shadow-inner">
+                ⏱ <span id="time-display">45:00</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4">
+        
+        <!-- SCREEN 1: FORM PENDAFTARAN -->
+        <div id="screen-intro" class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 animate-fade-in">
+            <div class="text-center mb-6">
+                <div class="bg-indigo-100 text-indigo-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                    </svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Ujian Bab II</h2>
+                <p class="text-sm text-gray-500 mt-2">Materi: Fiksi & Nonfiksi, Anatomi Buku, Resensi, Kalimat Langsung, dan Majas.</p>
+            </div>
+            
+            <form id="student-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="input-nama" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="Masukkan nama Anda">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                    <input type="text" id="input-kelas" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="Contoh: IX A">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Asal Sekolah</label>
+                    <input type="text" id="input-sekolah" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="Nama sekolah">
+                </div>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-4">
+                    <p class="text-xs text-yellow-700">Waktu ujian 45 menit untuk 30 soal HOTS. Kerjakan dengan teliti.</p>
+                </div>
+
+                <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-4 rounded-lg transition mt-4">
+                    Mulai Ujian Sekarang
+                </button>
+            </form>
+        </div>
+
+        <!-- SCREEN 2: QUIZ INTERFACE -->
+        <div id="screen-quiz" class="w-full max-w-4xl bg-white rounded-xl shadow-lg flex flex-col md:flex-row hidden-screen h-[85vh]">
+            
+            <!-- Sidebar Navigation -->
+            <div class="w-full md:w-1/4 bg-gray-50 p-4 border-b md:border-b-0 md:border-r border-gray-200 overflow-y-auto">
+                <div class="mb-4">
+                    <p class="text-xs text-gray-500 uppercase font-semibold">Data Peserta</p>
+                    <p id="info-nama" class="font-semibold text-sm truncate"></p>
+                    <p id="info-kelas" class="text-xs text-gray-500 truncate"></p>
+                </div>
+                <hr class="mb-4">
+                <p class="text-sm font-semibold mb-3">Navigasi Soal</p>
+                <div id="question-grid" class="grid grid-cols-5 gap-2">
+                    <!-- Grid generated via JS -->
+                </div>
+                <div class="mt-8">
+                    <button id="btn-submit-early" class="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-md transition shadow-sm">
+                        Kumpulkan Ujian
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Question Area -->
+            <div class="w-full md:w-3/4 p-6 flex flex-col relative overflow-y-auto">
+                <div class="flex justify-between items-center mb-6 border-b pb-3">
+                    <h3 class="text-lg font-bold text-gray-800">Soal No. <span id="q-number">1</span></h3>
+                </div>
+                
+                <div class="flex-grow">
+                    <!-- Stimulus / Teks -->
+                    <div id="q-stimulus" class="bg-gray-100 p-4 rounded-lg mb-5 text-sm leading-relaxed text-gray-700 border border-gray-200 text-justify">
+                        <!-- Teks dimuat disini -->
+                    </div>
+                    
+                    <!-- Pertanyaan -->
+                    <p id="q-text" class="text-base font-medium text-gray-800 mb-4 leading-snug">
+                        <!-- Pertanyaan dimuat disini -->
+                    </p>
+                    
+                    <!-- Opsi Jawaban -->
+                    <div id="q-options" class="space-y-3">
+                        <!-- Opsi dimuat disini via JS -->
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-8 pt-4 border-t border-gray-200">
+                    <button id="btn-prev" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition disabled:opacity-50">
+                        &larr; Sebelumnya
+                    </button>
+                    <button id="btn-next" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition">
+                        Selanjutnya &rarr;
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: HASIL & PEMBAHASAN -->
+        <div id="screen-result" class="w-full max-w-5xl bg-white rounded-xl shadow-lg p-6 md:p-10 hidden-screen my-8">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Ujian Selesai!</h2>
+                <p class="text-gray-500">Terima kasih telah mengerjakan dengan baik, <span id="res-nama" class="font-semibold text-gray-700"></span>.</p>
+                
+                <div class="mt-8 mb-6 relative w-40 h-40 mx-auto">
+                    <svg class="w-full h-full" viewBox="0 0 36 36">
+                        <path class="text-gray-200" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path id="score-ring" class="text-indigo-600" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="res-score" class="text-4xl font-black text-gray-800">0</span>
+                        <span class="text-xs text-gray-500 uppercase tracking-widest mt-1">Nilai</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center gap-8 text-sm">
+                    <div class="text-center"><p class="text-green-600 font-bold text-xl" id="res-benar">0</p><p class="text-gray-500">Benar</p></div>
+                    <div class="text-center"><p class="text-red-600 font-bold text-xl" id="res-salah">0</p><p class="text-gray-500">Salah</p></div>
+                    <div class="text-center"><p class="text-gray-400 font-bold text-xl" id="res-kosong">0</p><p class="text-gray-500">Kosong</p></div>
+                </div>
+            </div>
+
+            <hr class="my-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-6 border-l-4 border-indigo-600 pl-3">Pembahasan Soal</h3>
+            
+            <div id="review-container" class="space-y-8">
+                <!-- Pembahasan dirender via JS -->
+            </div>
+
+            <div class="mt-10 text-center">
+                <button onclick="location.reload()" class="bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-8 rounded-lg transition shadow-md">
+                    Kembali ke Beranda
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        /* =========================================================
+           DATABASE SOAL (30 Soal HOTS / TKA - Bab 2: Buku-Buku Berbicara)
+           Materi: Teks Fiksi & Nonfiksi, Resensi, Anatomi Buku, Majas, Kalimat Langsung
+           ========================================================= */
+        
+        const teks1 = `<strong>Bacalah kutipan resensi buku berikut untuk menjawab soal nomor 1-5!</strong><br><br>Novel <em>Senja di Pelupuk Mata</em> karya Anisa R. menyajikan kisah yang amat menggugah tentang perjuangan seorang guru honorer di pelosok Kalimantan. Gaya bahasa yang digunakan penulis sangat puitis, membuat pembaca seolah larut dalam rimbunnya hutan tropis dan pahitnya realitas pendidikan di sana. <strong>Namun</strong>, alur cerita pada pertengahan novel terasa sedikit bertele-tele karena terlalu banyak memperkenalkan tokoh sampingan yang konflik pribadinya tidak terselesaikan hingga akhir cerita. Meski begitu, nilai moral tentang keikhlasan yang diusung novel ini menjadikannya sangat layak dibaca oleh kalangan remaja hingga dewasa.`;
+        
+        const teks2 = `<strong>Bacalah kutipan cerita fiksi berikut untuk menjawab soal nomor 6-10!</strong><br><br>(1) Angin malam berteriak kencang, menampar jendela kamarku tanpa ampun. (2) Aku merapatkan selimut, mencoba mengusir dingin yang menusuk tulang. (3) Di luar sana, bulan menyembunyikan wajahnya di balik awan tebal kelabu. (4) Tiba-tiba, suara ketukan pintu terdengar memecah keheningan. "Reno, kamu belum tidur?" tanya suara parau dari balik pintu. (5) Aku tersentak, jantungku berdegup kencang seperti kuda pacu. (6) Tidak mungkin itu Paman, ia sudah meninggal seminggu yang lalu.`;
+        
+        const teks3 = `<strong>Bacalah teks nonfiksi berikut untuk menjawab soal nomor 11-15!</strong><br><br>Sistem tata surya kita terdiri atas matahari sebagai pusatnya dan berbagai benda langit yang mengelilinginya. Planet-planet bergerak dalam lintasan elips yang disebut orbit. Gaya gravitasi matahari-lah yang menjaga planet-planet tetap berada pada orbitnya masing-masing. Planet Merkurius merupakan planet terdekat dengan matahari, namun permukaannya mengalami fluktuasi suhu yang paling ekstrem dibandingkan planet lain di tata surya. Pada siang hari, suhunya bisa mencapai 430°C, sementara pada malam hari anjlok hingga -180°C karena tidak memiliki atmosfer yang cukup tebal untuk menahan panas.`;
+        
+        const teks4 = `<strong>Perhatikan percakapan berikut untuk menjawab soal nomor 16-20!</strong><br><br>
+Dina menghampiri meja Bu Guru dengan langkah ragu. "Maaf, Bu, apakah saya boleh mengikuti ujian susulan besok?" tanyanya dengan suara bergetar.<br>
+Bu Guru menghentikan goresan penanya, menatap Dina lekat-lekat. "Kenapa kamu tidak hadir pada saat ujian utama hari Senin kemarin, Din?" <br>
+"Ibu saya sakit keras, Bu, dan saya harus menjaganya di rumah sakit," jawab Dina sembari menunduk. <br>
+Mendengar hal itu, tatapan Bu Guru melembut. "Baiklah, Ibu izinkan. Temui Ibu di ruang guru besok jam istirahat pertama," kata Bu Guru sambil tersenyum.`;
+
+        const teks5 = `<strong>Bacalah teks tentang anatomi buku berikut untuk menjawab soal nomor 21-25!</strong><br><br>Sebuah buku nonfiksi yang baik dilengkapi dengan berbagai perangkat untuk memudahkan pembaca menemukan informasi. Di bagian akhir buku, sering kali kita menemukan halaman yang berisi daftar kata-kata sulit atau istilah teknis yang disusun secara alfabetis beserta penjelasannya. Selain itu, terdapat pula halaman yang memuat daftar kata kunci penting beserta nomor halaman di mana kata tersebut dibahas dalam buku. Untuk mengetahui sumber rujukan atau referensi dari mana penulis menyusun bukunya, pembaca dapat melihat pada bagian daftar pustaka.`;
+
+        const teks6 = `<strong>Bacalah dua kutipan teks berikut untuk menjawab soal nomor 26-30!</strong><br><br>
+<strong>Teks A:</strong><br>Buku digital atau <em>e-book</em> kini semakin digemari karena kepraktisannya. Satu gawai seukuran telapak tangan dapat menyimpan ribuan judul buku tanpa memakan ruang fisik. Selain itu, fitur pencarian kata membuat pembaca mudah menemukan bagian tertentu dengan cepat.<br><br>
+<strong>Teks B:</strong><br>Aroma lembaran kertas tua adalah candu bagi para pecinta buku fisik. Membalik halaman demi halaman memberikan sensasi taktil (sentuhan) yang tidak akan pernah tergantikan oleh dinginnya layar kaca. Lebih dari itu, buku fisik terbukti secara ilmiah lebih ramah bagi mata dan membantu otak menyimpan memori bacaan lebih lama.`;
+
+        const dbSoal = [
+            // Teks 1 (Resensi)
+            {
+                teks: teks1,
+                tanya: "Berdasarkan strukturnya, kutipan teks resensi di atas memuat unsur...",
+                opsi: [
+                    "A. Identitas buku dan sinopsis lengkap.",
+                    "B. Sinopsis singkat, keunggulan, kelemahan, dan rekomendasi.",
+                    "C. Latar belakang penulis dan riwayat penerbitan buku.",
+                    "D. Daftar isi buku dan simpulan cerita."
+                ],
+                jawaban: 1, // B
+                bahas: "Teks tersebut merangkum isi (perjuangan guru), menyebutkan keunggulan (gaya bahasa puitis), mengkritik kelemahan (alur bertele-tele), dan diakhiri dengan rekomendasi (layak dibaca remaja dan dewasa)."
+            },
+            {
+                teks: teks1,
+                tanya: "Penulis resensi menilai buku ini memiliki kekurangan. Kekurangan yang disoroti oleh peresensi adalah...",
+                opsi: [
+                    "A. Gaya bahasanya terlalu puitis sehingga sulit dipahami.",
+                    "B. Buku ini tidak cocok dibaca oleh kalangan anak-anak.",
+                    "C. Banyak tokoh tambahan yang permasalahannya dibiarkan menggantung.",
+                    "D. Latar tempat di pelosok Kalimantan kurang digambarkan dengan detail."
+                ],
+                jawaban: 2, // C
+                bahas: "Pada kalimat 'terlalu banyak memperkenalkan tokoh sampingan yang konflik pribadinya tidak terselesaikan hingga akhir cerita' merujuk pada permasalahan cerita/konflik tokoh sampingan yang menggantung."
+            },
+            {
+                teks: teks1,
+                tanya: "Kata konjungsi <em>'Namun'</em> pada teks tersebut memiliki fungsi mengaitkan antarkalimat untuk menyatakan...",
+                opsi: [
+                    "A. Penambahan informasi (aditif).",
+                    "B. Hubungan sebab-akibat (kausalitas).",
+                    "C. Hubungan pertentangan ide (konsesif/kontrastif).",
+                    "D. Urutan kejadian atau waktu (temporal)."
+                ],
+                jawaban: 2, // C
+                bahas: "Kata 'namun' adalah konjungsi antarkalimat yang menyatakan pertentangan dengan kalimat sebelumnya (mengontraskan bagian kelebihan dengan kekurangan buku)."
+            },
+            {
+                teks: teks1,
+                tanya: "Makna frasa <em>'pahitnya realitas'</em> dalam resensi tersebut mengandung arti...",
+                opsi: [
+                    "A. Rasa makanan di daerah pelosok yang tidak enak.",
+                    "B. Kenyataan hidup atau kondisi yang sulit, keras, dan penuh rintangan.",
+                    "C. Rasa kecewa karena tidak bisa menjadi pegawai negeri.",
+                    "D. Kisah cinta tokoh utama yang berakhir menyedihkan."
+                ],
+                jawaban: 1, // B
+                bahas: "Ini adalah majas metafora. Kata 'pahit' disandingkan dengan 'realitas' untuk menggambarkan kenyataan atau kondisi kehidupan yang berat, keras, dan menyedihkan."
+            },
+            {
+                teks: teks1,
+                tanya: "Berdasarkan isi teks resensi tersebut, buku <em>Senja di Pelupuk Mata</em> diklasifikasikan sebagai buku...",
+                opsi: [
+                    "A. Nonfiksi, karena menceritakan realitas pendidikan.",
+                    "B. Nonfiksi, karena berlatar di tempat nyata yaitu Kalimantan.",
+                    "C. Fiksi, karena berbentuk novel yang memiliki tokoh, alur, dan gaya bahasa rekaan.",
+                    "D. Pengayaan, karena ditujukan untuk memotivasi para remaja."
+                ],
+                jawaban: 2, // C
+                bahas: "Buku fiksi adalah buku yang berisi cerita rekaan/khayalan seperti novel, cerpen, atau puisi. Dalam teks secara jelas disebutkan bahwa buku tersebut adalah 'Novel'."
+            },
+
+            // Teks 2 (Cerita Fiksi & Majas)
+            {
+                teks: teks2,
+                tanya: "Penggunaan majas <strong>Personifikasi</strong> (menginsankan benda mati) paling jelas terlihat pada kalimat nomor...",
+                opsi: [
+                    "A. (1) dan (2)",
+                    "B. (1) dan (3)",
+                    "C. (2) dan (4)",
+                    "D. (4) dan (5)"
+                ],
+                jawaban: 1, // B
+                bahas: "Kalimat (1) 'Angin malam berteriak kencang, menampar jendela' dan kalimat (3) 'Bulan menyembunyikan wajahnya' memberikan sifat-sifat manusia (berteriak, menampar, menyembunyikan wajah) pada benda mati."
+            },
+            {
+                teks: teks2,
+                tanya: "Kalimat nomor (5): <em>'jantungku berdegup kencang seperti kuda pacu'</em> menggunakan majas...",
+                opsi: [
+                    "A. Asosiasi (Simile)",
+                    "B. Metafora",
+                    "C. Hiperbola",
+                    "D. Litotes"
+                ],
+                jawaban: 0, // A
+                bahas: "Majas asosiasi atau simile adalah perbandingan dua hal yang berbeda namun dianggap sama, biasanya ditandai dengan kata hubung pembanding seperti: bagai, laksana, seperti, umpama, bak."
+            },
+            {
+                teks: teks2,
+                tanya: "Latar suasana (mood) yang dibangun secara kuat dalam kutipan cerita fiksi tersebut adalah...",
+                opsi: [
+                    "A. Menyedihkan dan melankolis",
+                    "B. Tegang, mencekam, dan menakutkan",
+                    "C. Sepi, syahdu, dan damai",
+                    "D. Ramai dan penuh kepanikan"
+                ],
+                jawaban: 1, // B
+                bahas: "Angin menampar jendela, bulan tertutup awan, ketukan pintu, suara parau, dan fakta bahwa pamannya sudah meninggal menciptakan nuansa horor, tegang, dan mencekam."
+            },
+            {
+                teks: teks2,
+                tanya: "Kutipan cerita di atas ditulis dengan menggunakan sudut pandang...",
+                opsi: [
+                    "A. Orang pertama pelaku utama",
+                    "B. Orang pertama pelaku sampingan",
+                    "C. Orang ketiga serba tahu",
+                    "D. Orang ketiga pengamat"
+                ],
+                jawaban: 0, // A
+                bahas: "Narator menggunakan kata ganti 'Aku' dan 'Kamarku' serta menjadi pusat penceritaan dan kejadian tersebut dialami langsung oleh si 'Aku', sehingga merupakan sudut pandang orang pertama pelaku utama."
+            },
+            {
+                teks: teks2,
+                tanya: "Berdasarkan struktur teks narasi cerita pendek/novel, kutipan tersebut kemungkinan besar berada pada bagian...",
+                opsi: [
+                    "A. Orientasi (Pengenalan)",
+                    "B. Komplikasi (Puncak konflik/Ketegangan)",
+                    "C. Resolusi (Penyelesaian)",
+                    "D. Koda (Pesan moral)"
+                ],
+                jawaban: 1, // B
+                bahas: "Bagian ini menghadirkan ketegangan memuncak saat ada suara dari tokoh paman yang ternyata sudah meninggal. Ini adalah inti konflik batin dan ketakutan (komplikasi)."
+            },
+
+            // Teks 3 (Teks Nonfiksi)
+            {
+                teks: teks3,
+                tanya: "Manakah pernyataan di bawah ini yang merupakan <strong>Fakta</strong> berdasarkan teks nonfiksi tersebut?",
+                opsi: [
+                    "A. Suhu di planet Merkurius sangat tidak nyaman bagi kehidupan manusia.",
+                    "B. Suhu planet Merkurius bisa turun hingga -180°C pada malam hari.",
+                    "C. Bumi jauh lebih baik dan indah dibandingkan planet Merkurius.",
+                    "D. Seharusnya Merkurius memiliki atmosfer yang tebal."
+                ],
+                jawaban: 1, // B
+                bahas: "Pernyataan B berisi data yang objektif dan terukur sesuai isi teks. Pernyataan A, C, dan D mengandung opini subjektif ('tidak nyaman', 'lebih baik', 'seharusnya')."
+            },
+            {
+                teks: teks3,
+                tanya: "Menurut teks di atas, faktor utama yang menyebabkan fluktuasi suhu sangat ekstrem di Merkurius adalah...",
+                opsi: [
+                    "A. Jaraknya yang sangat dekat dengan matahari.",
+                    "B. Kecepatan orbitnya yang terlalu tinggi.",
+                    "C. Tidak memiliki atmosfer yang cukup tebal.",
+                    "D. Tarikan gaya gravitasi matahari yang sangat kuat."
+                ],
+                jawaban: 2, // C
+                bahas: "Di teks tertulis dengan jelas: '...anjlok hingga -180°C karena tidak memiliki atmosfer yang cukup tebal untuk menahan panas.'"
+            },
+            {
+                teks: teks3,
+                tanya: "Kata teknis (istilah) <em>'fluktuasi'</em> pada teks di atas memiliki makna...",
+                opsi: [
+                    "A. Peningkatan suhu secara terus-menerus.",
+                    "B. Gejala turun-naik atau ketidaktetapan (perubahan).",
+                    "C. Kehancuran atau kerusakan pada permukaan benda.",
+                    "D. Penurunan drastis ke titik terendah."
+                ],
+                jawaban: 1, // B
+                bahas: "Secara leksikal (kamus), fluktuasi berarti keadaan yang tidak tetap atau gejala naik-turunnya suatu hal (dalam teks ini adalah suhu)."
+            },
+            {
+                teks: teks3,
+                tanya: "Perbedaan mendasar antara teks 2 (fiksi) dan teks 3 (nonfiksi) di atas adalah...",
+                opsi: [
+                    "A. Teks 2 menggunakan bahasa baku, Teks 3 menggunakan bahasa santai.",
+                    "B. Teks 2 didasarkan pada riset ilmiah, Teks 3 dari imajinasi penulis.",
+                    "C. Teks 2 bersifat imajinatif/rekaan, Teks 3 bersifat faktual/objektif.",
+                    "D. Teks 2 ditujukan untuk ilmuwan, Teks 3 ditujukan untuk masyarakat umum."
+                ],
+                jawaban: 2, // C
+                bahas: "Fiksi adalah cerita rekaan atau imajinatif yang bertujuan menghibur atau memberi efek emosional, sedangkan teks nonfiksi memaparkan fakta, data objektif, dan ilmu pengetahuan."
+            },
+            {
+                teks: teks3,
+                tanya: "Ide pokok dari paragraf tersebut adalah...",
+                opsi: [
+                    "A. Sistem tata surya terdiri dari matahari dan planet.",
+                    "B. Gaya gravitasi matahari menahan orbit planet.",
+                    "C. Suhu di Merkurius bisa mencapai 430 derajat celcius.",
+                    "D. Kondisi sistem tata surya dan keadaan ekstrem planet Merkurius."
+                ],
+                jawaban: 3, // D
+                bahas: "Ide pokok mencakup keseluruhan paragraf. Paragraf ini membahas pengenalan tata surya secara umum yang dilanjutkan penjelasan spesifik kondisi (suhu ekstrem) Merkurius."
+            },
+
+            // Teks 4 (Kalimat Langsung dan Tidak Langsung)
+            {
+                teks: teks4,
+                tanya: "Jika kalimat langsung <em>\"Ibu saya sakit keras, Bu, dan saya harus menjaganya di rumah sakit,\" jawab Dina sembari menunduk</em>, diubah menjadi <strong>kalimat tidak langsung</strong>, bentuk yang paling tepat adalah...",
+                opsi: [
+                    "A. Dina menjawab sembari menunduk bahwa ibunya sakit keras dan ia harus menjaganya di rumah sakit.",
+                    "B. Dina menjawab sembari menunduk bahwa Ibu Dina sakit keras dan saya harus menjaganya di rumah sakit.",
+                    "C. Sembari menunduk Dina berkata, \"Ibunya sakit keras, Bu, dan dia harus menjaganya di rumah sakit.\"",
+                    "D. Ibunya Dina sakit keras sehingga dia harus menjaga ibunya di rumah sakit, jawab Dina."
+                ],
+                jawaban: 0, // A
+                bahas: "Ciri kalimat tidak langsung: Tidak memakai tanda kutip, intonasi datar, dan kata ganti orang berubah ('saya'/'aku' menjadi 'ia'/'dia')."
+            },
+            {
+                teks: teks4,
+                tanya: "Penggunaan tanda baca yang tepat saat menuliskan kalimat langsung ditunjukkan oleh ciri-ciri berikut, <strong>kecuali</strong>...",
+                opsi: [
+                    "A. Diapit oleh dua tanda petik ganda (\").",
+                    "B. Huruf pertama petikan langsung diawali huruf kapital.",
+                    "C. Tanda baca akhir (titik, tanya, seru) diletakkan di luar tanda petik penutup.",
+                    "D. Tanda koma digunakan untuk memisahkan petikan langsung dari bagian pengiringnya."
+                ],
+                jawaban: 2, // C
+                bahas: "Menurut PUEBI, tanda baca pengakhir kalimat seperti titik, koma, tanda seru, atau tanda tanya diletakkan di DALAM atau SEBELUM tanda kutip penutup. Contoh: \"... besok?\" tanyanya."
+            },
+            {
+                teks: teks4,
+                tanya: "Kata kerja pengiring tutur (verba pewarta) yang digunakan dalam percakapan di atas untuk menunjukkan aktivitas berkomunikasi adalah...",
+                opsi: [
+                    "A. menghampiri, menghentikan",
+                    "B. menatap, menunduk",
+                    "C. bertanya, menjawab, kata",
+                    "D. menjaganya, izinkan"
+                ],
+                jawaban: 2, // C
+                bahas: "Verba pewarta adalah kata kerja yang digunakan untuk mengiringi ucapan atau ujaran langsung tokoh, seperti: berkata, bertanya, menjawab, menyahut, bergumam, berteriak."
+            },
+            {
+                teks: teks4,
+                tanya: "Dari dialog tersebut, dapat disimpulkan (inferensi) bahwa karakter Bu Guru adalah orang yang...",
+                opsi: [
+                    "A. Keras kepala dan tidak kenal kompromi.",
+                    "B. Bijaksana, empatik, dan pengertian.",
+                    "C. Cenderung tidak peduli dengan masalah murid.",
+                    "D. Mudah ditipu oleh alasan siswanya."
+                ],
+                jawaban: 1, // B
+                bahas: "Setelah mendengar alasan yang masuk akal (ibu sakit), sikap guru yang awalnya tegas berubah melembut dan mengizinkan ujian susulan. Ini menunjukkan sifat empatik dan pengertian."
+            },
+            {
+                teks: teks4,
+                tanya: "Pola penyusunan kalimat langsung pada kalimat <em>Bu Guru menghentikan goresan penanya, menatap Dina lekat-lekat. \"Kenapa kamu tidak hadir pada saat ujian utama hari Senin kemarin, Din?\"</em> adalah...",
+                opsi: [
+                    "A. Pengiring - Kutipan",
+                    "B. Kutipan - Pengiring",
+                    "C. Kutipan - Pengiring - Kutipan",
+                    "D. Pengiring - Kutipan - Pengiring"
+                ],
+                jawaban: 0, // A
+                bahas: "Kalimat tersebut diawali dengan kalimat pengiring tindakan ('Bu Guru menghentikan... lekat-lekat.') lalu diikuti oleh kutipan langsung dari tokoh."
+            },
+
+            // Teks 5 (Anatomi Buku)
+            {
+                teks: teks5,
+                tanya: "Halaman di akhir buku yang berfungsi untuk mencari letak halaman suatu kata kunci, nama tokoh, atau tempat disebut...",
+                opsi: [
+                    "A. Glosarium",
+                    "B. Daftar Pustaka",
+                    "C. Indeks",
+                    "D. Lampiran"
+                ],
+                jawaban: 2, // C
+                bahas: "Indeks adalah daftar kata atau istilah penting yang terdapat dalam buku cetakan, tersusun menurut abjad, yang memberikan informasi mengenai nomor halaman tempat kata itu ditemukan."
+            },
+            {
+                teks: teks5,
+                tanya: "Berdasarkan teks di atas, perbedaan utama antara Glosarium dan Indeks adalah...",
+                opsi: [
+                    "A. Glosarium berisi nomor halaman, Indeks berisi arti kata.",
+                    "B. Glosarium berisi definisi/arti kata teknis, Indeks memuat kata penting dan letak halamannya.",
+                    "C. Glosarium diletakkan di depan buku, Indeks di belakang buku.",
+                    "D. Glosarium digunakan untuk buku fiksi, Indeks untuk buku nonfiksi."
+                ],
+                jawaban: 1, // B
+                bahas: "Teks menjelaskan: Glosarium = daftar kata sulit beserta penjelasannya. Indeks = daftar kata kunci beserta nomor halamannya."
+            },
+            {
+                teks: teks5,
+                tanya: "Jika seorang penulis ingin mencantumkan buku berjudul 'Linguistik Umum' karya Abdul Chaer yang diterbitkan oleh Rineka Cipta di Jakarta pada tahun 2012, penulisan <strong>Daftar Pustaka</strong> yang paling tepat adalah...",
+                opsi: [
+                    "A. Chaer, Abdul. 2012. <em>Linguistik Umum</em>. Jakarta: Rineka Cipta.",
+                    "B. Abdul Chaer. 2012. Linguistik Umum. Rineka Cipta: Jakarta.",
+                    "C. Chaer, Abdul. <em>Linguistik Umum</em>. 2012. Jakarta: Rineka Cipta.",
+                    "D. Abdul, Chaer. 2012. <em>Linguistik Umum</em>. Jakarta: Rineka Cipta."
+                ],
+                jawaban: 0, // A
+                bahas: "Format daftar pustaka yang baku: Nama Belakang, Nama Depan. Tahun Terbit. <em>Judul Buku (cetak miring)</em>. Kota Terbit: Nama Penerbit."
+            },
+            {
+                teks: teks5,
+                tanya: "Halaman dalam buku yang memuat informasi mengenai identitas buku lengkap (judul, penulis, penerbit, tahun terbit, nomor ISBN, hak cipta) disebut...",
+                opsi: [
+                    "A. Kata Pengantar",
+                    "B. Daftar Isi",
+                    "C. Halaman Persembahan",
+                    "D. Halaman Impresum (Hak Cipta)"
+                ],
+                jawaban: 3, // D
+                bahas: "Halaman impresum atau halaman hak cipta (copyright page) biasanya terletak di balik halaman judul utama, memuat informasi legal dan katalog dalam terbitan (KDT/ISBN)."
+            },
+            {
+                teks: teks5,
+                tanya: "Buku fiksi (seperti novel) umumnya <strong>tidak</strong> memiliki bagian anatomi berikut ini, kecuali...",
+                opsi: [
+                    "A. Indeks subjek",
+                    "B. Daftar pustaka",
+                    "C. Daftar isi",
+                    "D. Glosarium ilmiah"
+                ],
+                jawaban: 2, // C
+                bahas: "Novel (fiksi) biasanya tidak memakai indeks, daftar pustaka, atau glosarium ilmiah. Namun, novel (terutama yang tebal dan memiliki bab) tetap mencantumkan 'Daftar Isi'."
+            },
+
+            // Teks 6 (Literasi & Perbandingan Teks)
+            {
+                teks: teks6,
+                tanya: "Kedua teks (A dan B) tersebut mendiskusikan topik utama yang sama, yaitu berkaitan dengan...",
+                opsi: [
+                    "A. Bahaya membaca menggunakan gawai.",
+                    "B. Proses pencetakan buku secara massal.",
+                    "C. Perbandingan keunggulan format buku (digital vs fisik).",
+                    "D. Sejarah perkembangan buku di dunia modern."
+                ],
+                jawaban: 2, // C
+                bahas: "Teks A membahas keunggulan buku digital (e-book) dari segi kepraktisan, sedangkan teks B memaparkan keunggulan buku cetak (fisik) dari segi sensorik dan ingatan."
+            },
+            {
+                teks: teks6,
+                tanya: "Kata <em>'taktil'</em> pada Teks B dapat disinonimkan dengan arti...",
+                opsi: [
+                    "A. Sesuatu yang berhubungan dengan penciuman",
+                    "B. Sesuatu yang berhubungan dengan indra peraba/sentuhan",
+                    "C. Hal yang bisa dilihat jelas oleh mata",
+                    "D. Ingatan masa lalu yang bernostalgia"
+                ],
+                jawaban: 1, // B
+                bahas: "Di dalam Teks B penulis memberikan petunjuk dalam kurung '(sentuhan)' di sebelah kata taktil. Taktil berarti berkenaan dengan rabaan atau sentuhan."
+            },
+            {
+                teks: teks6,
+                tanya: "Penggalan Teks B: <em>'...tidak akan pernah tergantikan oleh dinginnya layar kaca'</em> mengandung majas...",
+                opsi: [
+                    "A. Sinekdoke",
+                    "B. Sinestesia",
+                    "C. Ironi",
+                    "D. Eufemisme"
+                ],
+                jawaban: 1, // B
+                bahas: "Sinestesia adalah majas yang mempertukarkan indra pendengaran, perabaan, penglihatan, dsb. 'Dinginnya' (peraba/suhu) disandingkan dengan 'layar kaca' untuk menyatakan sesuatu yang tidak memiliki jiwa/perasaan (visual)."
+            },
+            {
+                teks: teks6,
+                tanya: "Kelemahan argumen pada Teks A berdasarkan sudut pandang Teks B adalah...",
+                opsi: [
+                    "A. E-book terlalu mahal untuk dibeli pembaca.",
+                    "B. Gawai bisa rusak jika terkena air.",
+                    "C. Membaca melalui layar (gawai) kurang ramah bagi kesehatan mata.",
+                    "D. Fitur pencarian kata membuat orang menjadi malas membaca."
+                ],
+                jawaban: 2, // C
+                bahas: "Teks B menyebutkan argumen bahwa 'buku fisik terbukti... lebih ramah bagi mata', yang secara tidak langsung mengkritik teks A yang menganjurkan membaca dari layar gawai (yang diasumsikan melelahkan mata)."
+            },
+            {
+                teks: teks6,
+                tanya: "Berdasarkan kedua teks tersebut, jika seseorang sering bepergian jauh (traveling) dan memiliki tas yang kecil, solusi membaca yang paling relevan (HOTS: Evaluasi) adalah...",
+                opsi: [
+                    "A. Membawa 5 buku fisik sekaligus agar mata tetap sehat.",
+                    "B. Menggunakan buku digital (e-book) karena praktis dan tidak memakan ruang fisik.",
+                    "C. Tidak perlu membaca buku, lebih baik menikmati perjalanan.",
+                    "D. Merobek halaman buku fisik yang penting saja agar muat di tas."
+                ],
+                jawaban: 1, // B
+                bahas: "HOTS (Pemecahan Masalah/Evaluasi). Teks A memaparkan e-book unggul dalam kepraktisan ('satu gawai... tanpa memakan ruang fisik'). Solusi paling logis untuk masalah ruang tas yang sempit adalah buku digital."
+            }
+        ];
+
+        /* =========================================================
+           STATE & LOGIC APLIKASI
+           ========================================================= */
+        
+        let currentState = {
+            nama: "",
+            kelas: "",
+            sekolah: "",
+            jawaban: new Array(dbSoal.length).fill(null),
+            waktuSisa: 45 * 60, // 45 menit
+            intervalWaktu: null,
+            soalAktif: 0
+        };
+
+        // DOM Elements
+        const screenIntro = document.getElementById('screen-intro');
+        const screenQuiz = document.getElementById('screen-quiz');
+        const screenResult = document.getElementById('screen-result');
+        const navTimer = document.getElementById('nav-timer');
+        const timerDisplay = document.getElementById('time-display');
+        
+        // Inisialisasi
+        document.getElementById('student-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            currentState.nama = document.getElementById('input-nama').value;
+            currentState.kelas = document.getElementById('input-kelas').value;
+            currentState.sekolah = document.getElementById('input-sekolah').value;
+            
+            mulaiUjian();
+        });
+
+        function mulaiUjian() {
+            // Update UI Sidebar
+            document.getElementById('info-nama').innerText = currentState.nama;
+            document.getElementById('info-kelas').innerText = `${currentState.kelas} - ${currentState.sekolah}`;
+            
+            // Generate Grid
+            const grid = document.getElementById('question-grid');
+            grid.innerHTML = '';
+            for(let i = 0; i < dbSoal.length; i++) {
+                let btn = document.createElement('button');
+                btn.className = `w-full aspect-square flex items-center justify-center text-sm font-semibold rounded border transition hover:bg-gray-200 nav-btn`;
+                btn.id = `nav-btn-${i}`;
+                btn.innerText = i + 1;
+                btn.onclick = () => lompatSoal(i);
+                grid.appendChild(btn);
+            }
+
+            // Switch Screen
+            screenIntro.classList.add('hidden-screen');
+            screenQuiz.classList.remove('hidden-screen');
+            navTimer.classList.remove('hidden-screen');
+
+            tampilSoal(0);
+            jalankanTimer();
+        }
+
+        function jalankanTimer() {
+            currentState.intervalWaktu = setInterval(() => {
+                if (currentState.waktuSisa <= 0) {
+                    clearInterval(currentState.intervalWaktu);
+                    akhiriUjian(true);
+                } else {
+                    currentState.waktuSisa--;
+                    let m = Math.floor(currentState.waktuSisa / 60).toString().padStart(2, '0');
+                    let s = (currentState.waktuSisa % 60).toString().padStart(2, '0');
+                    timerDisplay.innerText = `${m}:${s}`;
+                    
+                    if(currentState.waktuSisa < 300) { // kurang dari 5 menit
+                        timerDisplay.parentElement.classList.replace('bg-indigo-800', 'bg-red-600');
+                        timerDisplay.parentElement.classList.add('animate-pulse');
+                    }
+                }
+            }, 1000);
+        }
+
+        function tampilSoal(index) {
+            currentState.soalAktif = index;
+            const soal = dbSoal[index];
+            
+            document.getElementById('q-number').innerText = index + 1;
+            document.getElementById('q-stimulus').innerHTML = soal.teks;
+            document.getElementById('q-text').innerHTML = soal.tanya;
+            
+            const opsContainer = document.getElementById('q-options');
+            opsContainer.innerHTML = '';
+
+            soal.opsi.forEach((optText, optIndex) => {
+                const label = document.createElement('label');
+                label.className = `option-label block border border-gray-300 rounded-lg p-3 text-sm flex items-start gap-3 transition`;
+                
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'opsi-soal';
+                input.value = optIndex;
+                input.className = 'mt-1 w-4 h-4 text-indigo-600';
+                
+                // Jika sudah pernah dijawab
+                if (currentState.jawaban[index] === optIndex) {
+                    input.checked = true;
+                    label.classList.add('selected-option');
+                }
+
+                input.onchange = () => {
+                    document.querySelectorAll('.option-label').forEach(el => el.classList.remove('selected-option'));
+                    if(input.checked) {
+                        label.classList.add('selected-option');
+                        simpanJawaban(index, optIndex);
+                    }
+                };
+
+                const span = document.createElement('span');
+                span.innerHTML = optText;
+
+                label.appendChild(input);
+                label.appendChild(span);
+                opsContainer.appendChild(label);
+            });
+
+            // Update Navigasi
+            document.querySelectorAll('.nav-btn').forEach((btn, i) => {
+                btn.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-600', 'border-gray-300', 'bg-white');
+                
+                if (i === index) {
+                    btn.classList.add('border-indigo-600', 'border-2', 'bg-indigo-50', 'text-indigo-800'); // Aktif
+                } else if (currentState.jawaban[i] !== null) {
+                    btn.classList.add('bg-indigo-600', 'text-white'); // Terjawab
+                } else {
+                    btn.classList.add('bg-white', 'text-gray-700', 'border-gray-300'); // Belum
+                }
+            });
+
+            // Handle Buttons
+            document.getElementById('btn-prev').disabled = index === 0;
+            
+            const btnNext = document.getElementById('btn-next');
+            if (index === dbSoal.length - 1) {
+                btnNext.innerText = "Selesai";
+                btnNext.classList.replace('bg-indigo-600', 'bg-green-600');
+                btnNext.classList.replace('hover:bg-indigo-700', 'hover:bg-green-700');
+                btnNext.onclick = () => kumpulkanDialog();
+            } else {
+                btnNext.innerText = "Selanjutnya \u2192";
+                btnNext.classList.replace('bg-green-600', 'bg-indigo-600');
+                btnNext.classList.replace('hover:bg-green-700', 'hover:bg-indigo-700');
+                btnNext.onclick = () => lompatSoal(index + 1);
+            }
+        }
+
+        function simpanJawaban(soalIndex, opsiIndex) {
+            currentState.jawaban[soalIndex] = opsiIndex;
+            document.getElementById(`nav-btn-${soalIndex}`).classList.add('bg-indigo-600', 'text-white');
+            document.getElementById(`nav-btn-${soalIndex}`).classList.remove('border-indigo-600', 'bg-indigo-50'); // hapus active style kalo ada
+        }
+
+        function lompatSoal(index) {
+            tampilSoal(index);
+        }
+
+        document.getElementById('btn-prev').onclick = () => lompatSoal(currentState.soalAktif - 1);
+        
+        document.getElementById('btn-submit-early').onclick = () => kumpulkanDialog();
+
+        function kumpulkanDialog() {
+            const terjawab = currentState.jawaban.filter(j => j !== null).length;
+            const kosong = dbSoal.length - terjawab;
+            
+            let msg = `Anda telah menjawab ${terjawab} soal. `;
+            if(kosong > 0) msg += `Masih ada ${kosong} soal yang KOSONG. `;
+            msg += `\n\nApakah Anda yakin ingin mengumpulkan ujian sekarang?`;
+            
+            if(confirm(msg)) {
+                akhiriUjian(false);
+            }
+        }
+
+        function akhiriUjian(isTimeout = false) {
+            clearInterval(currentState.intervalWaktu);
+            
+            if(isTimeout) {
+                alert("Waktu Habis! Ujian otomatis dikumpulkan.");
+            }
+
+            screenQuiz.classList.add('hidden-screen');
+            navTimer.classList.add('hidden-screen');
+            screenResult.classList.remove('hidden-screen');
+            window.scrollTo(0, 0);
+
+            kalkulasiNilai();
+        }
+
+        function kalkulasiNilai() {
+            let benar = 0;
+            let salah = 0;
+            let kosong = 0;
+
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.innerHTML = '';
+
+            dbSoal.forEach((soal, index) => {
+                const jwbUser = currentState.jawaban[index];
+                const jwbBenar = soal.jawaban;
+                
+                let isBenar = false;
+                if (jwbUser === null) {
+                    kosong++;
+                } else if (jwbUser === jwbBenar) {
+                    benar++;
+                    isBenar = true;
+                } else {
+                    salah++;
+                }
+
+                // Render Pembahasan
+                const div = document.createElement('div');
+                div.className = "bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-sm";
+                
+                let badgeStatus = jwbUser === null ? 
+                    `<span class="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Kosong</span>` : 
+                    isBenar ? 
+                    `<span class="bg-green-100 text-green-700 border border-green-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Benar</span>` : 
+                    `<span class="bg-red-100 text-red-700 border border-red-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Salah</span>`;
+                
+                let opsiHtml = `<div class="space-y-2 mt-4">`;
+                soal.opsi.forEach((opt, oIdx) => {
+                    let optStyle = "text-gray-600 bg-white border border-gray-200";
+                    if (oIdx === jwbBenar) {
+                        optStyle = "bg-green-50 border-green-500 text-green-800 font-medium"; // Correct Answer
+                    } else if (oIdx === jwbUser && jwbUser !== jwbBenar) {
+                        optStyle = "bg-red-50 border-red-400 text-red-700 line-through opacity-70"; // Wrong Answer User Picked
+                    }
+
+                    opsiHtml += `<div class="p-2 rounded text-sm ${optStyle}">${opt}</div>`;
+                });
+                opsiHtml += `</div>`;
+
+                div.innerHTML = `
+                    <div class="flex items-start justify-between gap-4 mb-3">
+                        <h4 class="font-bold text-gray-800">Soal No. ${index + 1}</h4>
+                        ${badgeStatus}
+                    </div>
+                    <div class="text-sm text-gray-700 mb-2 border-b pb-3 text-justify">
+                        ${soal.teks ? `<div class="text-xs bg-gray-200 p-2 rounded mb-2 border">${soal.teks}</div>` : ''}
+                        <strong>P:</strong> ${soal.tanya}
+                    </div>
+                    ${opsiHtml}
+                    <div class="mt-4 bg-indigo-50 border-l-4 border-indigo-500 p-3 text-sm text-indigo-900">
+                        <strong>Pembahasan:</strong><br>
+                        ${soal.bahas}
+                    </div>
+                `;
+                reviewContainer.appendChild(div);
+            });
+
+            // Update Header Hasil
+            document.getElementById('res-nama').innerText = currentState.nama;
+            
+            const nilai = Math.round((benar / dbSoal.length) * 100);
+            
+            document.getElementById('res-score').innerText = nilai;
+            document.getElementById('res-benar').innerText = benar;
+            document.getElementById('res-salah').innerText = salah;
+            document.getElementById('res-kosong').innerText = kosong;
+
+            // Animate SVG Ring
+            const circle = document.getElementById('score-ring');
+            circle.style.strokeDasharray = `${nilai}, 100`;
+
+            // Trigger Confetti if pass
+            if(nilai >= 70) {
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
