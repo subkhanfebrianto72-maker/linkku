@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz TKA/HOTS Bahasa Indonesia - Bab I</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Confetti JS for result screen -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
+        .hidden-screen { display: none !important; }
+        .option-label { cursor: pointer; transition: all 0.2s ease; }
+        .option-label:hover { background-color: #e5e7eb; }
+        .selected-option { background-color: #dbeafe !important; border-color: #3b82f6 !important; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px;}
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    </style>
+</head>
+<body class="text-gray-800 min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <header class="bg-blue-600 text-white shadow-md p-4 sticky top-0 z-50">
+        <div class="max-w-5xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold tracking-tight">E-Quiz Kls IX: Demi Keluarga</h1>
+            <div id="nav-timer" class="hidden-screen font-mono text-lg bg-blue-800 px-3 py-1 rounded-md shadow-inner">
+                ⏱ <span id="time-display">45:00</span>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow flex items-center justify-center p-4">
+        
+        <!-- SCREEN 1: FORM PENDAFTARAN -->
+        <div id="screen-intro" class="w-full max-w-md bg-white rounded-xl shadow-lg p-8 animate-fade-in">
+            <div class="text-center mb-6">
+                <div class="bg-blue-100 text-blue-600 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">Ujian Bab I</h2>
+                <p class="text-sm text-gray-500 mt-2">Materi: Teks Deskripsi, Sudut Pandang, Kohesi & Konjungsi. Soal tipe HOTS/TKA.</p>
+            </div>
+            
+            <form id="student-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="input-nama" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Masukkan nama Anda">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kelas</label>
+                    <input type="text" id="input-kelas" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Contoh: IX A">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Asal Sekolah</label>
+                    <input type="text" id="input-sekolah" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" placeholder="Nama sekolah">
+                </div>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-400 p-3 mt-4">
+                    <p class="text-xs text-yellow-700">Waktu ujian 45 menit untuk 30 soal. Kerjakan dengan teliti.</p>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition mt-4">
+                    Mulai Ujian Sekarang
+                </button>
+            </form>
+        </div>
+
+        <!-- SCREEN 2: QUIZ INTERFACE -->
+        <div id="screen-quiz" class="w-full max-w-4xl bg-white rounded-xl shadow-lg flex flex-col md:flex-row hidden-screen h-[85vh]">
+            
+            <!-- Sidebar Navigation -->
+            <div class="w-full md:w-1/4 bg-gray-50 p-4 border-b md:border-b-0 md:border-r border-gray-200 overflow-y-auto">
+                <div class="mb-4">
+                    <p class="text-xs text-gray-500 uppercase font-semibold">Data Peserta</p>
+                    <p id="info-nama" class="font-semibold text-sm truncate"></p>
+                    <p id="info-kelas" class="text-xs text-gray-500 truncate"></p>
+                </div>
+                <hr class="mb-4">
+                <p class="text-sm font-semibold mb-3">Navigasi Soal</p>
+                <div id="question-grid" class="grid grid-cols-5 gap-2">
+                    <!-- Grid generated via JS -->
+                </div>
+                <div class="mt-8">
+                    <button id="btn-submit-early" class="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold py-2 px-4 rounded-md transition shadow-sm">
+                        Kumpulkan Ujian
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Question Area -->
+            <div class="w-full md:w-3/4 p-6 flex flex-col relative overflow-y-auto">
+                <div class="flex justify-between items-center mb-6 border-b pb-3">
+                    <h3 class="text-lg font-bold text-gray-800">Soal No. <span id="q-number">1</span></h3>
+                </div>
+                
+                <div class="flex-grow">
+                    <!-- Stimulus / Teks -->
+                    <div id="q-stimulus" class="bg-gray-100 p-4 rounded-lg mb-5 text-sm leading-relaxed text-gray-700 border border-gray-200 text-justify">
+                        <!-- Teks dimuat disini -->
+                    </div>
+                    
+                    <!-- Pertanyaan -->
+                    <p id="q-text" class="text-base font-medium text-gray-800 mb-4 leading-snug">
+                        <!-- Pertanyaan dimuat disini -->
+                    </p>
+                    
+                    <!-- Opsi Jawaban -->
+                    <div id="q-options" class="space-y-3">
+                        <!-- Opsi dimuat disini via JS -->
+                    </div>
+                </div>
+
+                <div class="flex justify-between mt-8 pt-4 border-t border-gray-200">
+                    <button id="btn-prev" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium rounded-lg transition disabled:opacity-50">
+                        &larr; Sebelumnya
+                    </button>
+                    <button id="btn-next" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition">
+                        Selanjutnya &rarr;
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SCREEN 3: HASIL & PEMBAHASAN -->
+        <div id="screen-result" class="w-full max-w-5xl bg-white rounded-xl shadow-lg p-6 md:p-10 hidden-screen my-8">
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-800 mb-2">Ujian Selesai!</h2>
+                <p class="text-gray-500">Terima kasih telah mengerjakan dengan baik, <span id="res-nama" class="font-semibold text-gray-700"></span>.</p>
+                
+                <div class="mt-8 mb-6 relative w-40 h-40 mx-auto">
+                    <svg class="w-full h-full" viewBox="0 0 36 36">
+                        <path class="text-gray-200" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path id="score-ring" class="text-blue-600" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    </svg>
+                    <div class="absolute inset-0 flex flex-col items-center justify-center">
+                        <span id="res-score" class="text-4xl font-black text-gray-800">0</span>
+                        <span class="text-xs text-gray-500 uppercase tracking-widest mt-1">Nilai</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center gap-8 text-sm">
+                    <div class="text-center"><p class="text-green-600 font-bold text-xl" id="res-benar">0</p><p class="text-gray-500">Benar</p></div>
+                    <div class="text-center"><p class="text-red-600 font-bold text-xl" id="res-salah">0</p><p class="text-gray-500">Salah</p></div>
+                    <div class="text-center"><p class="text-gray-400 font-bold text-xl" id="res-kosong">0</p><p class="text-gray-500">Kosong</p></div>
+                </div>
+            </div>
+
+            <hr class="my-8">
+            <h3 class="text-xl font-bold text-gray-800 mb-6 border-l-4 border-blue-600 pl-3">Pembahasan Soal</h3>
+            
+            <div id="review-container" class="space-y-8">
+                <!-- Pembahasan dirender via JS -->
+            </div>
+
+            <div class="mt-10 text-center">
+                <button onclick="location.reload()" class="bg-gray-800 hover:bg-gray-900 text-white font-semibold py-3 px-8 rounded-lg transition shadow-md">
+                    Kembali ke Beranda
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        /* =========================================================
+           DATABASE SOAL (30 Soal HOTS / TKA - Bab 1 Bahasa Indonesia)
+           Materi: Teks Deskripsi, Sudut Pandang, Kohesi, Koherensi, Konjungsi
+           ========================================================= */
+        
+        const teks1 = `<strong>Bacalah teks berikut untuk menjawab soal nomor 1-4!</strong><br><br>Rumah tua peninggalan kakek itu berdiri kokoh di ujung jalan berbatu. Dindingnya yang terbuat dari papan kayu jati tampak kusam dimakan usia, namun guratan serat kayunya masih menyiratkan keanggunan masa lalu. Di ruang tengah, sebuah jam bandul besar terus berdetak monoton, seolah menjadi satu-satunya denyut kehidupan yang tersisa. Aku selalu merasa ada kehangatan aneh setiap kali menginjakkan kaki di lantai ubinnya yang dingin. Sayangnya, keluarga kami jarang berkumpul di sini sejak kakek tiada, kecuali saat libur hari raya.`;
+        
+        const teks2 = `<strong>Bacalah teks berikut untuk menjawab soal nomor 5-8!</strong><br><br>(1) Ayah adalah sosok yang tidak banyak bicara. (2) Ia lebih suka menunjukkan kasih sayangnya melalui tindakan nyata daripada untaian kata. (3) Setiap pagi, sebelum kami sekeluarga terbangun, ia sudah menyeduh teh manis dan menyiapkan roti bakar di atas meja makan. (4) Meskipun terkadang teh buatannya terlalu manis, kami tidak pernah memprotesnya. (5) Kucing peliharaan kami, si Belang, selalu tidur nyenyak di atas sofa ruang tamu. (6) Begitulah cara ayah memastikan kami memulai hari dengan perut kenyang dan hati yang tenang.`;
+        
+        const teks3 = `<strong>Bacalah kutipan cerita berikut untuk menjawab soal nomor 9-12!</strong><br><br>Ibu menatap buku raporku dengan dahi berkerut tajam. "Nilai matematikamu turun lagi, Nak," ucapnya pelan, nyaris menyerupai hembusan angin. Aku menunduk dalam-dalam, memainkan ujung kemejaku dengan gelisah. "Maaf, Bu. Soalnya lebih susah dari sebelumnya," jawabku terbata-bata. Kakak yang duduk di seberang meja hanya bisa diam, seolah tak ingin mengusik ketegangan yang menguar tebal di udara. Namun, alih-alih meledak marah, Ibu justru menarik napas panjang, menggeser kursi mendekatiku, dan mengusap kepalaku dengan lembut. "Ya sudah, besok kita belajar sama-sama lagi. Ibu tahu kamu sudah berusaha."`;
+        
+        const teks4 = `<strong>Bacalah teks berikut untuk menjawab soal nomor 13-16!</strong><br><br>(1) Pandemi mengubah banyak kebiasaan dalam keluarga kami. (2) [...], kami menjadi lebih sering menghabiskan waktu bersama di rumah. (3) Ayah yang biasanya pulang larut malam karena bekerja di ibu kota, kini bisa ikut makan malam bersama setiap hari. (4) Ibu juga lebih rajin mencoba resep-resep masakan baru dari internet [...] kami tidak bosan makan di rumah. (5) Aku dan kakak pun lebih sering membantu membereskan rumah.`;
+
+        const teks5 = `<strong>Bacalah teks berikut untuk menjawab soal nomor 17-20!</strong><br><br>Meskipun hidup dalam <em>kesedarhanaan</em>, keluarga kami selalu mengedepankan prinsip kejujuran di atas segalanya. Ayah selalu menasihati kami agar tidak pernah mengambil sesuatu yang bukan merupakan hak kami. "Lebih baik kita tidur nyenyak beralaskan tikar pandan, daripada tidur di kasur empuk hasil memeras keringat orang lain," kata beliau berulang kali setiap kami makan malam bersama.`;
+
+        const teks6 = `<strong>Bacalah teks deskripsi berikut untuk menjawab soal nomor 21-25!</strong><br><br>Ruang makan keluarga kami tidaklah besar, hanya berukuran 3x3 meter. Di tengah ruangan, terdapat sebuah meja makan berbentuk bundar yang terbuat dari kayu mahoni. Empat kursi rotan mengelilinginya, tampak sedikit usang di bagian sandarannya namun kaki-kakinya masih sangat kokoh mencengkeram lantai. Di atas meja tersebut, selalu terhidang masakan ibu yang ditutupi tudung saji anyaman bambu. Sebuah jendela kaca besar menghadap ke taman belakang, membiarkan cahaya matahari pagi menerobos masuk, menerangi sudut ruangan dan memantulkan kilau keemasan dari piring-piring keramik putih di rak dinding.`;
+
+        const teks7 = `<strong>Bacalah teks berikut untuk menjawab soal nomor 26-30!</strong><br><br>(1) Hari Minggu pagi adalah jadwal wajib kerja bakti bagi keluarga kami. (2) Ayah biasanya memotong rumput liar dan merapikan tanaman hias di halaman depan. (3) Ibu bertugas mencuci pakaian kotor dan menata ulang perabotan dapur. (4) Kakak mendapat bagian menyapu halaman dan mengepel seluruh lantai rumah. (5) Aku sendiri selalu mendapatkan tugas ringan: membuang sampah ke depan kompleks dan mengelap debu di meja belajar. (6) Setelah semua pekerjaan usai, kami selalu berkumpul di teras belakang, menikmati pisang goreng hangat dan teh manis buatan ibu. (7) Acara televisi di ruang keluarga selalu menayangkan serial kartun kesukaanku setiap Minggu pagi.`;
+
+        const dbSoal = [
+            // Teks 1
+            {
+                teks: teks1,
+                tanya: "Berdasarkan teks tersebut, ide pokok paragraf deskripsi di atas adalah...",
+                opsi: [
+                    "A. Kebiasaan keluarga yang jarang berkumpul di rumah kakek.",
+                    "B. Kondisi fisik dan suasana rumah tua peninggalan kakek.",
+                    "C. Sebuah jam bandul besar yang terus berdetak di ruang tengah.",
+                    "D. Perasaan dingin dan hangat yang dirasakan oleh tokoh 'Aku'."
+                ],
+                jawaban: 1, // B
+                bahas: "Ide pokok merupakan gagasan utama yang mendasari seluruh paragraf. Keseluruhan teks tersebut mendeskripsikan kondisi fisik rumah (dinding kayu, ubin, jam bandul) serta suasana yang melingkupinya (kokoh, kusam, hangat)."
+            },
+            {
+                teks: teks1,
+                tanya: "Kalimat yang membuktikan bahwa penulis menggunakan pencerapan <em>indera peraba</em> dalam mendeskripsikan objek adalah...",
+                opsi: [
+                    "A. Rumah tua peninggalan kakek itu berdiri kokoh di ujung jalan berbatu.",
+                    "B. Dindingnya yang terbuat dari papan kayu jati tampak kusam dimakan usia.",
+                    "C. Sebuah jam bandul besar terus berdetak monoton di ruang tengah.",
+                    "D. Aku selalu merasa ada kehangatan aneh setiap kali menginjakkan kaki di lantai ubinnya yang dingin."
+                ],
+                jawaban: 3, // D
+                bahas: "Pencerapan indera peraba (sentuhan) terlihat jelas pada frasa 'lantai ubinnya yang dingin' serta sensasi 'kehangatan'. Opsi A dan B dominan penglihatan, opsi C dominan pendengaran."
+            },
+            {
+                teks: teks1,
+                tanya: "Penggunaan sudut pandang pada kutipan teks di atas memberikan efek...",
+                opsi: [
+                    "A. Pembaca mengetahui segala pikiran dan perasaan dari semua tokoh yang ada di rumah kakek.",
+                    "B. Pembaca diajak merasakan suasana rumah secara objektif tanpa melibatkan emosi penulis.",
+                    "C. Pembaca diajak seolah-olah ikut merasakan pengalaman dan emosi langsung dari si pencerita.",
+                    "D. Pembaca hanya bertindak sebagai pengamat luar dari kejadian di rumah tersebut."
+                ],
+                jawaban: 2, // C
+                bahas: "Teks menggunakan sudut pandang orang pertama ('Aku'). Efek dari sudut pandang ini adalah pembaca merasa lebih dekat dan seolah-olah ikut mengalami serta merasakan apa yang dialami tokoh utama secara subjektif."
+            },
+            {
+                teks: teks1,
+                tanya: "Berdasarkan kalimat <em>'Di ruang tengah, sebuah jam bandul besar terus berdetak monoton, seolah menjadi satu-satunya denyut kehidupan yang tersisa'</em>, pembaca dapat menginferensi (menyimpulkan) bahwa suasana rumah tersebut...",
+                opsi: [
+                    "A. Sangat ramai dan penuh dengan aktivitas keluarga.",
+                    "B. Sangat hening, sepi, dan terasa hampa dari aktivitas manusia.",
+                    "C. Menakutkan dan menyimpan bahaya bagi tokoh pencerita.",
+                    "D. Penuh dengan barang-barang antik yang mahal harganya."
+                ],
+                jawaban: 1, // B
+                bahas: "Frasa 'satu-satunya denyut kehidupan yang tersisa' adalah gaya bahasa (majas) yang menyiratkan bahwa di rumah itu tidak ada aktivitas lain, sangat sepi, dan hening. Pilihan B paling tepat."
+            },
+            // Teks 2
+            {
+                teks: teks2,
+                tanya: "Syarat paragraf yang baik adalah memiliki koherensi (kepaduan makna). Kalimat sumbang yang merusak koherensi paragraf di atas ditunjukkan oleh nomor...",
+                opsi: [
+                    "A. (3)",
+                    "B. (4)",
+                    "C. (5)",
+                    "D. (6)"
+                ],
+                jawaban: 2, // C
+                bahas: "Paragraf tersebut membahas tentang karakter Ayah yang pendiam namun perhatian melalui tindakannya menyiapkan sarapan (kalimat 1-4 dan 6). Kalimat (5) yang membahas kucing peliharaan tidur di sofa melenceng dari topik utama, sehingga disebut kalimat sumbang."
+            },
+            {
+                teks: teks2,
+                tanya: "Kata ganti (pronomina) <em>-nya</em> pada kata <em>memprotesnya</em> di kalimat (4) merujuk kepada...",
+                opsi: [
+                    "A. Teh buatan ayah yang rasanya terlalu manis.",
+                    "B. Kebiasaan ayah yang tidak banyak bicara.",
+                    "C. Kasih sayang ayah kepada keluarganya.",
+                    "D. Tindakan ayah membangunkan keluarga."
+                ],
+                jawaban: 0, // A
+                bahas: "Kohesi merujuk pada keterkaitan antarunsur bahasa. Kalimat (4) berbunyi 'Meskipun terkadang teh buatannya terlalu manis, kami tidak pernah memprotesnya.' Kata '-nya' di sini merujuk pada objek yang dibahas di klausa sebelumnya, yaitu 'teh buatan ayah yang terlalu manis'."
+            },
+            {
+                teks: teks2,
+                tanya: "Konjungsi <em>'Meskipun'</em> pada kalimat (4) menyatakan hubungan makna...",
+                opsi: [
+                    "A. Sebab-akibat (kausalitas)",
+                    "B. Pemilihan (disjungtif)",
+                    "C. Pertentangan (konsesif)",
+                    "D. Penambahan (aditif)"
+                ],
+                jawaban: 2, // C
+                bahas: "Konjungsi 'meskipun', 'walaupun', 'biarpun' merupakan konjungsi konsesif yang menyatakan hubungan pertentangan atau keadaan yang berlawanan antara anak kalimat dan induk kalimat."
+            },
+            {
+                teks: teks2,
+                tanya: "Karakter atau sifat tokoh Ayah yang direpresentasikan penulis melalui teks deskripsi di atas bersifat...",
+                opsi: [
+                    "A. Tersurat (langsung dijelaskan oleh penulis bahwa ia penyayang).",
+                    "B. Tersirat melalui dialog antar tokoh dalam cerita.",
+                    "C. Tersirat melalui deskripsi tindakan dan perilakunya sehari-hari.",
+                    "D. Tersurat melalui penjelasan dari tokoh kucing peliharaannya."
+                ],
+                jawaban: 2, // C
+                bahas: "Penulis tidak mengatakan 'Ayahku penyayang', melainkan menunjukkannya lewat tindakan (menyiapkan roti dan teh setiap pagi). Teknik penyampaian watak tokoh melalui tindakan ini disebut analitik tidak langsung (tersirat)."
+            },
+            // Teks 3
+            {
+                teks: teks3,
+                tanya: "Frasa <em>'ketegangan yang menguar tebal di udara'</em> pada teks di atas mengandung makna kias yang berarti...",
+                opsi: [
+                    "A. Suhu udara di ruangan tersebut mendadak menjadi sangat panas.",
+                    "B. Suasana di meja makan terasa sangat kaku, mencekam, dan penuh antisipasi.",
+                    "C. Terdapat bau asap atau gas yang menyengat penciuman anggota keluarga.",
+                    "D. Kakak merasa sesak napas karena tidak berani berbicara kepada Ibu."
+                ],
+                jawaban: 1, // B
+                bahas: "Ini adalah bentuk majas metafora/personifikasi. Kata 'menguar tebal' biasanya untuk bau/asap, namun dipinjam untuk menggambarkan 'ketegangan'. Artinya suasananya sangat kaku dan mencekam."
+            },
+            {
+                teks: teks3,
+                tanya: "Tindakan ibu pada akhir cerita menunjukkan resolusi konflik internal keluarga. Karakter Ibu dapat dievaluasi sebagai sosok pendidik yang...",
+                opsi: [
+                    "A. Otoriter dan menuntut kesempurnaan akademik dari anaknya.",
+                    "B. Pasrah dan membiarkan anaknya gagal dalam pelajaran matematika.",
+                    "C. Empatis, mampu mengontrol emosi, dan bersikap suportif terhadap kesulitan anak.",
+                    "D. Mudah dimanipulasi oleh alasan dan permintaan maaf anaknya."
+                ],
+                jawaban: 2, // C
+                bahas: "Meski awalnya terlihat tegang (dahi berkerut), Ibu justru menarik napas (mengontrol emosi), mengusap kepala (empatis), dan mengajak belajar bersama (suportif). Oleh karena itu, opsi C sangat tepat menganalisis karakter tersebut (HOTS)."
+            },
+            {
+                teks: teks3,
+                tanya: "Jika teks tersebut diubah sudut pandangnya menjadi <em>sudut pandang orang ketiga serba tahu</em>, perubahan yang <strong>paling tidak mungkin</strong> terjadi adalah...",
+                opsi: [
+                    "A. Kata 'Aku' dan 'Raporku' diubah menjadi nama tokoh, misalnya 'Randi' dan 'Rapor Randi'.",
+                    "B. Penulis dapat mendeskripsikan secara pasti apa yang dipikirkan oleh tokoh Kakak.",
+                    "C. Pembaca tetap hanya bisa mengetahui perasaan si tokoh anak laki-laki secara eksklusif.",
+                    "D. Kalimat 'Ibu tahu kamu sudah berusaha' tetap dipertahankan sebagai dialog tokoh Ibu."
+                ],
+                jawaban: 2, // C
+                bahas: "Dalam sudut pandang orang ketiga serba tahu, narator mengetahui segala hal, termasuk perasaan SEMUA tokoh (bukan eksklusif satu tokoh saja). Jadi, opsi C adalah pernyataan yang TIDAK MUNGKIN terjadi jika sudut pandang diubah."
+            },
+            {
+                teks: teks3,
+                tanya: "Kata bentukan <em>'menyerupai'</em> pada teks tersebut memiliki kata dasar...",
+                opsi: [
+                    "A. Serupa",
+                    "B. Rupa",
+                    "C. Nyerupa",
+                    "D. Menyerupa"
+                ],
+                jawaban: 1, // B
+                bahas: "Kata 'menyerupai' berasal dari kata dasar 'rupa'. Mendapat imbuhan meN- + se- + rupa + -i. 'Serupa' sendiri berasal dari se- + rupa."
+            },
+            // Teks 4
+            {
+                teks: teks4,
+                tanya: "Kata hubung (konjungsi) antarkalimat yang paling tepat untuk mengisi bagian rumpang awal kalimat (2) adalah...",
+                opsi: [
+                    "A. Oleh karena itu",
+                    "B. Akan tetapi",
+                    "C. Sebaliknya",
+                    "D. Dengan demikian"
+                ],
+                jawaban: 0, // A
+                bahas: "Kalimat (1) menyatakan 'Pandemi mengubah kebiasaan'. Kalimat (2) adalah akibat dari situasi tersebut ('kami lebih sering di rumah'). Konjungsi penanda akibat/kesimpulan yang tepat adalah 'Oleh karena itu' atau 'Akibatnya'."
+            },
+            {
+                teks: teks4,
+                tanya: "Konjungsi intrakalimat (di dalam kalimat) yang tepat untuk melengkapi bagian rumpang pada kalimat (4) adalah...",
+                opsi: [
+                    "A. karena",
+                    "B. agar",
+                    "C. sehingga",
+                    "D. meskipun"
+                ],
+                jawaban: 1, // B
+                bahas: "Kalimatnya: 'Ibu lebih rajin mencoba resep... [tujuan] kami tidak bosan'. Kata hubung yang menyatakan tujuan/harapan adalah 'agar' atau 'supaya'."
+            },
+            {
+                teks: teks4,
+                tanya: "Jika dilihat dari isinya, paragraf di atas bermaksud menginformasikan gagasan bahwa...",
+                opsi: [
+                    "A. Pandemi memiliki dampak positif bagi kualitas kebersamaan keluarga.",
+                    "B. Ayah tidak lagi sibuk bekerja di ibu kota karena di-PHK saat pandemi.",
+                    "C. Ibu terpaksa harus belajar memasak dari internet agar hemat.",
+                    "D. Keluarga mereka sangat membosankan sebelum terjadinya pandemi."
+                ],
+                jawaban: 0, // A
+                bahas: "Teks menjelaskan perubahan kebiasaan saat pandemi yang justru mempererat keluarga (ayah bisa makan malam, ibu memasak, anak membantu). Ini menunjukkan inferensi dampak positif pandemi bagi kebersamaan (HOTS)."
+            },
+            {
+                teks: teks4,
+                tanya: "Berdasarkan hubungan kohesi leksikal, kata <em>'ibu kota'</em> pada kalimat (3) bersinonim dengan makna...",
+                opsi: [
+                    "A. Pusat pemerintahan",
+                    "B. Kampung halaman",
+                    "C. Tempat peristirahatan",
+                    "D. Daerah pinggiran"
+                ],
+                jawaban: 0, // A
+                bahas: "Secara leksikal, ibu kota merujuk pada kota tempat kedudukan pusat pemerintahan suatu negara atau daerah."
+            },
+            // Teks 5
+            {
+                teks: teks5,
+                tanya: "Kata yang penulisannya <strong>tidak baku</strong> (tidak sesuai Pedoman Umum Ejaan Bahasa Indonesia) pada paragraf tersebut adalah...",
+                opsi: [
+                    "A. prinsip",
+                    "B. kesedarhanaan",
+                    "C. hak",
+                    "D. memeras"
+                ],
+                jawaban: 1, // B
+                bahas: "Penulisan yang benar dan baku adalah 'kesederhanaan' (dari kata dasar sederhana), bukan 'kesedarhanaan'."
+            },
+            {
+                teks: teks5,
+                tanya: "Makna kias dari ungkapan <em>'tidur beralaskan tikar pandan'</em> dalam konteks nasihat ayah tersebut melambangkan...",
+                opsi: [
+                    "A. Kehidupan yang sangat tradisional dan menolak teknologi.",
+                    "B. Kebiasaan masyarakat desa yang tidak mampu membeli perabot.",
+                    "C. Kehidupan yang serba kekurangan secara materi atau hidup sederhana.",
+                    "D. Kepedulian terhadap kelestarian lingkungan dan bahan alam."
+                ],
+                jawaban: 2, // C
+                bahas: "Ungkapan 'tidur beralaskan tikar' sering digunakan sebagai metafora untuk melambangkan kemiskinan atau kesederhanaan hidup secara finansial."
+            },
+            {
+                teks: teks5,
+                tanya: "Frasa <em>'memeras keringat orang lain'</em> memiliki makna konotasi yang berarti...",
+                opsi: [
+                    "A. Mengambil keuntungan dari orang lain dengan cara curang, paksaan, atau eksploitasi.",
+                    "B. Menyuruh orang lain bekerja keras di bawah terik matahari secara harfiah.",
+                    "C. Membantu orang lain menyelesaikan pekerjaannya yang sangat berat.",
+                    "D. Meminta bayaran atas jasa yang telah diberikan secara adil."
+                ],
+                jawaban: 0, // A
+                bahas: "Memeras keringat orang lain adalah idiom (ungkapan) yang berarti mengeksploitasi, menindas, atau merugikan orang lain demi keuntungan pribadi."
+            },
+            {
+                teks: teks5,
+                tanya: "Kata ganti <em>'beliau'</em> pada kalimat terakhir memiliki fungsi kohesi gramatikal yang merujuk kepada...",
+                opsi: [
+                    "A. Penulis cerita",
+                    "B. Orang lain",
+                    "C. Kami",
+                    "D. Ayah"
+                ],
+                jawaban: 3, // D
+                bahas: "Kata 'beliau' merupakan kata ganti orang ketiga tunggal yang digunakan untuk menghormati orang yang lebih tua. Dalam konteks ini merujuk kepada 'Ayah'."
+            },
+            // Teks 6
+            {
+                teks: teks6,
+                tanya: "Objek utama yang dideskripsikan oleh penulis dalam teks tersebut adalah...",
+                opsi: [
+                    "A. Jendela kaca besar",
+                    "B. Masakan ibu",
+                    "C. Ruang makan keluarga",
+                    "D. Kursi rotan usang"
+                ],
+                jawaban: 2, // C
+                bahas: "Ide pokok dari deskripsi tata ruang (spasial) tersebut difokuskan pada gambaran fisik 'Ruang makan keluarga', di mana objek lain seperti meja, kursi, dan jendela hanyalah rincian pendukung."
+            },
+            {
+                teks: teks6,
+                tanya: "Dalam menulis teks deskripsi, penulis sering menggunakan kata sifat (adjektiva). Kata sifat yang <strong>tidak</strong> terdapat dalam teks tersebut adalah...",
+                opsi: [
+                    "A. usang",
+                    "B. bundar",
+                    "C. kokoh",
+                    "D. merdu"
+                ],
+                jawaban: 3, // D
+                bahas: "Kata 'usang', 'bundar', dan 'kokoh' ada di dalam teks. Kata 'merdu' (berkaitan dengan suara) tidak digunakan karena teks dominan menggunakan pencerapan visual/penglihatan."
+            },
+            {
+                teks: teks6,
+                tanya: "Tujuan penulis menyandingkan kata <em>'usang'</em> dan <em>'kokoh'</em> pada kalimat ketiga adalah untuk...",
+                opsi: [
+                    "A. Menunjukkan bahwa keluarga tersebut tidak memiliki uang untuk membeli kursi baru.",
+                    "B. Membangun kesan bahwa kursi tersebut bernilai sejarah dan memiliki daya tahan yang sangat kuat meski sudah lama dipakai.",
+                    "C. Mengkritik pembuat kursi rotan karena barangnya cepat terlihat kusam.",
+                    "D. Menggambarkan betapa tidak nyamannya kursi tersebut saat diduduki."
+                ],
+                jawaban: 1, // B
+                bahas: "Penyandingan usang (lama dipakai) dan kokoh (kuat) memberikan efek kontras yang positif, menyiratkan kualitas barang dan nilai kebersamaan keluarga yang bertahan lama (analisis HOTS)."
+            },
+            {
+                teks: teks6,
+                tanya: "Penggunaan konjungsi <em>'namun'</em> pada frasa <em>'tampak sedikit usang di bagian sandarannya namun kaki-kakinya masih sangat kokoh'</em> berfungsi sebagai...",
+                opsi: [
+                    "A. Penanda syarat atau pengandaian (kondisional).",
+                    "B. Penanda waktu kejadian (temporal).",
+                    "C. Penghubung yang menyatakan pertentangan antar klausa (konsesif/kontrastif).",
+                    "D. Penghubung yang memperjelas rincian deskripsi (elaborasi)."
+                ],
+                jawaban: 2, // C
+                bahas: "Kata 'namun', 'tetapi', 'akan tetapi' adalah konjungsi pertentangan (koordinatif korelatif/kontrastif). Menghubungkan keadaan 'usang' yang bertentangan dengan ekspektasi 'rapuh', melainkan justru 'kokoh'."
+            },
+            {
+                teks: teks6,
+                tanya: "Majas personifikasi (mengumpamakan benda mati seolah hidup) terlihat pada kutipan kalimat...",
+                opsi: [
+                    "A. Sebuah meja makan berbentuk bundar yang terbuat dari kayu mahoni.",
+                    "B. Kaki-kakinya masih sangat kokoh mencengkeram lantai.",
+                    "C. Selalu terhidang masakan ibu yang ditutupi tudung saji.",
+                    "D. Terdapat sebuah meja makan berbentuk bundar."
+                ],
+                jawaban: 1, // B
+                bahas: "Kata 'mencengkeram' adalah sifat tindakan makhluk hidup (manusia/hewan). Menggunakan kata ini untuk kaki kursi (benda mati) merupakan majas personifikasi."
+            },
+            // Teks 7
+            {
+                teks: teks7,
+                tanya: "Agar paragraf tersebut tetap koheren (padu) membahas aktivitas kerja bakti keluarga di pagi/siang hari, kalimat yang paling tepat untuk <strong>dihilangkan</strong> adalah...",
+                opsi: [
+                    "A. Kalimat (4)",
+                    "B. Kalimat (5)",
+                    "C. Kalimat (6)",
+                    "D. Kalimat (7)"
+                ],
+                jawaban: 3, // D
+                bahas: "Kalimat (7) tentang menonton kartun merusak fokus (koherensi) paragraf yang menceritakan urutan kerja bakti (1-5) dan ditutup dengan istirahat makan bersama di teras (6)."
+            },
+            {
+                teks: teks7,
+                tanya: "Berdasarkan rincian kejadiannya, urutan penyampaian dalam paragraf tersebut dikembangkan menggunakan pola...",
+                opsi: [
+                    "A. Spasial (berdasarkan urutan ruang)",
+                    "B. Kronologis (berdasarkan urutan waktu/kejadian)",
+                    "C. Kausalitas (berdasarkan sebab akibat)",
+                    "D. Deduktif (dari umum ke khusus)"
+                ],
+                jawaban: 1, // B
+                bahas: "Teks menceritakan alur waktu: Hari minggu pagi kerja bakti -> pembagian tugas berlangsung -> 'Setelah semua pekerjaan usai' mereka istirahat. Ada penanda waktu yang jelas sehingga disebut pola kronologis."
+            },
+            {
+                teks: teks7,
+                tanya: "Dalam teks tersebut, banyak digunakan verba material (kata kerja tindakan fisik). Di bawah ini yang <strong>bukan</strong> termasuk verba material yang dilakukan oleh keluarga tersebut adalah...",
+                opsi: [
+                    "A. Memotong",
+                    "B. Mencuci",
+                    "C. Adalah",
+                    "D. Mengepel"
+                ],
+                jawaban: 2, // C
+                bahas: "'Memotong', 'mencuci', dan 'mengepel' adalah tindakan fisik (verba material). 'Adalah' merupakan verba relasional (kopula) yang mendefinisikan subjek."
+            },
+            {
+                teks: teks7,
+                tanya: "Analisis makna tersirat (amanat/pesan) yang relevan dengan tema 'Keluarga' berdasarkan deskripsi aktivitas tersebut adalah...",
+                opsi: [
+                    "A. Pekerjaan rumah tangga merupakan tanggung jawab eksklusif seorang ibu.",
+                    "B. Kebersihan rumah sangat bergantung pada ketersediaan peralatan modern.",
+                    "C. Kerja sama, pembagian tugas, dan kebersamaan dapat mempererat keharmonisan keluarga.",
+                    "D. Anak bungsu berhak mendapatkan beban kerja yang lebih berat daripada anak sulung."
+                ],
+                jawaban: 2, // C
+                bahas: "Teks menggambarkan seluruh anggota keluarga bahu-membahu bekerja bakti, lalu menikmati hasil dan istirahat bersama. Ini menyiratkan nilai moral tentang pentingnya kerja sama demi keharmonisan keluarga."
+            },
+            {
+                teks: teks7,
+                tanya: "Jika kalimat (5) diubah menjadi kalimat pasif (pasivasi), maka bentuk yang paling tepat (secara sintaksis) adalah...",
+                opsi: [
+                    "A. Tugas ringan selalu aku dapatkan: membuang sampah ke depan kompleks dan mengelap debu di meja belajar.",
+                    "B. Membuang sampah dan mengelap debu adalah tugas yang selalu diberikan kepadaku.",
+                    "C. Aku selalu membuang sampah ke depan kompleks dan debu di meja belajar dibersihkan olehku.",
+                    "D. Sampah selalu aku buang ke depan kompleks demi tugas yang kudapatkan."
+                ],
+                jawaban: 0, // A
+                bahas: "Kalimat asalnya 'Aku (S) mendapatkan (P) tugas ringan (O)'. Bentuk pasif persona (karena subjek kata ganti orang 1): Objek maju ke depan, predikat dilebur dengan subjek tanpa awalan me/di. Menjadi: Tugas ringan (S) selalu aku dapatkan (P)."
+            }
+        ];
+
+        /* =========================================================
+           STATE & LOGIC APLIKASI
+           ========================================================= */
+        
+        let currentState = {
+            nama: "",
+            kelas: "",
+            sekolah: "",
+            jawaban: new Array(dbSoal.length).fill(null),
+            waktuSisa: 45 * 60, // 45 menit
+            intervalWaktu: null,
+            soalAktif: 0
+        };
+
+        // DOM Elements
+        const screenIntro = document.getElementById('screen-intro');
+        const screenQuiz = document.getElementById('screen-quiz');
+        const screenResult = document.getElementById('screen-result');
+        const navTimer = document.getElementById('nav-timer');
+        const timerDisplay = document.getElementById('time-display');
+        
+        // Inisialisasi
+        document.getElementById('student-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            currentState.nama = document.getElementById('input-nama').value;
+            currentState.kelas = document.getElementById('input-kelas').value;
+            currentState.sekolah = document.getElementById('input-sekolah').value;
+            
+            mulaiUjian();
+        });
+
+        function mulaiUjian() {
+            // Update UI Sidebar
+            document.getElementById('info-nama').innerText = currentState.nama;
+            document.getElementById('info-kelas').innerText = `${currentState.kelas} - ${currentState.sekolah}`;
+            
+            // Generate Grid
+            const grid = document.getElementById('question-grid');
+            grid.innerHTML = '';
+            for(let i = 0; i < dbSoal.length; i++) {
+                let btn = document.createElement('button');
+                btn.className = `w-full aspect-square flex items-center justify-center text-sm font-semibold rounded border transition hover:bg-gray-200 nav-btn`;
+                btn.id = `nav-btn-${i}`;
+                btn.innerText = i + 1;
+                btn.onclick = () => lompatSoal(i);
+                grid.appendChild(btn);
+            }
+
+            // Switch Screen
+            screenIntro.classList.add('hidden-screen');
+            screenQuiz.classList.remove('hidden-screen');
+            navTimer.classList.remove('hidden-screen');
+
+            tampilSoal(0);
+            jalankanTimer();
+        }
+
+        function jalankanTimer() {
+            currentState.intervalWaktu = setInterval(() => {
+                if (currentState.waktuSisa <= 0) {
+                    clearInterval(currentState.intervalWaktu);
+                    akhiriUjian(true);
+                } else {
+                    currentState.waktuSisa--;
+                    let m = Math.floor(currentState.waktuSisa / 60).toString().padStart(2, '0');
+                    let s = (currentState.waktuSisa % 60).toString().padStart(2, '0');
+                    timerDisplay.innerText = `${m}:${s}`;
+                    
+                    if(currentState.waktuSisa < 300) { // kurang dari 5 menit
+                        timerDisplay.parentElement.classList.replace('bg-blue-800', 'bg-red-600');
+                        timerDisplay.parentElement.classList.add('animate-pulse');
+                    }
+                }
+            }, 1000);
+        }
+
+        function tampilSoal(index) {
+            currentState.soalAktif = index;
+            const soal = dbSoal[index];
+            
+            document.getElementById('q-number').innerText = index + 1;
+            document.getElementById('q-stimulus').innerHTML = soal.teks;
+            document.getElementById('q-text').innerHTML = soal.tanya;
+            
+            const opsContainer = document.getElementById('q-options');
+            opsContainer.innerHTML = '';
+
+            soal.opsi.forEach((optText, optIndex) => {
+                const label = document.createElement('label');
+                label.className = `option-label block border border-gray-300 rounded-lg p-3 text-sm flex items-start gap-3 transition`;
+                
+                const input = document.createElement('input');
+                input.type = 'radio';
+                input.name = 'opsi-soal';
+                input.value = optIndex;
+                input.className = 'mt-1 w-4 h-4 text-blue-600';
+                
+                // Jika sudah pernah dijawab
+                if (currentState.jawaban[index] === optIndex) {
+                    input.checked = true;
+                    label.classList.add('selected-option');
+                }
+
+                input.onchange = () => {
+                    document.querySelectorAll('.option-label').forEach(el => el.classList.remove('selected-option'));
+                    if(input.checked) {
+                        label.classList.add('selected-option');
+                        simpanJawaban(index, optIndex);
+                    }
+                };
+
+                const span = document.createElement('span');
+                span.innerHTML = optText;
+
+                label.appendChild(input);
+                label.appendChild(span);
+                opsContainer.appendChild(label);
+            });
+
+            // Update Navigasi
+            document.querySelectorAll('.nav-btn').forEach((btn, i) => {
+                btn.classList.remove('bg-blue-600', 'text-white', 'border-blue-600', 'border-gray-300', 'bg-white');
+                
+                if (i === index) {
+                    btn.classList.add('border-blue-600', 'border-2', 'bg-blue-50', 'text-blue-800'); // Aktif
+                } else if (currentState.jawaban[i] !== null) {
+                    btn.classList.add('bg-blue-600', 'text-white'); // Terjawab
+                } else {
+                    btn.classList.add('bg-white', 'text-gray-700', 'border-gray-300'); // Belum
+                }
+            });
+
+            // Handle Buttons
+            document.getElementById('btn-prev').disabled = index === 0;
+            
+            const btnNext = document.getElementById('btn-next');
+            if (index === dbSoal.length - 1) {
+                btnNext.innerText = "Selesai";
+                btnNext.classList.replace('bg-blue-600', 'bg-green-600');
+                btnNext.classList.replace('hover:bg-blue-700', 'hover:bg-green-700');
+                btnNext.onclick = () => kumpulkanDialog();
+            } else {
+                btnNext.innerText = "Selanjutnya \u2192";
+                btnNext.classList.replace('bg-green-600', 'bg-blue-600');
+                btnNext.classList.replace('hover:bg-green-700', 'hover:bg-blue-700');
+                btnNext.onclick = () => lompatSoal(index + 1);
+            }
+        }
+
+        function simpanJawaban(soalIndex, opsiIndex) {
+            currentState.jawaban[soalIndex] = opsiIndex;
+            document.getElementById(`nav-btn-${soalIndex}`).classList.add('bg-blue-600', 'text-white');
+            document.getElementById(`nav-btn-${soalIndex}`).classList.remove('border-blue-600', 'bg-blue-50'); // hapus active style kalo ada
+        }
+
+        function lompatSoal(index) {
+            tampilSoal(index);
+        }
+
+        document.getElementById('btn-prev').onclick = () => lompatSoal(currentState.soalAktif - 1);
+        
+        document.getElementById('btn-submit-early').onclick = () => kumpulkanDialog();
+
+        function kumpulkanDialog() {
+            const terjawab = currentState.jawaban.filter(j => j !== null).length;
+            const kosong = dbSoal.length - terjawab;
+            
+            let msg = `Anda telah menjawab ${terjawab} soal. `;
+            if(kosong > 0) msg += `Masih ada ${kosong} soal yang KOSONG. `;
+            msg += `\n\nApakah Anda yakin ingin mengumpulkan ujian sekarang?`;
+            
+            if(confirm(msg)) {
+                akhiriUjian(false);
+            }
+        }
+
+        function akhiriUjian(isTimeout = false) {
+            clearInterval(currentState.intervalWaktu);
+            
+            if(isTimeout) {
+                alert("Waktu Habis! Ujian otomatis dikumpulkan.");
+            }
+
+            screenQuiz.classList.add('hidden-screen');
+            navTimer.classList.add('hidden-screen');
+            screenResult.classList.remove('hidden-screen');
+            window.scrollTo(0, 0);
+
+            kalkulasiNilai();
+        }
+
+        function kalkulasiNilai() {
+            let benar = 0;
+            let salah = 0;
+            let kosong = 0;
+
+            const reviewContainer = document.getElementById('review-container');
+            reviewContainer.innerHTML = '';
+
+            dbSoal.forEach((soal, index) => {
+                const jwbUser = currentState.jawaban[index];
+                const jwbBenar = soal.jawaban;
+                
+                let isBenar = false;
+                if (jwbUser === null) {
+                    kosong++;
+                } else if (jwbUser === jwbBenar) {
+                    benar++;
+                    isBenar = true;
+                } else {
+                    salah++;
+                }
+
+                // Render Pembahasan
+                const div = document.createElement('div');
+                div.className = "bg-gray-50 border border-gray-200 rounded-xl p-5 shadow-sm";
+                
+                let badgeStatus = jwbUser === null ? 
+                    `<span class="bg-gray-200 text-gray-700 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Kosong</span>` : 
+                    isBenar ? 
+                    `<span class="bg-green-100 text-green-700 border border-green-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Benar</span>` : 
+                    `<span class="bg-red-100 text-red-700 border border-red-300 px-2 py-1 rounded text-xs font-bold uppercase tracking-wider">Salah</span>`;
+                
+                let opsiHtml = `<div class="space-y-2 mt-4">`;
+                soal.opsi.forEach((opt, oIdx) => {
+                    let optStyle = "text-gray-600 bg-white border border-gray-200";
+                    if (oIdx === jwbBenar) {
+                        optStyle = "bg-green-50 border-green-500 text-green-800 font-medium"; // Correct Answer
+                    } else if (oIdx === jwbUser && jwbUser !== jwbBenar) {
+                        optStyle = "bg-red-50 border-red-400 text-red-700 line-through opacity-70"; // Wrong Answer User Picked
+                    }
+
+                    opsiHtml += `<div class="p-2 rounded text-sm ${optStyle}">${opt}</div>`;
+                });
+                opsiHtml += `</div>`;
+
+                div.innerHTML = `
+                    <div class="flex items-start justify-between gap-4 mb-3">
+                        <h4 class="font-bold text-gray-800">Soal No. ${index + 1}</h4>
+                        ${badgeStatus}
+                    </div>
+                    <div class="text-sm text-gray-700 mb-2 border-b pb-3 text-justify">
+                        ${soal.teks ? `<div class="text-xs bg-gray-200 p-2 rounded mb-2 border">${soal.teks}</div>` : ''}
+                        <strong>P:</strong> ${soal.tanya}
+                    </div>
+                    ${opsiHtml}
+                    <div class="mt-4 bg-blue-50 border-l-4 border-blue-500 p-3 text-sm text-blue-900">
+                        <strong>Pembahasan:</strong><br>
+                        ${soal.bahas}
+                    </div>
+                `;
+                reviewContainer.appendChild(div);
+            });
+
+            // Update Header Hasil
+            document.getElementById('res-nama').innerText = currentState.nama;
+            
+            const nilai = Math.round((benar / dbSoal.length) * 100);
+            
+            document.getElementById('res-score').innerText = nilai;
+            document.getElementById('res-benar').innerText = benar;
+            document.getElementById('res-salah').innerText = salah;
+            document.getElementById('res-kosong').innerText = kosong;
+
+            // Animate SVG Ring
+            const circle = document.getElementById('score-ring');
+            circle.style.strokeDasharray = `${nilai}, 100`;
+
+            // Trigger Confetti if pass
+            if(nilai >= 70) {
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 }
+                });
+            }
+        }
+    </script>
+</body>
+</html>
