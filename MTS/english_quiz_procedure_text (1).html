@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>English Quiz: Procedure Text - Grade 9</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8; 
+        }
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-gray-800 flex flex-col">
+
+    <!-- Custom Modal Overlay (Replaces alert()) -->
+    <div id="customModal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center fade-in">
+        <div class="bg-white rounded-2xl p-6 max-w-sm w-full mx-4 shadow-2xl text-center">
+            <div id="modalIcon" class="text-4xl mb-4 text-yellow-500"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3 id="modalTitle" class="text-xl font-bold mb-2">Notice</h3>
+            <p id="modalMessage" class="text-gray-600 mb-6">Message goes here.</p>
+            <button onclick="closeModal()" class="w-full bg-indigo-600 text-white font-semibold py-2 rounded-xl hover:bg-indigo-700 transition">OK</button>
+        </div>
+    </div>
+
+    <!-- View 1: Registration Form -->
+    <div id="registrationView" class="flex-grow flex items-center justify-center p-4 fade-in">
+        <div class="glass-panel w-full max-w-md p-8 rounded-3xl shadow-xl">
+            <div class="text-center mb-8">
+                <div class="inline-block p-4 bg-indigo-100 rounded-full mb-4">
+                    <i class="fas fa-graduation-cap text-4xl text-indigo-600"></i>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800">Sumatif Akhir Semester</h1>
+                <p class="text-gray-500 mt-2">Bahasa Inggris Kelas IX - Procedure Text</p>
+            </div>
+            
+            <form id="startForm" class="space-y-5">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-user text-gray-400"></i>
+                        </div>
+                        <input type="text" id="studentName" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="Enter your full name" required autocomplete="off">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Class</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-users text-gray-400"></i>
+                        </div>
+                        <select id="studentClass" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" required>
+                            <option value="" disabled selected>Select your class</option>
+                            <option value="IX A">IX A</option>
+                            <option value="IX B">IX B</option>
+                            <option value="IX C">IX C</option>
+                            <option value="IX D">IX D</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">School Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <i class="fas fa-school text-gray-400"></i>
+                        </div>
+                        <input type="text" id="schoolName" class="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition" placeholder="e.g. MTs Negeri 2 Brebes" required autocomplete="off">
+                    </div>
+                </div>
+                
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all flex justify-center items-center gap-2">
+                        <span>Start Quiz (45 Minutes)</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- View 2: Quiz Interface -->
+    <div id="quizView" class="hidden flex-col h-screen overflow-hidden">
+        <!-- Top Navbar -->
+        <header class="bg-white shadow-sm px-6 py-4 flex justify-between items-center z-10 flex-shrink-0">
+            <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 font-bold text-lg" id="avatarInitials">
+                    S
+                </div>
+                <div class="hidden sm:block">
+                    <h2 class="font-bold text-gray-800 leading-tight" id="headerName">Student Name</h2>
+                    <p class="text-xs text-gray-500" id="headerInfo">Class - School</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-6">
+                <!-- Progress -->
+                <div class="hidden md:flex flex-col items-end">
+                    <span class="text-xs font-semibold text-gray-500 mb-1">Progress</span>
+                    <div class="flex items-center gap-2">
+                        <div class="w-32 h-2 bg-gray-200 rounded-full overflow-hidden">
+                            <div id="progressBar" class="h-full bg-indigo-500 w-0 transition-all duration-300"></div>
+                        </div>
+                        <span class="text-sm font-bold text-indigo-600" id="progressText">1/15</span>
+                    </div>
+                </div>
+                
+                <!-- Timer -->
+                <div class="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-2 rounded-xl border border-red-100 shadow-sm">
+                    <i class="fas fa-stopwatch animate-pulse"></i>
+                    <span id="timerDisplay" class="font-bold font-mono text-lg tracking-wider">45:00</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Quiz Content Area -->
+        <main class="flex-grow flex flex-col lg:flex-row overflow-hidden bg-gray-50">
+            
+            <!-- Left Pane: Reading Text -->
+            <div class="w-full lg:w-1/2 p-4 lg:p-6 flex flex-col h-full overflow-hidden border-r border-gray-200">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex-grow flex flex-col overflow-hidden">
+                    <div class="bg-indigo-50 p-4 border-b border-indigo-100 flex items-center gap-2 text-indigo-800">
+                        <i class="fas fa-book-open"></i>
+                        <h3 class="font-semibold text-sm uppercase tracking-wider">Reading Text</h3>
+                    </div>
+                    <div id="readingTextContainer" class="p-6 overflow-y-auto custom-scrollbar flex-grow prose prose-sm md:prose-base max-w-none text-gray-700">
+                        <!-- Text dynamically loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Pane: Question Area -->
+            <div class="w-full lg:w-1/2 p-4 lg:p-6 flex flex-col h-full overflow-hidden">
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 flex-grow flex flex-col overflow-hidden fade-in relative">
+                    
+                    <div class="p-6 overflow-y-auto custom-scrollbar flex-grow" id="questionContainer">
+                        <!-- Question Header -->
+                        <div class="flex justify-between items-start mb-6">
+                            <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1 rounded-lg uppercase tracking-wider" id="qNumberBadge">Question 1</span>
+                            <span class="text-xs text-gray-400 flex items-center gap-1" id="qIndicatorBadge"><i class="fas fa-bullseye"></i> LOTS</span>
+                        </div>
+                        
+                        <!-- Question Text -->
+                        <h2 class="text-xl md:text-2xl font-bold text-gray-800 mb-6 leading-relaxed" id="questionText">
+                            Question text goes here?
+                        </h2>
+                        
+                        <!-- Answer Options -->
+                        <div id="optionsContainer" class="space-y-3">
+                            <!-- Options injected here -->
+                        </div>
+                    </div>
+
+                    <!-- Navigation Footer -->
+                    <div class="bg-gray-50 p-4 border-t border-gray-200 flex justify-between items-center flex-shrink-0">
+                        <button id="btnPrev" onclick="prevQuestion()" class="px-5 py-2.5 rounded-xl font-medium text-gray-600 bg-white border border-gray-300 hover:bg-gray-100 transition flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-arrow-left"></i> Previous
+                        </button>
+                        <button id="btnNext" onclick="nextQuestion()" class="px-5 py-2.5 rounded-xl font-medium text-white bg-indigo-600 hover:bg-indigo-700 shadow-md transition flex items-center gap-2">
+                            Next <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button id="btnSubmit" onclick="confirmSubmit()" class="hidden px-5 py-2.5 rounded-xl font-bold text-white bg-green-500 hover:bg-green-600 shadow-md transition flex items-center gap-2">
+                            <i class="fas fa-check-circle"></i> Submit Quiz
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- View 3: Result & Review View -->
+    <div id="resultView" class="hidden min-h-screen p-4 lg:p-8 bg-gray-50">
+        <div class="max-w-4xl mx-auto space-y-6 fade-in">
+            <!-- Score Card -->
+            <div class="glass-panel p-8 rounded-3xl shadow-lg text-center relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10">
+                    <i class="fas fa-award text-9xl"></i>
+                </div>
+                <h1 class="text-3xl font-bold text-gray-800 mb-2">Quiz Completed!</h1>
+                <p class="text-gray-500 mb-8" id="resultStudentInfo">Name | Class | School</p>
+                
+                <div class="flex justify-center items-center mb-8">
+                    <div class="relative w-48 h-48">
+                        <svg class="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-gray-200" stroke-width="3" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="scoreCircle" class="text-green-500 transition-all duration-1000 ease-out" stroke-dasharray="0, 100" stroke-width="3" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <span class="text-5xl font-extrabold text-gray-800" id="finalScore">0</span>
+                            <span class="text-sm font-medium text-gray-500">out of 100</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 text-center max-w-md mx-auto mb-8 border-t border-b py-4 border-gray-100">
+                    <div>
+                        <div class="text-2xl font-bold text-green-500" id="statCorrect">0</div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Correct</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-red-500" id="statWrong">0</div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Wrong</div>
+                    </div>
+                    <div>
+                        <div class="text-2xl font-bold text-gray-500" id="statMissed">0</div>
+                        <div class="text-xs text-gray-500 uppercase tracking-wide">Skipped</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Review Section -->
+            <div class="bg-white rounded-3xl shadow-sm border border-gray-200 p-6 lg:p-8">
+                <div class="flex items-center gap-3 mb-6 border-b border-gray-100 pb-4">
+                    <div class="p-2 bg-blue-100 text-blue-600 rounded-lg">
+                        <i class="fas fa-list-check"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Pembahasan Soal (Review)</h2>
+                </div>
+                <div id="reviewContainer" class="space-y-8">
+                    <!-- Reviews injected here -->
+                </div>
+                
+                <div class="mt-10 text-center">
+                     <button onclick="location.reload()" class="bg-gray-800 text-white font-bold py-3 px-8 rounded-xl hover:bg-gray-900 transition shadow-lg">
+                        <i class="fas fa-redo mr-2"></i> Take Quiz Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data Texts (Procedure Texts)
+        const texts = {
+            food: `
+                <h3 class="text-xl font-bold mb-2 text-indigo-900">How to Make Fried Rice</h3>
+                <p class="mb-4 text-gray-600 italic">A quick and easy meal for your breakfast.</p>
+                <p class="mb-2 text-indigo-800"><strong>Ingredients:</strong></p>
+                <ul class="list-disc pl-5 mb-4 space-y-1 text-gray-700">
+                    <li>2 plates of white rice</li>
+                    <li>2 cloves of garlic, chopped</li>
+                    <li>3 shallots, sliced thin</li>
+                    <li>1 tablespoon of sweet soy sauce</li>
+                    <li>1 egg, beaten</li>
+                    <li>A pinch of salt and pepper</li>
+                    <li>2 tablespoons of cooking oil</li>
+                    <li>Chicken sausages, sliced (optional)</li>
+                </ul>
+                <p class="mb-2 text-indigo-800"><strong>Steps:</strong></p>
+                <ol class="list-decimal pl-5 space-y-2 text-gray-700">
+                    <li>First, heat the cooking oil in a frying pan on medium heat.</li>
+                    <li>Second, add the chopped garlic and shallots. Fry them until they smell good and turn golden brown.</li>
+                    <li>After that, pour the beaten egg and stir it well to make scrambled eggs. If you use sausages, add them now.</li>
+                    <li>Then, put the white rice into the pan and mix it with the egg and spices completely.</li>
+                    <li>Next, pour the sweet soy sauce, salt, and pepper. Stir the rice continuously for about 3 minutes until all ingredients are mixed well.</li>
+                    <li>Finally, turn off the stove. Serve the fried rice on a plate while it is warm. You can garnish it with cucumber slices.</li>
+                </ol>
+            `,
+            drink: `
+                <h3 class="text-xl font-bold mb-2 text-indigo-900">How to Make Fresh Mango Juice</h3>
+                <p class="mb-4 text-gray-600 italic">Drinking fresh fruit juice is very good for our health because it contains many vitamins. Here is a simple way to make a delicious and refreshing mango juice.</p>
+                <p class="mb-2 text-indigo-800"><strong>Materials and Tools:</strong></p>
+                <ul class="list-disc pl-5 mb-4 space-y-1 text-gray-700">
+                    <li>1 large ripe sweet mango</li>
+                    <li>2 tablespoons of sugar (or honey for a healthier choice)</li>
+                    <li>200 ml of cold water</li>
+                    <li>A cup of ice cubes</li>
+                    <li>A blender</li>
+                    <li>A sharp knife and a serving glass</li>
+                </ul>
+                <p class="mb-2 text-indigo-800"><strong>Steps:</strong></p>
+                <ol class="list-decimal pl-5 space-y-2 text-gray-700">
+                    <li>First, wash the mango under running water to clean it from dirt.</li>
+                    <li>Second, peel the mango carefully using a sharp knife and cut the flesh into small pieces. Discard the seed.</li>
+                    <li>Third, put the mango pieces, cold water, sugar, and half of the ice cubes into the blender jar.</li>
+                    <li>Turn on the blender and blend all ingredients for about 1 to 2 minutes until it becomes completely smooth and thick.</li>
+                    <li>After that, prepare the serving glass and put the remaining ice cubes into it.</li>
+                    <li>Then, pour the smooth juice into the glass.</li>
+                    <li>Your fresh mango juice is ready to be enjoyed!</li>
+                </ol>
+            `,
+            manual: `
+                <h3 class="text-xl font-bold mb-2 text-indigo-900">How to Use a Digital Camera Correctly</h3>
+                <p class="mb-4 text-gray-600 italic">Using a digital camera is quite easy if you follow the correct instructions. The purpose of this manual is to guide beginners on taking a good picture without damaging the device.</p>
+                <p class="mb-2 text-indigo-800"><strong>Instructions:</strong></p>
+                <ol class="list-decimal pl-5 space-y-2 text-gray-700">
+                    <li>First, ensure that the camera battery is fully charged. Insert a memory card into the slot.</li>
+                    <li>Second, remove the lens cap carefully.</li>
+                    <li>Turn on the camera by pressing the 'Power' button located on the top right side. The LCD screen will light up.</li>
+                    <li>Then, look at the LCD screen to frame the object you want to capture. You can use the zoom in/out button to adjust the frame.</li>
+                    <li>Next, press the 'Shutter' button half-way down to focus on the object. Wait for a second. The indicator light on the screen will turn green when it is in focus.</li>
+                    <li>Finally, press the 'Shutter' button completely down to take the picture. You will hear a click sound.</li>
+                    <li>Do not forget to turn off the camera and put the lens cap back on when you are finished.</li>
+                </ol>
+            `,
+            tips: `
+                <h3 class="text-xl font-bold mb-2 text-indigo-900">How to Keep Your Body Healthy During Rainy Season</h3>
+                <p class="mb-4 text-gray-600 italic">The rainy season often brings diseases like flu and cough. We must protect ourselves. Here are some tips to stay healthy.</p>
+                <p class="mb-2 text-indigo-800"><strong>Things you should do:</strong></p>
+                <ol class="list-decimal pl-5 space-y-2 text-gray-700">
+                    <li><strong>Eat Nutritious Food:</strong> Consume a balanced diet rich in vitamins, especially Vitamin C, to boost your immune system. Oranges and spinach are great choices.</li>
+                    <li><strong>Drink Plenty of Water:</strong> Even if it's cold, stay hydrated. Drinking warm water or herbal tea can also soothe your throat.</li>
+                    <li><strong>Maintain Hygiene:</strong> Wash your hands with soap and running water frequently, especially before eating and after returning home.</li>
+                    <li><strong>Bring Rain Gear:</strong> Always carry an umbrella or a raincoat in your bag. If you get caught in the rain, take a warm shower immediately after reaching home.</li>
+                    <li><strong>Get Enough Sleep:</strong> Ensure you get 7-8 hours of quality sleep every night so your body can rest and recover.</li>
+                </ol>
+            `
+        };
+
+        const questionsData = [
+            // ==========================================
+            // PART 1: MULTIPLE CHOICE (PILIHAN GANDA BIASA - 15 SOAL)
+            // ==========================================
+            
+            // Text: Food
+            {
+                id: 1, textId: 'food', type: 'radio', indicator: 'LOTS', 
+                question: "What is the best title for the text?",
+                options: ["How to Eat Fried Rice", "How to Make Fried Rice", "Ingredients for Fried Rice", "Steps to Cook Rice"],
+                answer: "How to Make Fried Rice",
+                explanation: "Judul yang paling tepat untuk teks prosedur tersebut adalah 'How to Make Fried Rice' karena teks tersebut menjelaskan cara atau langkah-langkah membuat nasi goreng."
+            },
+            {
+                id: 2, textId: 'food', type: 'radio', indicator: 'LOTS',
+                question: "What is the main purpose (social function) of the text?",
+                options: ["To tell a story about fried rice", "To describe what fried rice looks like", "To tell the readers how to make fried rice", "To persuade readers to buy fried rice"],
+                answer: "To tell the readers how to make fried rice",
+                explanation: "Tujuan utama (Social Function) dari teks prosedur (Procedure Text) adalah untuk memberi tahu pembaca bagaimana melakukan/membuat sesuatu ('to tell the readers how to make...')."
+            },
+            {
+                id: 3, textId: 'food', type: 'radio', indicator: 'LOTS',
+                question: "The generic structure of the text consists of...",
+                options: ["Orientation, Complication, Resolution", "Goal, Ingredients, Steps", "Identification, Description", "General Classification, Description"],
+                answer: "Goal, Ingredients, Steps",
+                explanation: "Struktur umum (Generic Structure) dari teks prosedur tentang makanan/minuman selalu terdiri dari: Goal (Tujuan/Judul), Ingredients/Materials (Bahan/Alat), dan Steps (Langkah-langkah)."
+            },
+            {
+                id: 4, textId: 'food', type: 'radio', indicator: 'MOTS',
+                question: "Based on the text, what should we do after pouring the beaten egg into the pan?",
+                options: ["Heat the cooking oil", "Stir it well to make scrambled eggs", "Add sweet soy sauce and salt", "Serve it on a plate"],
+                answer: "Stir it well to make scrambled eggs",
+                explanation: "Berdasarkan langkah ke-3 ('After that, pour the beaten egg and stir it well to make scrambled eggs'), hal yang dilakukan setelah menuangkan telur adalah mengaduknya menjadi telur orak-arik."
+            },
+            {
+                id: 5, textId: 'food', type: 'radio', indicator: 'LOTS',
+                question: "Which of the following sentences is an imperative sentence (kalimat perintah) found in the text?",
+                options: ["1 egg, beaten", "They smell good", "Serve the fried rice on a plate", "While it is warm"],
+                answer: "Serve the fried rice on a plate",
+                explanation: "Imperative sentence (kalimat perintah) biasanya diawali dengan kata kerja dasar (Verb 1). Contoh di teks: 'Serve the fried rice...' (Sajikan nasi goreng...)."
+            },
+
+            // Text: Drink
+            {
+                id: 6, textId: 'drink', type: 'radio', indicator: 'MOTS',
+                question: "What is the main idea of the introductory paragraph?",
+                options: ["Mango juice is hard to make", "Drinking fresh fruit juice is very good for our health", "We need a blender to make juice", "Mango is an expensive fruit"],
+                answer: "Drinking fresh fruit juice is very good for our health",
+                explanation: "Ide pokok (Main Idea) paragraf pengantar dijelaskan di kalimat pembuka, yaitu meminum jus buah segar sangat baik untuk kesehatan karena mengandung banyak vitamin."
+            },
+            {
+                id: 7, textId: 'drink', type: 'radio', indicator: 'MOTS',
+                question: "What is the moral value or benefit of following this procedure?",
+                options: ["We will get sick", "We can make a healthy, delicious, and refreshing drink", "We can sell the blender", "We will know how to plant a mango tree"],
+                answer: "We can make a healthy, delicious, and refreshing drink",
+                explanation: "Manfaat mengikuti prosedur ini adalah kita dapat membuat minuman yang sehat dan menyegarkan, seperti yang tersirat di awal teks."
+            },
+            {
+                id: 8, textId: 'drink', type: 'radio', indicator: 'MOTS',
+                question: "Which part of the text mentions the items we need, such as a knife and a glass?",
+                options: ["Goal", "Steps", "Materials and Tools", "Conclusion"],
+                answer: "Materials and Tools",
+                explanation: "Berdasarkan struktur teks, pisau (knife) dan gelas (glass) disebutkan pada bagian 'Materials and Tools' (Bahan dan Alat)."
+            },
+            {
+                id: 9, textId: 'drink', type: 'radio', indicator: 'MOTS',
+                question: "According to the text, why should we wash the mango before peeling it?",
+                options: ["To make it sweet", "To clean it from dirt", "To make it soft", "To change its color"],
+                answer: "To clean it from dirt",
+                explanation: "Pada langkah ke-1 tertulis 'wash the mango under running water to clean it from dirt' (cuci mangga untuk membersihkannya dari kotoran)."
+            },
+            {
+                id: 10, textId: 'drink', type: 'radio', indicator: 'MOTS',
+                question: "\"<b>After that</b>, prepare the serving glass...\" The bold phrase is an example of...",
+                options: ["Action Verb", "Imperative Sentence", "Sequence Marker", "Adjective"],
+                answer: "Sequence Marker",
+                explanation: "Frasa 'After that' (Setelah itu), 'First' (Pertama), 'Then' (Kemudian) merupakan penanda urutan langkah-langkah yang disebut Sequence Marker (Conjunction of sequence)."
+            },
+
+            // Text: Manual
+            {
+                id: 11, textId: 'manual', type: 'radio', indicator: 'HOTS',
+                question: "What is the main focus of the 'Instructions' section in the text?",
+                options: ["To explain how a camera works mechanically", "To describe the physical parts of a digital camera", "To provide chronological steps to capture an image safely", "To tell the history of digital cameras"],
+                answer: "To provide chronological steps to capture an image safely",
+                explanation: "(HOTS) Bagian 'Instructions' memberikan langkah-langkah berurutan (chronological steps) untuk mengambil gambar dengan baik tanpa merusak kamera (safely)."
+            },
+            {
+                id: 12, textId: 'manual', type: 'radio', indicator: 'MOTS',
+                question: "Where is the 'Power' button located based on the text?",
+                options: ["On the LCD screen", "On the memory card", "On the top right side", "Under the lens cap"],
+                answer: "On the top right side",
+                explanation: "Pada langkah ke-3 disebutkan: '...pressing the 'Power' button located on the top right side.'"
+            },
+            {
+                id: 13, textId: 'manual', type: 'radio', indicator: 'HOTS',
+                question: "What will happen if you press the shutter button half-way down?",
+                options: ["The camera will turn off", "The camera will take the picture immediately", "The camera will focus on the object", "The memory card will pop out"],
+                answer: "The camera will focus on the object",
+                explanation: "Langkah ke-5 menyatakan: 'press the Shutter button half-way down to focus on the object' (kamera akan memfokuskan pada objek)."
+            },
+            
+            // Text: Tips
+            {
+                id: 14, textId: 'tips', type: 'radio', indicator: 'MOTS',
+                question: "What should you do if you get caught in the rain according to the text?",
+                options: ["Drink cold water", "Take a warm shower immediately", "Sleep without washing", "Eat spinach only"],
+                answer: "Take a warm shower immediately",
+                explanation: "Pada poin ke-4 (Bring Rain Gear) disebutkan: 'If you get caught in the rain, take a warm shower immediately after reaching home.'"
+            },
+            {
+                id: 15, textId: 'tips', type: 'radio', indicator: 'LOTS',
+                question: "How many hours of sleep are recommended to keep the body healthy?",
+                options: ["4-5 hours", "5-6 hours", "7-8 hours", "9-10 hours"],
+                answer: "7-8 hours",
+                explanation: "Pada poin ke-5 tertulis: 'Ensure you get 7-8 hours of quality sleep every night'."
+            },
+
+            // ==========================================
+            // PART 2: MULTIPLE CHOICE COMPLEX (PILIHAN GANDA KOMPLEKS - 5 SOAL)
+            // ==========================================
+            {
+                id: 16, textId: 'food', type: 'checkbox', indicator: 'MOTS',
+                question: "Which of the following ingredients are needed to make the fried rice? (Select all that apply)",
+                options: ["2 cloves of garlic", "2 tablespoons of sugar", "Sweet soy sauce", "Chicken sausages"],
+                answer: ["2 cloves of garlic", "Sweet soy sauce", "Chicken sausages"],
+                explanation: "Berdasarkan daftar Ingredients, bawang putih (garlic), kecap manis (sweet soy sauce), dan sosis ayam (chicken sausages) digunakan. Gula tidak digunakan."
+            },
+            {
+                id: 17, textId: 'drink', type: 'checkbox', indicator: 'MOTS',
+                question: "Which sequence markers (penanda urutan) are used in the Mango Juice text? (Select all correct answers)",
+                options: ["First", "Because", "Third", "After that"],
+                answer: ["First", "Third", "After that"],
+                explanation: "'First', 'Third', dan 'After that' adalah sequence markers untuk menunjukkan urutan langkah. 'Because' adalah konjungsi alasan, bukan urutan."
+            },
+            {
+                id: 18, textId: 'manual', type: 'checkbox', indicator: 'HOTS',
+                question: "Based on the camera manual, which actions represent a 'DO NOT' (atau hal yang harus dihindari/dijaga)? (Select two correct interpretations)",
+                options: ["Leaving the lens cap off when finished", "Taking a picture without checking the battery", "Pressing the shutter completely to focus", "Using the camera with a memory card"],
+                answer: ["Leaving the lens cap off when finished", "Pressing the shutter completely to focus"],
+                explanation: "(HOTS) Teks menyarankan memasang kembali tutup lensa saat selesai (berarti 'jangan dibiarkan terbuka') dan memfokuskan dengan menekan setengah, bukan sepenuhnya (berarti 'jangan tekan penuh untuk memfokuskan')."
+            },
+            {
+                id: 19, textId: 'tips', type: 'checkbox', indicator: 'MOTS',
+                question: "To maintain hygiene and health, what actions are suggested in the text? (Select all that apply)",
+                options: ["Washing hands with soap", "Drinking herbal tea", "Sleeping 5 hours", "Consuming Vitamin C"],
+                answer: ["Washing hands with soap", "Drinking herbal tea", "Consuming Vitamin C"],
+                explanation: "Mencuci tangan, minum teh herbal, dan konsumsi Vitamin C disarankan. Tidur disarankan 7-8 jam, bukan 5 jam."
+            },
+            {
+                id: 20, textId: 'food', type: 'checkbox', indicator: 'LOTS',
+                question: "Identify the action verbs (kata kerja aksi) from the choices below based on the Fried Rice text. (Select all that apply)",
+                options: ["Heat", "Pan", "Pour", "Stir"],
+                answer: ["Heat", "Pour", "Stir"],
+                explanation: "Action verbs adalah kata kerja yang menunjukkan tindakan. Heat (memanaskan), Pour (menuang), dan Stir (mengaduk) adalah verbs. Pan (wajan) adalah kata benda (noun)."
+            },
+
+            // ==========================================
+            // PART 3: MATCHING / MENJODOHKAN (5 SOAL diadaptasi ke Dropdown)
+            // ==========================================
+            // Dalam format web sederhana tanpa drag-and-drop, matching kita buat sebagai soal dengan dropdown pilihan pasangan.
+            {
+                id: 21, textId: 'drink', type: 'dropdown', indicator: 'LOTS',
+                question: "Match the tool with its function based on the text: What is the 'Knife' used for?",
+                options: ["To blend the ice", "To clean the dirt", "To peel and cut the mango", "To serve the juice"],
+                answer: "To peel and cut the mango",
+                explanation: "Pisau (Knife) digunakan untuk mengupas (peel) dan memotong (cut) mangga."
+            },
+            {
+                id: 22, textId: 'drink', type: 'dropdown', indicator: 'LOTS',
+                question: "Match the tool with its function: What is the 'Blender' used for?",
+                options: ["To cut the fruit", "To mix and make the ingredients smooth", "To wash the mango", "To measure the sugar"],
+                answer: "To mix and make the ingredients smooth",
+                explanation: "Blender digunakan untuk mencampur bahan-bahan hingga halus (smooth)."
+            },
+            {
+                id: 23, textId: 'manual', type: 'dropdown', indicator: 'MOTS',
+                question: "Match the button/part with its function: The 'Shutter button (half-way)'.",
+                options: ["To turn on the camera", "To focus on the object", "To take the picture completely", "To zoom in"],
+                answer: "To focus on the object",
+                explanation: "Menekan tombol shutter setengah (half-way) berfungsi untuk fokus pada objek."
+            },
+            {
+                id: 24, textId: 'manual', type: 'dropdown', indicator: 'MOTS',
+                question: "Match the button/part with its function: The 'Power button'.",
+                options: ["To store photos", "To focus on the object", "To turn on the camera", "To see the picture frame"],
+                answer: "To turn on the camera",
+                explanation: "Tombol power berfungsi untuk menyalakan (turn on) kamera."
+            },
+            {
+                id: 25, textId: 'tips', type: 'dropdown', indicator: 'LOTS',
+                question: "Match the item with its health benefit: 'Oranges and spinach'.",
+                options: ["To keep you hydrated", "To wash your hands", "To boost your immune system", "To help you sleep"],
+                answer: "To boost your immune system",
+                explanation: "Jeruk dan bayam kaya Vitamin C yang berfungsi meningkatkan sistem imun (boost immune system)."
+            },
+
+            // ==========================================
+            // PART 4 & 5: SHORT ANSWER / JAWABAN SINGKAT & URAIAN SINGKAT (10 SOAL)
+            // ==========================================
+            {
+                id: 26, textId: 'food', type: 'text', indicator: 'LOTS',
+                question: "How many tablespoons of cooking oil do we need to make the fried rice? (Write a number)",
+                options: [],
+                answer: "2",
+                explanation: "Pada bagian Ingredients tertulis: '2 tablespoons of cooking oil'."
+            },
+            {
+                id: 27, textId: 'food', type: 'text', indicator: 'MOTS',
+                question: "Look at step 5: 'Stir the rice continuously... until all ingredients are mixed well.' What is the synonym of the word 'continuously'? (Clue: non-stop, starts with 'c' or 'c...tly' or 'non-stop')",
+                options: [],
+                answer: "constantly", // We will allow multiple valid answers in logic but set main one here.
+                altAnswers: ["non-stop", "nonstop", "always", "constantly"],
+                explanation: "Continuously berarti terus-menerus. Sinonim yang tepat bisa berupa constantly atau non-stop."
+            },
+            {
+                id: 28, textId: 'drink', type: 'text', indicator: 'MOTS',
+                question: "According to step 2 in making mango juice, what part of the mango should we discard (throw away)?",
+                options: [],
+                answer: "seed",
+                altAnswers: ["the seed", "seeds"],
+                explanation: "Pada langkah ke-2 tertulis: 'Discard the seed' (buang bijinya)."
+            },
+            {
+                id: 29, textId: 'drink', type: 'text', indicator: 'HOTS',
+                question: "If we want to make the mango juice healthier, what can we use to replace the sugar? (Based on the ingredients list)",
+                options: [],
+                answer: "honey",
+                explanation: "Pada daftar bahan tertulis: '2 tablespoons of sugar (or honey for a healthier choice)'."
+            },
+            {
+                id: 30, textId: 'manual', type: 'text', indicator: 'LOTS',
+                question: "What button do you press to turn on the camera? (Answer with 1 word)",
+                options: [],
+                answer: "Power",
+                explanation: "Pada langkah ke-3 tertulis: '...turn on the camera by pressing the 'Power' button'. Jadi jawabannya adalah tombol Power."
+            },
+            {
+                id: 31, textId: 'manual', type: 'text', indicator: 'HOTS',
+                question: "When we press the shutter button half-way, the indicator light will turn... (Write the color)",
+                options: [],
+                answer: "green",
+                explanation: "Berdasarkan langkah ke-5: 'The indicator light on the screen will turn green when it is in focus.' Jawabannya adalah green (hijau)."
+            },
+            {
+                id: 32, textId: 'tips', type: 'text', indicator: 'MOTS',
+                question: "What kind of water is suggested to soothe your throat when it's cold? (2 words)",
+                options: [],
+                answer: "warm water",
+                explanation: "Pada tips ke-2 tertulis: 'Drinking warm water or herbal tea can also soothe your throat.'"
+            },
+            {
+                id: 33, textId: 'tips', type: 'text', indicator: 'MOTS',
+                question: "When are the two most important times to wash your hands mentioned in the text?",
+                options: [],
+                answer: "before eating and after returning home",
+                altAnswers: ["before eating", "after returning home", "before eat and after home"],
+                explanation: "Pada tips ke-3 tertulis: 'especially before eating and after returning home'."
+            },
+            {
+                id: 34, textId: 'manual', type: 'text', indicator: 'MOTS',
+                question: "What must you insert into the slot before using the camera?",
+                options: [],
+                answer: "memory card",
+                altAnswers: ["a memory card", "sd card"],
+                explanation: "Pada langkah ke-1 tertulis: 'Insert a memory card into the slot.'"
+            },
+            {
+                id: 35, textId: 'food', type: 'text', indicator: 'HOTS',
+                question: "What is suggested to garnish (decorate) the fried rice at the end?",
+                options: [],
+                answer: "cucumber slices",
+                altAnswers: ["cucumber", "cucumbers", "slice of cucumber"],
+                explanation: "Pada langkah terakhir disebutkan: 'You can garnish it with cucumber slices.'"
+            }
+        ];
+
+        let currentUser = {};
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let timerInterval;
+        const totalDuration = 45 * 60; // 45 minutes in seconds
+        let timeLeft = totalDuration;
+
+        // Custom Alert Function
+        function showAlert(title, message, isError = false) {
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalMessage').innerText = message;
+            
+            const icon = document.getElementById('modalIcon');
+            if(isError) {
+                icon.innerHTML = '<i class="fas fa-times-circle text-red-500"></i>';
+            } else {
+                icon.innerHTML = '<i class="fas fa-exclamation-triangle text-yellow-500"></i>';
+            }
+
+            document.getElementById('customModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('customModal').classList.add('hidden');
+        }
+
+        // Start Quiz Event
+        document.getElementById('startForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('studentName').value.trim();
+            const cls = document.getElementById('studentClass').value;
+            const school = document.getElementById('schoolName').value.trim();
+
+            if(!name || !cls || !school) {
+                showAlert("Incomplete Form", "Please fill in all fields before starting the quiz.", true);
+                return;
+            }
+
+            currentUser = { name, class: cls, school };
+            
+            // Setup Header
+            document.getElementById('headerName').innerText = name;
+            document.getElementById('headerInfo').innerText = `${cls} - ${school}`;
+            document.getElementById('avatarInitials').innerText = name.charAt(0).toUpperCase();
+
+            // Transition Views
+            document.getElementById('registrationView').classList.add('hidden');
+            document.getElementById('quizView').classList.remove('hidden');
+            document.getElementById('quizView').style.display = 'flex';
+
+            // Start Logic
+            startTimer();
+            renderQuestion();
+        });
+
+        // Timer Logic
+        function startTimer() {
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                // Warning at 5 minutes
+                if(timeLeft === 300) {
+                    document.getElementById('timerDisplay').parentElement.classList.replace('bg-red-50', 'bg-red-500');
+                    document.getElementById('timerDisplay').parentElement.classList.replace('text-red-600', 'text-white');
+                    showAlert("Time Warning", "You have 5 minutes left!", false);
+                }
+
+                if(timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    forceSubmit();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+            const s = (timeLeft % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').innerText = `${m}:${s}`;
+        }
+
+        function renderQuestion() {
+            const q = questionsData[currentQuestionIndex];
+            
+            // Update Reading Text
+            const textContainer = document.getElementById('readingTextContainer');
+            const currentTextHTML = texts[q.textId];
+            if(textContainer.innerHTML !== currentTextHTML) {
+                textContainer.innerHTML = currentTextHTML;
+                textContainer.scrollTop = 0; 
+            }
+
+            // Update Badges & Progress
+            let qTypeBadge = q.type === 'radio' ? 'Pilihan Ganda' : 
+                             q.type === 'checkbox' ? 'PG Kompleks' : 
+                             q.type === 'dropdown' ? 'Menjodohkan' : 'Uraian Singkat';
+
+            document.getElementById('qNumberBadge').innerText = `No. ${currentQuestionIndex + 1} of ${questionsData.length} | ${qTypeBadge}`;
+            document.getElementById('qIndicatorBadge').innerHTML = `<i class="fas fa-brain"></i> ${q.indicator}`;
+            
+            const progressPercent = ((currentQuestionIndex + 1) / questionsData.length) * 100;
+            document.getElementById('progressBar').style.width = `${progressPercent}%`;
+            document.getElementById('progressText').innerText = `${currentQuestionIndex + 1}/${questionsData.length}`;
+
+            // Update Question Text
+            document.getElementById('questionText').innerHTML = q.question;
+
+            // Render Options
+            const optContainer = document.getElementById('optionsContainer');
+            optContainer.innerHTML = ''; 
+
+            if (q.type === 'radio') {
+                q.options.forEach((opt, idx) => {
+                    const isChecked = userAnswers[q.id] === opt;
+                    optContainer.innerHTML += `
+                        <label class="flex items-start p-4 border rounded-xl cursor-pointer transition-all hover:bg-indigo-50 ${isChecked ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'}" onclick="handleOptionSelect(this, 'radio')">
+                            <div class="flex items-center h-5">
+                                <input type="radio" name="q_${q.id}" value="${opt}" ${isChecked ? 'checked' : ''} class="w-5 h-5 text-indigo-600 focus:ring-indigo-500 border-gray-300" onchange="saveAnswer('${q.id}', this.value)">
+                            </div>
+                            <div class="ml-3 text-sm md:text-base text-gray-700 w-full">${opt}</div>
+                        </label>
+                    `;
+                });
+            } else if (q.type === 'checkbox') {
+                const savedArr = Array.isArray(userAnswers[q.id]) ? userAnswers[q.id] : [];
+                q.options.forEach((opt, idx) => {
+                    const isChecked = savedArr.includes(opt);
+                    optContainer.innerHTML += `
+                        <label class="flex items-start p-4 border rounded-xl cursor-pointer transition-all hover:bg-indigo-50 ${isChecked ? 'border-indigo-500 bg-indigo-50' : 'border-gray-200'}" onclick="handleOptionSelect(this, 'checkbox')">
+                            <div class="flex items-center h-5">
+                                <input type="checkbox" name="q_${q.id}" value="${opt}" ${isChecked ? 'checked' : ''} class="w-5 h-5 text-indigo-600 rounded focus:ring-indigo-500 border-gray-300" onchange="saveCheckboxAnswer('${q.id}', this)">
+                            </div>
+                            <div class="ml-3 text-sm md:text-base text-gray-700 w-full">${opt}</div>
+                        </label>
+                    `;
+                });
+                optContainer.innerHTML += `<p class="text-sm text-indigo-600 mt-2 font-medium bg-indigo-50 p-2 rounded"><i class="fas fa-info-circle"></i> Soal Pilihan Ganda Kompleks: Anda dapat memilih lebih dari satu jawaban yang benar.</p>`;
+            } else if (q.type === 'dropdown') {
+                const savedAns = userAnswers[q.id] || '';
+                let optionsHtml = `<option value="" disabled ${!savedAns ? 'selected' : ''}>-- Pilih Pasangan yang Tepat --</option>`;
+                q.options.forEach(opt => {
+                    optionsHtml += `<option value="${opt}" ${savedAns === opt ? 'selected' : ''}>${opt}</option>`;
+                });
+                
+                optContainer.innerHTML = `
+                    <div class="mt-4 p-4 border border-indigo-200 bg-indigo-50 rounded-xl">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Pilih jawaban (Menjodohkan):</label>
+                        <select onchange="saveAnswer('${q.id}', this.value)" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-indigo-500 outline-none text-gray-700 bg-white">
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                `;
+            } else if (q.type === 'text') {
+                const savedText = userAnswers[q.id] || '';
+                optContainer.innerHTML = `
+                    <div class="mt-2">
+                        <input type="text" id="textInput_${q.id}" value="${savedText}" placeholder="Ketik jawaban singkat Anda di sini..." class="w-full p-4 rounded-xl border border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition text-gray-700" oninput="saveAnswer('${q.id}', this.value)">
+                        <p class="text-xs text-gray-500 mt-2 italic"><i class="fas fa-info-circle"></i> Jawablah dengan singkat, padat, dan jelas sesuai teks.</p>
+                    </div>
+                `;
+            }
+
+            // Button Visibility
+            document.getElementById('btnPrev').disabled = currentQuestionIndex === 0;
+            
+            if(currentQuestionIndex === questionsData.length - 1) {
+                document.getElementById('btnNext').classList.add('hidden');
+                document.getElementById('btnSubmit').classList.remove('hidden');
+            } else {
+                document.getElementById('btnNext').classList.remove('hidden');
+                document.getElementById('btnSubmit').classList.add('hidden');
+            }
+        }
+
+        // Input Handlers
+        function handleOptionSelect(labelElement, type) {
+            // Visual feedback for labels
+            if(type === 'radio') {
+                const siblings = labelElement.parentElement.children;
+                for(let el of siblings) {
+                    if(el.tagName === 'LABEL') {
+                        el.classList.remove('border-indigo-500', 'bg-indigo-50');
+                        el.classList.add('border-gray-200');
+                    }
+                }
+                labelElement.classList.add('border-indigo-500', 'bg-indigo-50');
+                labelElement.classList.remove('border-gray-200');
+            } else if (type === 'checkbox') {
+                // Checkbox styling handled on change event due to toggle nature
+                setTimeout(() => {
+                    const input = labelElement.querySelector('input');
+                    if(input.checked) {
+                        labelElement.classList.add('border-indigo-500', 'bg-indigo-50');
+                        labelElement.classList.remove('border-gray-200');
+                    } else {
+                        labelElement.classList.remove('border-indigo-500', 'bg-indigo-50');
+                        labelElement.classList.add('border-gray-200');
+                    }
+                }, 10);
+            }
+        }
+
+        function saveAnswer(qId, val) {
+            userAnswers[qId] = val.trim(); // store trimmed string
+        }
+
+        function saveCheckboxAnswer(qId, checkboxEl) {
+            if(!userAnswers[qId] || !Array.isArray(userAnswers[qId])) {
+                userAnswers[qId] = [];
+            }
+            if(checkboxEl.checked) {
+                userAnswers[qId].push(checkboxEl.value);
+            } else {
+                userAnswers[qId] = userAnswers[qId].filter(v => v !== checkboxEl.value);
+            }
+        }
+
+        // Navigation
+        function nextQuestion() {
+            if (currentQuestionIndex < questionsData.length - 1) {
+                currentQuestionIndex++;
+                renderQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                renderQuestion();
+            }
+        }
+
+        // Submission Logic
+        function confirmSubmit() {
+            // Count unanswered
+            let answered = Object.keys(userAnswers).filter(k => {
+                const ans = userAnswers[k];
+                if(Array.isArray(ans)) return ans.length > 0;
+                return ans && ans.trim() !== '';
+            }).length;
+            
+            let unans = questionsData.length - answered;
+            
+            if(unans > 0) {
+                document.getElementById('modalTitle').innerText = "Submit Quiz?";
+                document.getElementById('modalMessage').innerText = `You still have ${unans} unanswered question(s). Are you sure you want to submit?`;
+                document.getElementById('modalIcon').innerHTML = '<i class="fas fa-question-circle text-blue-500"></i>';
+                
+                // Alter modal button temporarily
+                const btn = document.getElementById('customModal').querySelector('button');
+                const oldClick = btn.onclick;
+                const oldText = btn.innerText;
+                
+                btn.innerText = "Yes, Submit Now";
+                btn.classList.replace('bg-indigo-600', 'bg-green-600');
+                btn.onclick = function() {
+                    btn.innerText = oldText;
+                    btn.classList.replace('bg-green-600', 'bg-indigo-600');
+                    btn.onclick = oldClick; // restore
+                    closeModal();
+                    processResults();
+                };
+                
+                // Add cancel button logic temporarily (handled simply by clicking outside usually, but let's keep it simple)
+                document.getElementById('customModal').classList.remove('hidden');
+            } else {
+                processResults();
+            }
+        }
+
+        function forceSubmit() {
+            showAlert("Time's Up!", "Your time is over. The quiz is submitted automatically.", false);
+            setTimeout(() => {
+                closeModal();
+                processResults();
+            }, 2000);
+        }
+
+        function processResults() {
+            clearInterval(timerInterval);
+            
+            // Hide quiz, show results
+            document.getElementById('quizView').classList.add('hidden');
+            document.getElementById('quizView').style.display = 'none';
+            document.getElementById('resultView').classList.remove('hidden');
+
+            let correct = 0;
+            let wrong = 0;
+            let missed = 0;
+
+            const reviewHtml = [];
+
+            questionsData.forEach((q, index) => {
+                let isCorrect = false;
+                let userAnswer = userAnswers[q.id];
+                let isMissed = false;
+
+                // Checking Logic
+                if (q.type === 'radio' || q.type === 'dropdown') {
+                    if(!userAnswer) {
+                        isMissed = true;
+                        userAnswer = "<em>- Tidak dijawab -</em>";
+                    } else if (userAnswer === q.answer) {
+                        isCorrect = true;
+                    }
+                } else if (q.type === 'checkbox') {
+                    if(!userAnswer || userAnswer.length === 0) {
+                        isMissed = true;
+                        userAnswer = "<em>- Tidak dijawab -</em>";
+                    } else {
+                        let arrAns = Array.isArray(userAnswer) ? userAnswer : [];
+                        let arrCorrect = q.answer;
+                        // For exact match in complex PG
+                        if(arrAns.length === arrCorrect.length && arrAns.every(v => arrCorrect.includes(v))) {
+                            isCorrect = true;
+                        } else {
+                            // Partial credit could be added here, but usually it's all or nothing
+                            isCorrect = false;
+                        }
+                        userAnswer = arrAns.join('<br> • ');
+                        if(userAnswer) userAnswer = '• ' + userAnswer; // formatting
+                    }
+                } else if (q.type === 'text') {
+                     if(!userAnswer || userAnswer.trim() === '') {
+                        isMissed = true;
+                        userAnswer = "<em>- Tidak dijawab -</em>";
+                    } else {
+                        let userAnsClean = userAnswer.toLowerCase().trim();
+                        let mainAnsClean = q.answer.toLowerCase().trim();
+                        
+                        // Check main answer
+                        if(userAnsClean === mainAnsClean) {
+                            isCorrect = true;
+                        } 
+                        // Check alternative answers if exist
+                        else if (q.altAnswers) {
+                            let found = q.altAnswers.find(alt => alt.toLowerCase().trim() === userAnsClean || userAnsClean.includes(alt.toLowerCase().trim()));
+                            if(found) isCorrect = true;
+                        }
+                        // Soft check: if user answer contains the main answer keyword (for short text)
+                        else if (userAnsClean.includes(mainAnsClean) && userAnsClean.length < mainAnsClean.length + 15) {
+                            isCorrect = true;
+                        }
+                    }
+                }
+
+                if(isMissed) missed++;
+                else if(isCorrect) correct++;
+                else wrong++;
+
+                // Build Review UI
+                let displayCorrectAnswer = q.answer;
+                if(Array.isArray(q.answer)) {
+                    displayCorrectAnswer = '• ' + q.answer.join('<br> • ');
+                }
+                
+                reviewHtml.push(`
+                    <div class="bg-white rounded-2xl p-5 border shadow-sm ${isCorrect ? 'border-green-300' : (isMissed ? 'border-gray-300' : 'border-red-300')} mb-6">
+                        <div class="flex items-start gap-4">
+                            <div class="mt-1 flex-shrink-0">
+                                ${isCorrect ? '<div class="w-8 h-8 bg-green-100 text-green-600 rounded-full flex items-center justify-center"><i class="fas fa-check"></i></div>' : (isMissed ? '<div class="w-8 h-8 bg-gray-100 text-gray-500 rounded-full flex items-center justify-center"><i class="fas fa-minus"></i></div>' : '<div class="w-8 h-8 bg-red-100 text-red-600 rounded-full flex items-center justify-center"><i class="fas fa-times"></i></div>')}
+                            </div>
+                            <div class="flex-grow w-full overflow-hidden">
+                                <div class="flex items-center gap-2 mb-2">
+                                    <span class="bg-gray-100 text-gray-600 text-xs font-bold px-2 py-1 rounded">No. ${index + 1}</span>
+                                    <span class="bg-indigo-50 text-indigo-600 text-xs font-bold px-2 py-1 rounded">${q.indicator}</span>
+                                </div>
+                                <h4 class="font-bold text-gray-800 mb-4 text-lg">${q.question}</h4>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                                    <div class="bg-gray-50 p-4 rounded-xl border border-gray-100">
+                                        <span class="block text-xs text-gray-500 uppercase font-bold mb-2"><i class="fas fa-user-edit mr-1"></i> Jawabanmu</span>
+                                        <div class="${isCorrect ? 'text-green-700' : 'text-gray-700'}">${userAnswer}</div>
+                                    </div>
+                                    <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100">
+                                        <span class="block text-xs text-indigo-400 uppercase font-bold mb-2"><i class="fas fa-key mr-1"></i> Kunci Jawaban</span>
+                                        <div class="text-indigo-800 font-semibold">${displayCorrectAnswer}</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-blue-50/50 border border-blue-100 p-4 rounded-xl text-sm text-gray-700 mt-2">
+                                    <div class="font-bold text-blue-800 mb-1"><i class="fas fa-lightbulb mr-1 text-yellow-500"></i> Pembahasan:</div>
+                                    ${q.explanation}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `);
+            });
+
+            // Calculate Score (Scale to 100)
+            // Score formula: (correct answers / total questions) * 100
+            const finalScore = Math.round((correct / questionsData.length) * 100);
+
+            // Populate Result UI
+            document.getElementById('resultStudentInfo').innerText = `${currentUser.name} | Kelas ${currentUser.class} | ${currentUser.school}`;
+            
+            // Animate Score Counter
+            animateValue("finalScore", 0, finalScore, 1500);
+            
+            // Set circle progress
+            setTimeout(() => {
+                document.getElementById('scoreCircle').setAttribute('stroke-dasharray', `${finalScore}, 100`);
+                if(finalScore < 60) {
+                    document.getElementById('scoreCircle').classList.replace('text-green-500', 'text-red-500');
+                }
+                else if (finalScore < 80) {
+                    document.getElementById('scoreCircle').classList.replace('text-green-500', 'text-yellow-500');
+                }
+            }, 100);
+
+            document.getElementById('statCorrect').innerText = correct;
+            document.getElementById('statWrong').innerText = wrong;
+            document.getElementById('statMissed').innerText = missed;
+
+            document.getElementById('reviewContainer').innerHTML = reviewHtml.join('');
+        }
+
+        // Utility function to animate numbers
+        function animateValue(id, start, end, duration) {
+            if (start === end) {
+                document.getElementById(id).innerHTML = end;
+                return;
+            }
+            var range = end - start;
+            var current = start;
+            var increment = end > start? 1 : -1;
+            var stepTime = Math.abs(Math.floor(duration / range));
+            var obj = document.getElementById(id);
+            var timer = setInterval(function() {
+                current += increment;
+                obj.innerHTML = current;
+                if (current == end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+    </script>
+</body>
+</html>
