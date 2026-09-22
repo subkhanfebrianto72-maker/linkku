@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif Informatika Kelas 8</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #eff6ff; }
+        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-blue-50 text-slate-800 font-sans min-h-screen flex items-center justify-center p-4">
+
+    <!-- MAIN CONTAINER -->
+    <div id="app-container" class="bg-white rounded-2xl shadow-xl w-full max-w-3xl overflow-hidden border border-blue-100 my-4">
+        
+        <!-- HEADER -->
+        <div class="bg-blue-600 p-6 text-center text-white">
+            <h1 class="text-2xl font-bold mb-1">ASTS Informatika Kelas VIII</h1>
+            <p class="text-blue-200 text-sm">Latihan Soal & Pembahasan (Paket Lengkap)</p>
+        </div>
+
+        <div class="p-6 md:p-8">
+            <!-- 1. FORM REGISTRASI -->
+            <div id="intro-screen" class="fade-in block">
+                <h2 class="text-xl font-semibold text-blue-900 mb-4 border-b-2 border-blue-100 pb-2">Isi Data Diri</h2>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-blue-800 mb-1">Nama Lengkap</label>
+                        <input type="text" id="input-nama" placeholder="Masukkan nama Anda..." class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-blue-800 mb-1">Kelas</label>
+                        <select id="input-kelas" class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+                            <option value="">-- Pilih Kelas --</option>
+                            <option value="VIII A">VIII A</option>
+                            <option value="VIII B">VIII B</option>
+                            <option value="VIII C">VIII C</option>
+                            <option value="VIII D">VIII D</option>
+                            <option value="VIII E">VIII E</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-blue-800 mb-1">Nama Sekolah</label>
+                        <input type="text" id="input-sekolah" placeholder="Masukkan nama sekolah..." class="w-full px-4 py-2 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition" required>
+                    </div>
+                    <button onclick="startQuiz()" class="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5">
+                        Mulai Kuis Sekarang
+                    </button>
+                </div>
+            </div>
+
+            <!-- 2. SCREEN KUIS -->
+            <div id="quiz-screen" class="fade-in hidden">
+                <div class="flex flex-col md:flex-row md:justify-between md:items-center mb-6 gap-2">
+                    <span class="text-sm font-bold text-blue-600 bg-blue-100 px-3 py-1 rounded-full w-max" id="question-counter">Soal 1 / 40</span>
+                    <span class="text-sm text-gray-500 font-medium" id="student-info-badge"></span>
+                </div>
+                
+                <!-- Progress Bar -->
+                <div class="w-full bg-blue-100 rounded-full h-2 mb-6">
+                    <div id="progress-bar" class="bg-blue-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+                </div>
+
+                <div class="mb-6">
+                    <h3 class="text-lg md:text-xl font-medium text-gray-800 leading-relaxed" id="question-text">Teks Soal Disini</h3>
+                </div>
+
+                <div class="space-y-3" id="options-container">
+                    <!-- Options disisipkan disini oleh JS -->
+                </div>
+
+                <div class="mt-8 flex justify-end">
+                    <button id="next-btn" onclick="nextQuestion()" class="hidden bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded-lg shadow transition-all">
+                        Selanjutnya &rarr;
+                    </button>
+                    <button id="finish-btn" onclick="finishQuiz()" class="hidden bg-green-600 hover:bg-green-700 text-white font-semibold px-6 py-2 rounded-lg shadow transition-all">
+                        Selesai Kuis &check;
+                    </button>
+                </div>
+            </div>
+
+            <!-- 3. SCREEN HASIL & PEMBAHASAN -->
+            <div id="result-screen" class="fade-in hidden">
+                <div class="text-center mb-8">
+                    <div class="inline-block bg-blue-100 p-4 rounded-full mb-4">
+                        <svg class="w-12 h-12 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800">Kuis Selesai!</h2>
+                    <p class="text-gray-600 mt-2" id="result-summary"></p>
+                    
+                    <div class="mt-6 bg-blue-50 border border-blue-200 rounded-xl p-6 shadow-inner max-w-sm mx-auto">
+                        <p class="text-sm text-blue-600 font-semibold uppercase tracking-wider mb-1">Skor Akhir Anda</p>
+                        <p class="text-6xl font-black text-blue-800" id="final-score">0</p>
+                    </div>
+                </div>
+
+                <div class="mb-4 flex items-center justify-between border-b-2 border-blue-100 pb-2">
+                    <h3 class="text-xl font-semibold text-blue-900">Kunci Jawaban & Pembahasan</h3>
+                </div>
+                
+                <div id="review-container" class="space-y-6 max-h-[500px] overflow-y-auto pr-2 pb-4">
+                    <!-- Pembahasan disisipkan disini -->
+                </div>
+
+                <button onclick="location.reload()" class="w-full mt-8 bg-white border-2 border-blue-600 text-blue-600 hover:bg-blue-50 font-semibold py-3 rounded-lg transition-all shadow-sm">
+                    Kembali ke Halaman Awal
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Data Soal Lengkap 40 Nomor (30 Pilgan + 10 Menjodohkan yang diadaptasi)
+        const quizData = [
+            {
+                question: "(1) Penulisan rumus VLOOKUP yang tepat dan menghasilkan nilai 'A' untuk siswa dengan NIS 802 pada rentang sel A3:E5 adalah...",
+                options: [
+                    "=VLOOKUP(802;A3:E5;4;FALSE)", 
+                    "=VLOOKUP(802;A3:D4;3;FALSE)", 
+                    "=HLOOKUP(802;A3:D4;4;FALSE)", 
+                    "=VLOOKUP(802;A3:E5;5;FALSE)"
+                ],
+                correctAnswer: 3,
+                explanation: "Kolom 'Predikat' berada pada kolom ke-5 dari tabel acuan (No, NIS, Nama Siswa, Nilai Akhir, Predikat). Sehingga column_index_number yang tepat adalah 5."
+            },
+            {
+                question: "(2) Jika data Predikat (A, B, C) disusun menjadi tabel acuan secara mendatar (baris pertama berisi batas nilai, baris kedua berisi predikat), maka fungsi yang paling tepat untuk membaca tabel acuan tersebut adalah...",
+                options: ["VLOOKUP", "INDEX", "HLOOKUP", "MATCH"],
+                correctAnswer: 2,
+                explanation: "HLOOKUP (Horizontal Lookup) digunakan untuk membaca tabel referensi yang tersusun secara horizontal (mendatar/berdasarkan baris)."
+            },
+            {
+                question: "(3) Apa yang terjadi jika row_num diisi dengan angka 3 dan array hanya memiliki satu kolom data (A2:A10) pada fungsi INDEX?",
+                options: [
+                    "Fungsi akan mengalami error karena column_num tidak diisi.",
+                    "Fungsi akan mengambil nilai dari baris ke-3 di dalam rentang A2:A10.",
+                    "Fungsi akan menjumlahkan 3 sel pertama.",
+                    "Fungsi akan mencari angka 3 di dalam rentang tersebut."
+                ],
+                correctAnswer: 1,
+                explanation: "Pada array/rentang satu dimensi (hanya 1 kolom atau 1 baris), argumen yang kedua secara otomatis dianggap sebagai posisi elemen dalam rentang tersebut, dan argumen ketiga bersifat opsional."
+            },
+            {
+                question: "(4) Jika fungsi =MATCH('Proyektor'; A2:A10; 0) menghasilkan angka 4, dan fungsi =INDEX(B2:B10; 4) dijalankan, maka tujuan utama dari penggabungan kedua fungsi ini adalah...",
+                options: [
+                    "Menjumlahkan total harga proyektor.",
+                    "Mencari data di kolom B yang posisinya sebaris dengan 'Proyektor' di kolom A.",
+                    "Mengurutkan data aset sekolah secara alfabetis.",
+                    "Menghitung jumlah proyektor yang tersedia."
+                ],
+                correctAnswer: 1,
+                explanation: "Kombinasi INDEX dan MATCH bekerja sebagai alternatif VLOOKUP. MATCH menemukan posisi baris (misal baris ke-4), dan INDEX mengambil nilai pada baris ke-4 tersebut di kolom tujuan (B)."
+            },
+            {
+                question: "(5) Pada fungsi =MATCH(lookup_value, lookup_array, [match_type]), argumen match_type bernilai 0 digunakan untuk...",
+                options: [
+                    "Pencarian hasil yang mendekati nilai yang dicari.",
+                    "Pencarian data dengan format tabel horizontal.",
+                    "Pencarian data numerik yang diurutkan dari besar ke kecil.",
+                    "Pencarian dengan hasil yang sama persis dengan yang dicari."
+                ],
+                correctAnswer: 3,
+                explanation: "Angka 0 (Exact Match) pada fungsi MATCH memerintahkan spreadsheet untuk menemukan letak data yang benar-benar sama persis karakternya dengan kriteria yang dicari."
+            },
+            {
+                question: "(6) Pada scatter plot, titik data yang menunjukkan lonjakan tidak wajar atau menyimpang jauh dari tren data utama disebut...",
+                options: ["Outlier", "Intersection", "Trendline", "Domain"],
+                correctAnswer: 0,
+                explanation: "Outlier (pencilan) adalah titik data yang nilainya terpaut sangat jauh dari nilai sekumpulan data lainnya secara statistik."
+            },
+            {
+                question: "(7) Mengapa Column Chart (grafik kolom) sangat direkomendasikan untuk membandingkan total pengunjung perpustakaan per hari (Senin hingga Jumat)?",
+                options: [
+                    "Karena grafiknya menggunakan lingkaran bersudut 360 derajat.",
+                    "Karena sangat efektif untuk membandingkan data antar kategori secara jelas dan mudah dipahami.",
+                    "Karena mampu menunjukkan hubungan dua variabel bebas secara acak.",
+                    "Karena memisahkan data menjadi sistem bilangan desimal."
+                ],
+                correctAnswer: 1,
+                explanation: "Column chart sangat ideal untuk perbandingan antar kategori diskrit (seperti hari dalam seminggu) karena ketinggian batangnya mewakili kuantitas yang mudah dibandingkan secara visual."
+            },
+            {
+                question: "(8) Jika ingin melihat tren peningkatan atau penurunan jumlah peminjaman buku dari bulan Januari hingga Juni, grafik yang paling tepat digunakan adalah...",
+                options: [
+                    "Line Chart karena menunjukkan perubahan atau tren data dari waktu ke waktu.",
+                    "Pie Chart karena menunjukkan nilai dalam data negatif.",
+                    "Scatter Plot karena menyebar titik secara vertikal.",
+                    "Combo Chart karena menggabungkan teks dan gambar."
+                ],
+                correctAnswer: 0,
+                explanation: "Line Chart (grafik garis) adalah standar utama untuk menunjukkan pergerakan atau fluktuasi data selama suatu periode waktu tertentu (runtun waktu)."
+            },
+            {
+                question: "(9) Karakteristik utama data yang cocok diubah menjadi Pie Chart (Grafik Lingkaran) adalah...",
+                options: [
+                    "Data yang memiliki nilai negatif.",
+                    "Data berupa persentase yang merupakan bagian dari keseluruhan.",
+                    "Data yang menunjukkan tren waktu selama lima tahun.",
+                    "Data yang membutuhkan pencarian nilai lookup_value."
+                ],
+                correctAnswer: 1,
+                explanation: "Pie Chart dirancang untuk memperlihatkan proporsi setiap kategori terhadap total keseluruhan (biasanya menjadi 100%)."
+            },
+            {
+                question: "(10) Langkah pertama dalam membuat grafik di Excel adalah memilih/blok data. Jika data tidak diblok terlebih dahulu, yang akan terjadi adalah...",
+                options: [
+                    "Spreadsheet akan membuat grafik secara otomatis dari data di sheet lain.",
+                    "Komputer akan mengonversi data menjadi bilangan biner.",
+                    "Area grafik (canvas) akan muncul kosong karena sistem belum mengetahui data mana yang divisualisasikan.",
+                    "Excel akan menghitung SUMIFS secara otomatis."
+                ],
+                correctAnswer: 2,
+                explanation: "Jika kita menyisipkan grafik tanpa memilih range data, aplikasi akan menampilkan wadah/bingkai grafik yang kosong (blank canvas) dan kita harus memasukkan data secara manual via opsi 'Select Data'."
+            },
+            {
+                question: "(11) Menjumlahkan data dengan kriteria 'Buku Tulis' pada kategori (C) dan tanggal '10-Okt-2025' pada kolom tanggal (A), serta menjumlah di kolom jumlah (D). Sintaks SUMIFS yang benar adalah...",
+                options: [
+                    "=SUMIFS(D2:D100;C2:C100;\"Buku Tulis\";A2:A100;\"10-Okt-2025\")",
+                    "=COUNTIFS(C2:C100;\"Buku Tulis\";A2:A100;\"10-Okt-2025\")",
+                    "=SUMIF(D2:D100; C2:C100; \"Buku Tulis\")",
+                    "=SUMIFS(\"Buku Tulis\"; C2:C100; D2:D100)"
+                ],
+                correctAnswer: 0,
+                explanation: "Struktur =SUMIFS(sum_range, criteria_range1, criteria1, criteria_range2, criteria2). D adalah range yang dijumlah, C divalidasi dengan 'Buku Tulis', dan A divalidasi dengan tanggal."
+            },
+            {
+                question: "(12) Fungsi COUNTIFS memanfaatkan karakter wildcard (*). Jika rumus =COUNTIFS(B2:B50;\"Buku*\") dijalankan, data manakah yang akan dihitung?",
+                options: [
+                    "Hanya barang yang bernama tepat \"Buku\".",
+                    "Barang bernama \"Buku Gambar\", \"Buku Tulis\", dan \"Buku Kotak\".",
+                    "Barang bernama \"Tas Buku\".",
+                    "Barang bernama \"Pensil dan Buku\"."
+                ],
+                correctAnswer: 1,
+                explanation: "Tanda bintang (*) setelah kata 'Buku' berarti teks apa saja yang diawali dengan kata 'Buku', sehingga akan mencakup Buku Gambar, Buku Tulis, dll."
+            },
+            {
+                question: "(13) Berdasarkan konsep Pivot Table 2 Dimensi yang merangkum Nama Perangkat ke bawah dan Bulan ke kanan, dua kolom utama dari data mentah yang dijadikan sumbu/dimensi adalah...",
+                options: [
+                    "Nama Perangkat dan Total",
+                    "Januari dan Februari",
+                    "Nama Perangkat (sebagai Rows) dan Bulan (sebagai Columns)",
+                    "Total dan Jumlah"
+                ],
+                correctAnswer: 2,
+                explanation: "Dalam tabel crosstab (2 dimensi), satu variabel kategori diletakkan di baris (Rows) dan satu lagi di kolom (Columns) agar datanya bersilangan."
+            },
+            {
+                question: "(14) Pada panel PivotTable Fields, posisi yang benar untuk meletakkan Nama Perangkat (ke bawah), Bulan (ke kanan), dan data kuantitatif di tengah adalah...",
+                options: [
+                    "Nama Perangkat di Columns, Bulan di Rows, Jumlah di Values",
+                    "Jumlah di Rows, Nama Perangkat di Columns, Bulan di Values",
+                    "Bulan di Values, Nama Perangkat di Filters",
+                    "Nama Perangkat di Rows, Bulan di Columns, Jumlah di Values"
+                ],
+                correctAnswer: 3,
+                explanation: "Rows menangani label vertikal (Nama Perangkat), Columns menangani header horizontal (Bulan), dan Values untuk angka yang dihitung (Jumlah)."
+            },
+            {
+                question: "(15) Pada area Values di Pivot Table, metode perhitungan (Value Field Settings) yang digunakan untuk menghasilkan angka agregasi total adalah fungsi...",
+                options: ["AVERAGE", "COUNT", "SUM", "MIN"],
+                correctAnswer: 2,
+                explanation: "Fungsi SUM digunakan untuk menjumlahkan/menotal agregasi kuantitatif dari nilai-nilai."
+            },
+            {
+                question: "(16) Fungsi dikatakan bijektif jika memenuhi sifat surjektif sekaligus injektif. Artinya...",
+                options: [
+                    "Setiap elemen himpunan asal memiliki banyak pasangan.",
+                    "Terdapat elemen di himpunan tujuan yang tidak memiliki pasangan.",
+                    "Setiap elemen A dipasangkan dengan tepat satu elemen B, dan seluruh elemen B memiliki pasangan unik dari A.",
+                    "Hasil pemetaan membentuk grafik eksponensial."
+                ],
+                correctAnswer: 2,
+                explanation: "Bijektif atau korespondensi satu-satu berarti tidak ada cabang dan tidak ada sisa, baik di himpunan asal maupun tujuan. Semua berpasangan eksklusif."
+            },
+            {
+                question: "(17) Diberikan himpunan A = {1, 2, 3} dan B = {a, b, c}. Jika fungsi ƒ = {(1, b), (2, c), (3, a)}, himpunan B disebut sebagai...",
+                options: ["Domain", "Kodomain", "Relasi", "Range dan Kodomain"],
+                correctAnswer: 1,
+                explanation: "Himpunan A adalah Domain (daerah asal). Himpunan tujuan B adalah Kodomain (daerah kawan). Elemen B yang dipetakan disebut Range."
+            },
+            {
+                question: "(18) Sebuah fungsi ƒ: A → B disebut surjektif jika setiap elemen dalam himpunan B memiliki pasangan dari himpunan A. Fungsi ini sering disebut juga sebagai...",
+                options: ["Fungsi Onto", "Fungsi Satu-satu", "Fungsi Konstan", "Fungsi Linear"],
+                correctAnswer: 0,
+                explanation: "Fungsi Surjektif disebut juga fungsi onto, yang menjamin tidak ada anggota di daerah kawan (Kodomain) yang tidak mendapatkan pemetaan dari daerah asal."
+            },
+            {
+                question: "(19) Biaya tetap Rp100.000,00 ditambah Rp2.000,00 per GB. Jika dimodelkan, ini merupakan contoh penerapan dari fungsi linear dengan bentuk umum...",
+                options: ["ƒ(x) = c", "f(x) = ax + b", "f(x) = ax", "f(x) = x²"],
+                correctAnswer: 1,
+                explanation: "Biaya total = (2000 * GB) + 100000. Bentuk f(x) = ax + b, di mana 'a' adalah laju perubahan (2000) dan 'b' adalah nilai konstanta awal (100000)."
+            },
+            {
+                question: "(20) Jika grafik fungsi konstan f(x) = 5 sejajar sumbu x, berapakah nilai f(100)?",
+                options: ["100", "500", "0", "5"],
+                correctAnswer: 3,
+                explanation: "Pada fungsi konstan f(x) = c, nilai fungsi selalu sama (yaitu c) tidak peduli berapapun besarnya nilai x (input)."
+            },
+            {
+                question: "(21) Himpunan A={Pramuka, PMR, Paskibra} dan B={PMR, Voli, Basket}. Hasil dari A ∩ (irisan) B adalah...",
+                options: ["{Pramuka, Paskibra}", "{PMR}", "{Voli, Basket}", "{Tari}"],
+                correctAnswer: 1,
+                explanation: "Irisan (Intersection / ∩) mengambil anggota yang sama dari kedua himpunan, yaitu PMR."
+            },
+            {
+                question: "(22) Gabungan atau union (A U B) dari kedua himpunan A={Pramuka, PMR, Paskibra} dan B={PMR, Voli, Basket} adalah...",
+                options: [
+                    "{Pramuka, PMR, Paskibra, Voli, Basket}",
+                    "{PMR}",
+                    "{Tari}",
+                    "{Pramuka, Paskibra}"
+                ],
+                correctAnswer: 0,
+                explanation: "Union (Gabungan) menyatukan seluruh elemen yang ada di A dan B, tanpa menulis ganda elemen yang sama."
+            },
+            {
+                question: "(23) Himpunan semesta V={Pramuka, PMR, Paskibra, Voli, Basket, Tari}. Anggota dari komplemen himpunan A (A={Pramuka, PMR, Paskibra}) adalah...",
+                options: [
+                    "{Pramuka, Paskibra}",
+                    "{PMR}",
+                    "{Voli, Basket, Tari}",
+                    "{Tari}"
+                ],
+                correctAnswer: 2,
+                explanation: "Komplemen A adalah himpunan semua anggota di semesta V yang bukan merupakan anggota kelompok A."
+            },
+            {
+                question: "(24) Hasil konversi bilangan desimal 13 ke sistem bilangan biner adalah...",
+                options: ["1101", "1011", "1110", "1001"],
+                correctAnswer: 0,
+                explanation: "13/2=6 sisa 1, 6/2=3 sisa 0, 3/2=1 sisa 1, 1/2=0 sisa 1. Mengambil sisa dari bawah ke atas: 1101."
+            },
+            {
+                question: "(25) Nilai desimal dari bilangan biner 1010 adalah...",
+                options: ["8", "10", "12", "14"],
+                correctAnswer: 1,
+                explanation: "(1*2³) + (0*2²) + (1*2¹) + (0*2⁰) = 8 + 0 + 2 + 0 = 10."
+            },
+            {
+                question: "(26) Hasil konversi bilangan desimal 20 ke bilangan oktal (basis 8) adalah...",
+                options: ["24 (basis 8)", "42 (basis 8)", "32 (basis 8)", "14 (basis 8)"],
+                correctAnswer: 0,
+                explanation: "20 dibagi 8 sama dengan 2, dengan sisa 4. Hasilnya dibaca dari hasil akhir ke sisa: 24 oktal."
+            },
+            {
+                question: "(27) Stack merupakan jenis struktur data yang mengikuti prinsip Last In First Out (LIFO), artinya...",
+                options: [
+                    "Data yang pertama dimasukkan akan diproses lebih dulu.",
+                    "Data diurutkan secara alfabetis.",
+                    "Item atau data terakhir yang dimasukkan akan menjadi yang pertama kali dikeluarkan.",
+                    "Data akan dihapus secara otomatis saat penuh."
+                ],
+                correctAnswer: 2,
+                explanation: "Seperti tumpukan kotak piring, elemen terakhir yang diletakkan di tumpukan paling atas akan menjadi elemen pertama yang diambil (Last In First Out)."
+            },
+            {
+                question: "(28) Komputer memanfaatkan stack. Jika terdapat ekspresi (3 + 4) x 5, cara stack mengevaluasi operasi ini secara logis adalah...",
+                options: [
+                    "Menyelesaikan perkalian 4 x 5 terlebih dahulu.",
+                    "Menghapus tanda kurung dan mengeksekusi dari kanan.",
+                    "Menempatkan 3 dan 4 ke stack, mengaplikasikan +, lalu menempatkan 5 dan mengaplikasikan x.",
+                    "Membuang operator dan hanya menjumlahkan operand."
+                ],
+                correctAnswer: 2,
+                explanation: "Sistem membaca operand (3, 4) memasukannya ke stack, saat operator (+) dipanggil sistem mengeluarkan 3 & 4 lalu menjumlahkannya menjadi 7, lalu 7 dan 5 dimasukkan, lalu dikalikan."
+            },
+            {
+                question: "(29) Jika dilakukan instruksi Push(5), Push(10), Push(15), Pop(), Push(20) pada stack kosong. Angka paling atas (Peek) saat ini adalah...",
+                options: ["5", "10", "15", "20"],
+                correctAnswer: 3,
+                explanation: "Stack: [5], [5,10], [5,10,15]. Pop mengeluarkan 15 menyisakan [5,10]. Push 20 menambahkan ke atas, sehingga stack menjadi [5,10,20]. Top = 20."
+            },
+            {
+                question: "(30) Stack sangat berguna dalam pemrograman, misalnya untuk...",
+                options: [
+                    "Memutar video resolusi tinggi.",
+                    "Menyimpan riwayat aktivitas pada browser (tombol Back) atau fungsi undo.",
+                    "Mengubah tegangan fisik voltase komputer.",
+                    "Membuat grafik Pie Chart secara otomatis."
+                ],
+                correctAnswer: 1,
+                explanation: "Tombol Back/Undo adalah implementasi sempurna dari Stack. Halaman/aksi terakhir yang Anda buka/lakukan adalah hal pertama yang dikembalikan ketika Anda memencet Undo/Back (LIFO)."
+            },
+            {
+                question: "(31 - Adaptasi) Argumen yang berisi rentang sel tempat kriteria dievaluasi pada fungsi SUMIFS disebut...",
+                options: ["Criteria_range1", "MATCH", "FALSE / 0", "Stack"],
+                correctAnswer: 0,
+                explanation: "Criteria_range1 adalah argument pertama penentu kriteria di SUMIFS yang menunjukkan lokasi range dari sekumpulan sel yang akan difilter kondisinya."
+            },
+            {
+                question: "(32 - Adaptasi) Jenis grafik yang menyajikan sebaran titik untuk menganalisis korelasi dan outlier adalah...",
+                options: ["Pie Chart", "Scatter Plot", "Column Chart", "Line Chart"],
+                correctAnswer: 1,
+                explanation: "Scatter plot dirancang dengan mendistribusikan titik kordinat sumbu x dan y untuk melihat pola kumpulan data."
+            },
+            {
+                question: "(33 - Adaptasi) Fitur yang mampu merangkum data dengan melibatkan dua kolom sekaligus sebagai Rows dan Columns disebut...",
+                options: ["Pivot Table 2 Dimensi", "Array Formula", "VLOOKUP", "Range"],
+                correctAnswer: 0,
+                explanation: "Pivot table memungkinkan pembuatan ringkasan silang (crosstab) dengan dua dimensi sekaligus untuk mempermudah tabulasi silang."
+            },
+            {
+                question: "(34 - Adaptasi) Fungsi Spreadsheet yang digunakan untuk menemukan posisi (nomor indeks) baris atau kolom dari suatu nilai di dalam array adalah...",
+                options: ["INDEX", "SUMIFS", "MATCH", "COUNTIFS"],
+                correctAnswer: 2,
+                explanation: "MATCH bertugas menemukan letak posisi (angka ke berapa) sebuah data berada dalam baris atau kolom data referensi."
+            },
+            {
+                question: "(35 - Adaptasi) Parameter/Fitur pelengkap VLOOKUP agar menghasilkan pencarian yang sama persis (exact match), bukan perkiraan adalah...",
+                options: ["TRUE / 1", "FALSE / 0", "Criteria_range1", "MATCH"],
+                correctAnswer: 1,
+                explanation: "FALSE atau angka 0 memastikan VLOOKUP hanya akan mengeluarkan hasil jika data yang dicari 100% cocok karakternya."
+            },
+            {
+                question: "(36 - Adaptasi) Fungsi matematika di mana setiap elemen Domain memiliki pasangan unik dan seluruh Kodomain terpetakan sempurna (gabungan Injektif dan Surjektif) adalah...",
+                options: ["Surjektif", "Injektif", "Bijektif", "Konstan"],
+                correctAnswer: 2,
+                explanation: "Fungsi Bijektif adalah korespondensi 1-1 sempurna."
+            },
+            {
+                question: "(37 - Adaptasi) Himpunan objek yang BUKAN merupakan elemen dari A, tetapi masih merupakan bagian dari semesta pembicaraan disebut...",
+                options: ["Intersection (Irisan)", "Union (Gabungan)", "Relasi", "Komplemen (A')"],
+                correctAnswer: 3,
+                explanation: "Komplemen suatu himpunan (ditulis dengan tanda petik/A' atau C) adalah semua anggota semesta di luar himpunan tersebut."
+            },
+            {
+                question: "(38 - Adaptasi) Sistem bilangan dengan basis 16 yang digunakan di komputer (menggunakan kombinasi 0-9 dan A-F) adalah...",
+                options: ["Biner", "Oktal", "Desimal", "Heksadesimal"],
+                correctAnswer: 3,
+                explanation: "Heksa = 6, Desimal = 10, total 16 basis."
+            },
+            {
+                question: "(39 - Adaptasi) Sistem bilangan berbasis 2 yang hanya menggunakan dua angka (0 dan 1) untuk logika komputasi adalah...",
+                options: ["Biner", "Oktal", "Desimal", "Heksadesimal"],
+                correctAnswer: 0,
+                explanation: "Bi berarti 2, biner mengartikan 0 (off) dan 1 (on) sebagai tingkat dasar bahasa mesin komputer."
+            },
+            {
+                question: "(40 - Adaptasi) Struktur data yang memiliki prinsip kerja Last In First Out (LIFO) dalam menyimpan instruksi memori disebut...",
+                options: ["Queue (Antrean)", "Stack (Tumpukan)", "Array", "Linked List"],
+                correctAnswer: 1,
+                explanation: "Stack berarti tumpukan, tumpukan yang dimasukkan paling akhir akan keluar atau diambil paling awal (LIFO)."
+            }
+        ];
+
+        // State Kuis
+        let currentQuestion = 0;
+        let score = 0;
+        let userAnswers = new Array(quizData.length).fill(undefined);
+        let userData = { nama: '', kelas: '', sekolah: '' };
+
+        // Elemen DOM
+        const formScreen = document.getElementById('intro-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const nextBtn = document.getElementById('next-btn');
+        const finishBtn = document.getElementById('finish-btn');
+        const optionsContainer = document.getElementById('options-container');
+        const progressBar = document.getElementById('progress-bar');
+
+        // Navigasi UI: Mulai Kuis
+        function startQuiz() {
+            userData.nama = document.getElementById('input-nama').value.trim();
+            userData.kelas = document.getElementById('input-kelas').value;
+            userData.sekolah = document.getElementById('input-sekolah').value.trim();
+
+            if (!userData.nama || !userData.kelas || !userData.sekolah) {
+                alert("Mohon lengkapi Nama, Kelas, dan Nama Sekolah terlebih dahulu untuk mencatat progres Anda!");
+                return;
+            }
+
+            document.getElementById('student-info-badge').innerText = `${userData.nama} - ${userData.kelas}`;
+            formScreen.classList.add('hidden');
+            quizScreen.classList.remove('hidden');
+            
+            loadQuestion();
+        }
+
+        // Navigasi UI: Tampilkan Soal
+        function loadQuestion() {
+            const q = quizData[currentQuestion];
+            document.getElementById('question-counter').innerText = `Soal ${currentQuestion + 1} / ${quizData.length}`;
+            document.getElementById('question-text').innerText = q.question;
+            
+            const progress = ((currentQuestion) / quizData.length) * 100;
+            progressBar.style.width = `${progress}%`;
+
+            optionsContainer.innerHTML = '';
+            
+            q.options.forEach((opt, index) => {
+                const optDiv = document.createElement('div');
+                // Beri efek styling khusus jika opsi ini adalah opsi yang pernah di-klik (saat user mundur soal misal)
+                const isSelected = userAnswers[currentQuestion] === index;
+                
+                optDiv.className = `flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-100 hover:border-blue-300 hover:bg-blue-50'}`;
+                optDiv.onclick = () => selectOption(index);
+                
+                const circle = document.createElement('div');
+                circle.className = `w-5 h-5 rounded-full border-2 mr-3 flex-shrink-0 flex items-center justify-center ${isSelected ? 'border-blue-500' : 'border-gray-300'}`;
+                circle.id = `circle-${index}`;
+                if (isSelected) { circle.innerHTML = '<div class="w-2.5 h-2.5 bg-blue-500 rounded-full"></div>'; }
+                
+                const text = document.createElement('span');
+                text.className = "text-gray-700 font-medium";
+                text.innerText = opt;
+
+                optDiv.appendChild(circle);
+                optDiv.appendChild(text);
+                optDiv.id = `option-${index}`;
+                optionsContainer.appendChild(optDiv);
+            });
+
+            // Tampilkan tombol yang relevan
+            nextBtn.classList.add('hidden');
+            finishBtn.classList.add('hidden');
+            
+            // Tampilkan tombol Lanjut/Selesai otomatis jika user pernah menjawab soal ini
+            if (userAnswers[currentQuestion] !== undefined) {
+                if (currentQuestion === quizData.length - 1) {
+                    finishBtn.classList.remove('hidden');
+                } else {
+                    nextBtn.classList.remove('hidden');
+                }
+            }
+        }
+
+        // Aksi: Pilih Jawaban
+        function selectOption(selectedIndex) {
+            // Reset highlight semua opsi
+            quizData[currentQuestion].options.forEach((_, i) => {
+                const optDiv = document.getElementById(`option-${i}`);
+                const circle = document.getElementById(`circle-${i}`);
+                optDiv.classList.remove('border-blue-500', 'bg-blue-50');
+                optDiv.classList.add('border-gray-100');
+                circle.classList.remove('border-blue-500');
+                circle.classList.add('border-gray-300');
+                circle.innerHTML = ''; 
+            });
+
+            // Highlight opsi yang diklik
+            const selectedDiv = document.getElementById(`option-${selectedIndex}`);
+            const selectedCircle = document.getElementById(`circle-${selectedIndex}`);
+            selectedDiv.classList.remove('border-gray-100');
+            selectedDiv.classList.add('border-blue-500', 'bg-blue-50');
+            selectedCircle.classList.remove('border-gray-300');
+            selectedCircle.classList.add('border-blue-500');
+            selectedCircle.innerHTML = '<div class="w-2.5 h-2.5 bg-blue-500 rounded-full"></div>';
+
+            // Simpan ke array
+            userAnswers[currentQuestion] = selectedIndex;
+
+            // Tampilkan tombol
+            if (currentQuestion === quizData.length - 1) {
+                finishBtn.classList.remove('hidden');
+            } else {
+                nextBtn.classList.remove('hidden');
+            }
+        }
+
+        // Navigasi UI: Lanjut
+        function nextQuestion() {
+            if (userAnswers[currentQuestion] !== undefined) {
+                currentQuestion++;
+                loadQuestion();
+            }
+        }
+
+        // Navigasi UI: Selesai
+        function finishQuiz() {
+            let correctCount = 0;
+            quizData.forEach((q, index) => {
+                if (userAnswers[index] === q.correctAnswer) {
+                    correctCount++;
+                }
+            });
+
+            // Mengonversi jumlah benar menjadi skala 100
+            score = Math.round((correctCount / quizData.length) * 100);
+            
+            quizScreen.classList.add('hidden');
+            resultScreen.classList.remove('hidden');
+            
+            // Berikan respons/kalimat semangat bedasarkan nilai
+            let message = "";
+            if (score >= 90) message = "Luar Biasa Sempurna!";
+            else if (score >= 75) message = "Kerja bagus, pertahankan!";
+            else message = "Tetap semangat, mari pelajari pembahasannya!";
+
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('result-summary').innerHTML = `${message} <b>${userData.nama}</b>. Kamu berhasil menjawab ${correctCount} dari ${quizData.length} soal dengan benar.`;
+
+            generateReview();
+        }
+
+        // Generator Pembahasan
+        function generateReview() {
+            const container = document.getElementById('review-container');
+            container.innerHTML = '';
+
+            quizData.forEach((q, index) => {
+                const isCorrect = userAnswers[index] === q.correctAnswer;
+                const userAnsText = userAnswers[index] !== undefined ? q.options[userAnswers[index]] : "Tidak dijawab";
+                const correctAnsText = q.options[q.correctAnswer];
+
+                const reviewCard = document.createElement('div');
+                reviewCard.className = `p-4 rounded-xl border-l-4 shadow-sm ${isCorrect ? 'bg-green-50 border-green-500' : 'bg-red-50 border-red-500'}`;
+                
+                reviewCard.innerHTML = `
+                    <div class="flex items-start mb-2">
+                        <span class="flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-white text-xs font-bold mr-3 mt-0.5 shadow-sm ${isCorrect ? 'bg-green-500' : 'bg-red-500'}">
+                            ${isCorrect ? '&check;' : '&#10005;'}
+                        </span>
+                        <div>
+                            <h4 class="text-sm font-semibold text-gray-800 mb-1">Soal ${index + 1}</h4>
+                            <p class="text-sm text-gray-700 mb-3">${q.question}</p>
+                        </div>
+                    </div>
+                    <div class="ml-9 text-sm">
+                        <p class="mb-1"><span class="font-medium text-gray-600">Jawaban Kamu:</span> <span class="${isCorrect ? 'text-green-700 font-semibold' : 'text-red-600 line-through'}">${userAnsText}</span></p>
+                        ${!isCorrect ? `<p class="mb-2"><span class="font-medium text-gray-600">Kunci Jawaban:</span> <span class="text-green-700 font-semibold">${correctAnsText}</span></p>` : ''}
+                        
+                        <div class="mt-3 bg-white p-3 rounded-lg border border-gray-200">
+                            <p class="text-xs font-bold text-blue-600 uppercase mb-1">Pembahasan & Penjelasan:</p>
+                            <p class="text-gray-700">${q.explanation}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(reviewCard);
+            });
+        }
+    </script>
+</body>
+</html>
