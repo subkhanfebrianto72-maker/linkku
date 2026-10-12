@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Math Duel - Tantangan Matematika Interaktif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --blue-team: #3b82f6;
+            --blue-team-dark: #2563eb;
+            --red-team: #ef4444;
+            --red-team-dark: #dc2828;
+            --bg-color: #f8fafc;
+        }
+
+        body {
+            font-family: 'Nunito', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+            margin: 0;
+            overflow: hidden; /* Prevent scrolling on IFP */
+            user-select: none; /* Prevent accidental text selection during frantic tapping */
+        }
+
+        h1, h2, h3, .math-font {
+            font-family: 'Fredoka One', cursive;
+        }
+
+        /* Split Screen Layout */
+        .split-container {
+            display: flex;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .side {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .side-left {
+            background-color: rgba(219, 234, 254, 0.8);
+            border-right: 8px dashed #94a3b8;
+        }
+
+        .side-right {
+            background-color: rgba(254, 226, 226, 0.8);
+        }
+
+        /* Settings Overlay */
+        #settings-overlay, #winner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.9);
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            backdrop-filter: blur(5px);
+        }
+
+        .panel-box {
+            background: white;
+            border-radius: 2rem;
+            padding: 3rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            width: 90%;
+            text-align: center;
+            border: 8px solid #cbd5e1;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            height: 40px;
+            background-color: #e2e8f0;
+            border-radius: 20px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+            border: 4px solid white;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+        }
+
+        .progress-bar.blue {
+            background: linear-gradient(90deg, #60a5fa, #2563eb);
+        }
+
+        .progress-bar.red {
+            background: linear-gradient(90deg, #f87171, #dc2828);
+        }
+        
+        .progress-icon {
+            color: white;
+            font-size: 1.5rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+
+        /* Question Display */
+        .question-box {
+            background: white;
+            border-radius: 1.5rem;
+            padding: 2rem;
+            margin: 2rem 0;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            font-size: 5rem;
+            text-align: center;
+            color: #1e293b;
+            border: 6px solid;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 250px;
+        }
+
+        .side-left .question-box { border-color: var(--blue-team); }
+        .side-right .question-box { border-color: var(--red-team); }
+
+        /* Answers Grid */
+        .answers-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .answer-btn {
+            font-family: 'Fredoka One', cursive;
+            font-size: 3rem;
+            border: none;
+            border-radius: 1rem;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.1s, filter 0.1s;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .answer-btn:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 0 rgba(0,0,0,0.2);
+        }
+
+        .side-left .answer-btn {
+            background-color: var(--blue-team);
+        }
+        .side-left .answer-btn:active {
+            background-color: var(--blue-team-dark);
+        }
+
+        .side-right .answer-btn {
+            background-color: var(--red-team);
+        }
+        .side-right .answer-btn:active {
+            background-color: var(--red-team-dark);
+        }
+
+        /* Feedback Animations */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        .wrong-shake {
+            animation: shake 0.4s ease-in-out;
+            background-color: #cbd5e1 !important; /* Visual feedback for wrong container */
+        }
+        
+        .correct-pop {
+            animation: pop 0.3s ease-in-out;
+        }
+
+        .feedback-overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 10rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 10;
+        }
+        
+        .feedback-overlay.show {
+            opacity: 1;
+            animation: pop 0.5s ease-out forwards;
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-weight: 900;
+            text-align: center;
+            background: white;
+            padding: 0.5rem 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            margin-bottom: 1rem;
+        }
+        
+        .side-left .score-display { color: var(--blue-team-dark); border: 4px solid var(--blue-team); }
+        .side-right .score-display { color: var(--red-team-dark); border: 4px solid var(--red-team); }
+
+        /* Custom Toggle Checkbox */
+        .op-toggle {
+            display: none;
+        }
+        .op-label {
+            display: inline-block;
+            padding: 1rem 2rem;
+            margin: 0.5rem;
+            border-radius: 1rem;
+            background: #e2e8f0;
+            color: #475569;
+            font-weight: bold;
+            font-size: 1.5rem;
+            cursor: pointer;
+            border: 4px solid transparent;
+            transition: all 0.2s;
+        }
+        .op-toggle:checked + .op-label {
+            background: #fcd34d;
+            color: #92400e;
+            border-color: #f59e0b;
+            transform: scale(1.05);
+        }
+
+        .btn-start {
+            background: #10b981;
+            color: white;
+            font-size: 2.5rem;
+            padding: 1rem 3rem;
+            border-radius: 1rem;
+            border: none;
+            box-shadow: 0 8px 0 #047857;
+            cursor: pointer;
+            transition: transform 0.1s;
+            font-family: 'Fredoka One', cursive;
+            margin-top: 2rem;
+        }
+        .btn-start:active {
+            transform: translateY(8px);
+            box-shadow: 0 0 0 #047857;
+        }
+
+        /* Header Info */
+        .header-info {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 20;
+            background: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            font-weight: bold;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border: 3px solid #cbd5e1;
+        }
+        
+        .target-score {
+            font-size: 1.5rem;
+            color: #f59e0b;
+        }
+
+        #confetti-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 40;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header-info" id="game-info" style="display: none;">
+        <span><i class="fas fa-trophy text-yellow-500"></i> Target: <span class="target-score math-font" id="display-target">10</span></span>
+        <button onclick="showSettings()" class="bg-gray-200 hover:bg-gray-300 rounded-full w-10 h-10 flex items-center justify-center ml-4">
+            <i class="fas fa-cog text-gray-600"></i>
+        </button>
+    </div>
+
+    <div class="split-container" id="game-container" style="display: none;">
+        <!-- Left Team (Blue) -->
+        <div class="side side-left" id="side-left">
+            <div class="feedback-overlay" id="feedback-left"></div>
+            
+            <div class="flex justify-between items-center mb-2">
+                <h2 class="text-4xl text-blue-800 drop-shadow-sm"><i class="fas fa-users"></i> TIM BIRU</h2>
+            </div>
+            
+            <div class="score-display" id="score-left">0</div>
+            
+            <div class="progress-container">
+                <div class="progress-bar blue" id="progress-left">
+                    <i class="fas fa-rocket progress-icon"></i>
+                </div>
+            </div>
+
+            <div class="question-box math-font" id="question-left">
+                ?
+            </div>
+
+            <div class="answers-grid" id="answers-left">
+                <button class="answer-btn" onclick="checkAnswer('left', 0)"></button>
+                <button class="answer-btn" onclick="checkAnswer('left', 1)"></button>
+                <button class="answer-btn" onclick="checkAnswer('left', 2)"></button>
+                <button class="answer-btn" onclick="checkAnswer('left', 3)"></button>
+            </div>
+        </div>
+
+        <!-- Right Team (Red) -->
+        <div class="side side-right" id="side-right">
+            <div class="feedback-overlay" id="feedback-right"></div>
+            
+            <div class="flex justify-between items-center flex-row-reverse mb-2">
+                <h2 class="text-4xl text-red-800 drop-shadow-sm">TIM MERAH <i class="fas fa-users"></i></h2>
+            </div>
+            
+            <div class="score-display" id="score-right">0</div>
+            
+            <div class="progress-container">
+                <div class="progress-bar red" id="progress-right">
+                    <i class="fas fa-rocket progress-icon"></i>
+                </div>
+            </div>
+
+            <div class="question-box math-font" id="question-right">
+                ?
+            </div>
+
+            <div class="answers-grid" id="answers-right">
+                <button class="answer-btn" onclick="checkAnswer('right', 0)"></button>
+                <button class="answer-btn" onclick="checkAnswer('right', 1)"></button>
+                <button class="answer-btn" onclick="checkAnswer('right', 2)"></button>
+                <button class="answer-btn" onclick="checkAnswer('right', 3)"></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Overlay -->
+    <div id="settings-overlay">
+        <div class="panel-box">
+            <h1 class="text-6xl text-slate-800 mb-6"><i class="fas fa-gamepad text-indigo-500"></i> Math Duel</h1>
+            <p class="text-2xl text-slate-600 mb-8">Tantangan Cerdas Cermat Matematika</p>
+
+            <div class="mb-8">
+                <h3 class="text-2xl mb-4 text-slate-700">Pilih Operasi Hitung:</h3>
+                <div>
+                    <input type="checkbox" id="op-add" class="op-toggle" checked value="+">
+                    <label for="op-add" class="op-label"><i class="fas fa-plus"></i> Penjumlahan</label>
+                    
+                    <input type="checkbox" id="op-sub" class="op-toggle" checked value="-">
+                    <label for="op-sub" class="op-label"><i class="fas fa-minus"></i> Pengurangan</label>
+                    
+                    <input type="checkbox" id="op-mul" class="op-toggle" value="*">
+                    <label for="op-mul" class="op-label"><i class="fas fa-times"></i> Perkalian</label>
+                    
+                    <input type="checkbox" id="op-div" class="op-toggle" value="/">
+                    <label for="op-div" class="op-label"><i class="fas fa-divide"></i> Pembagian</label>
+                </div>
+                <p id="op-error" class="text-red-500 mt-2 hidden text-lg">Pilih minimal satu operasi hitung!</p>
+            </div>
+
+            <div class="flex justify-center gap-8 mb-8">
+                <div>
+                    <h3 class="text-xl mb-2 text-slate-700">Level Kesulitan:</h3>
+                    <select id="difficulty" class="text-2xl p-3 border-4 border-slate-300 rounded-xl bg-gray-50 focus:border-indigo-500 outline-none font-bold text-slate-700">
+                        <option value="easy">Mudah (1-20)</option>
+                        <option value="medium">Sedang (10-50)</option>
+                        <option value="hard">Sulit (20-100)</option>
+                    </select>
+                </div>
+                <div>
+                    <h3 class="text-xl mb-2 text-slate-700">Skor Kemenangan:</h3>
+                    <select id="target-score-select" class="text-2xl p-3 border-4 border-slate-300 rounded-xl bg-gray-50 focus:border-indigo-500 outline-none font-bold text-slate-700">
+                        <option value="10">10 Poin</option>
+                        <option value="15" selected>15 Poin</option>
+                        <option value="20">20 Poin</option>
+                        <option value="30">30 Poin</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-start w-full" onclick="startGame()">
+                <i class="fas fa-play"></i> MULAI PERMAINAN
+            </button>
+        </div>
+    </div>
+
+    <!-- Winner Overlay -->
+    <canvas id="confetti-canvas"></canvas>
+    <div id="winner-overlay" style="display: none;">
+        <div class="panel-box" style="background: rgba(255,255,255,0.95);">
+            <h1 class="text-7xl mb-4" id="winner-title">🏆</h1>
+            <h2 class="text-6xl mb-6 math-font" id="winner-name">TIM MENANG!</h2>
+            <div class="flex justify-center gap-8 mb-8 text-3xl font-bold">
+                <div class="text-blue-600">Biru: <span id="final-score-left">0</span></div>
+                <div class="text-red-600">Merah: <span id="final-score-right">0</span></div>
+            </div>
+            <button class="btn-start" onclick="showSettings()">
+                <i class="fas fa-redo"></i> MAIN LAGI
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const state = {
+            scores: { left: 0, right: 0 },
+            targetScore: 15,
+            operations: ['+', '-'],
+            difficulty: 'easy', // easy, medium, hard
+            currentQuestions: { left: null, right: null },
+            isPlaying: false
+        };
+
+        // DOM Elements
+        const els = {
+            settings: document.getElementById('settings-overlay'),
+            game: document.getElementById('game-container'),
+            info: document.getElementById('game-info'),
+            winnerOverlay: document.getElementById('winner-overlay'),
+            winnerName: document.getElementById('winner-name'),
+            displayTarget: document.getElementById('display-target'),
+            confettiCanvas: document.getElementById('confetti-canvas'),
+            
+            left: {
+                side: document.getElementById('side-left'),
+                score: document.getElementById('score-left'),
+                progress: document.getElementById('progress-left'),
+                question: document.getElementById('question-left'),
+                buttons: document.getElementById('answers-left').children,
+                feedback: document.getElementById('feedback-left')
+            },
+            right: {
+                side: document.getElementById('side-right'),
+                score: document.getElementById('score-right'),
+                progress: document.getElementById('progress-right'),
+                question: document.getElementById('question-right'),
+                buttons: document.getElementById('answers-right').children,
+                feedback: document.getElementById('feedback-right')
+            }
+        };
+
+        // Ranges based on difficulty
+        const diffRanges = {
+            easy: { min: 1, max: 20 },
+            medium: { min: 10, max: 50 },
+            hard: { min: 20, max: 100 }
+        };
+
+        function getRandomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function generateQuestion(difficulty, allowedOps) {
+            const op = allowedOps[Math.floor(Math.random() * allowedOps.length)];
+            const range = diffRanges[difficulty];
+            let num1, num2, answer;
+
+            switch(op) {
+                case '+':
+                    num1 = getRandomInt(range.min, range.max);
+                    num2 = getRandomInt(range.min, range.max);
+                    answer = num1 + num2;
+                    break;
+                case '-':
+                    // Ensure positive result for simplicity
+                    num1 = getRandomInt(range.min, range.max * 1.5);
+                    num2 = getRandomInt(range.min, num1); // num2 is always <= num1
+                    answer = num1 - num2;
+                    break;
+                case '*':
+                    // Scale down for multiplication so it doesn't get too crazy
+                    let maxMul = difficulty === 'easy' ? 10 : (difficulty === 'medium' ? 12 : 20);
+                    num1 = getRandomInt(2, maxMul);
+                    num2 = getRandomInt(2, maxMul);
+                    answer = num1 * num2;
+                    break;
+                case '/':
+                    // Ensure clean division
+                    let divisor = getRandomInt(2, difficulty === 'easy' ? 10 : 20);
+                    answer = getRandomInt(1, difficulty === 'easy' ? 10 : 20);
+                    num1 = answer * divisor;
+                    num2 = divisor;
+                    break;
+            }
+
+            // Convert operations to readable symbols
+            let opSymbol = op;
+            if (op === '*') opSymbol = '×';
+            if (op === '/') opSymbol = '÷';
+
+            return {
+                text: `${num1} ${opSymbol} ${num2}`,
+                answer: answer
+            };
+        }
+
+        function generateWrongAnswers(correctAnswer, difficulty) {
+            let options = new Set([correctAnswer]);
+            let variance = difficulty === 'easy' ? 5 : 15;
+            
+            while(options.size < 4) {
+                // Generate plausible wrong answers
+                let offset = getRandomInt(1, variance) * (Math.random() < 0.5 ? 1 : -1);
+                let wrong = correctAnswer + offset;
+                if (wrong >= 0 && !options.has(wrong)) {
+                    options.add(wrong);
+                }
+            }
+            // Shuffle
+            return Array.from(options).sort(() => Math.random() - 0.5);
+        }
+
+        function setQuestion(team) {
+            if (!state.isPlaying) return;
+
+            const q = generateQuestion(state.difficulty, state.operations);
+            state.currentQuestions[team] = q;
+            
+            const options = generateWrongAnswers(q.answer, state.difficulty);
+            
+            // Update UI
+            els[team].question.textContent = q.text;
+            els[team].question.classList.add('correct-pop');
+            setTimeout(() => els[team].question.classList.remove('correct-pop'), 300);
+
+            for (let i = 0; i < 4; i++) {
+                els[team].buttons[i].textContent = options[i];
+                // Store the raw value to check against later
+                els[team].buttons[i].dataset.val = options[i];
+            }
+        }
+
+        function updateProgress(team) {
+            const score = state.scores[team];
+            const percentage = Math.min((score / state.targetScore) * 100, 100);
+            
+            els[team].score.textContent = score;
+            els[team].progress.style.width = `${percentage}%`;
+        }
+
+        function showFeedback(team, isCorrect) {
+            const overlay = els[team].feedback;
+            overlay.innerHTML = isCorrect ? '<i class="fas fa-check-circle text-green-500"></i>' : '<i class="fas fa-times-circle text-red-500"></i>';
+            overlay.classList.add('show');
+            
+            if (!isCorrect) {
+                els[team].side.classList.add('wrong-shake');
+                setTimeout(() => els[team].side.classList.remove('wrong-shake'), 400);
+            }
+
+            setTimeout(() => overlay.classList.remove('show'), 500);
+        }
+
+        function checkAnswer(team, btnIndex) {
+            if (!state.isPlaying) return;
+
+            const selectedVal = parseInt(els[team].buttons[btnIndex].dataset.val);
+            const correctVal = state.currentQuestions[team].answer;
+
+            if (selectedVal === correctVal) {
+                // Correct
+                state.scores[team]++;
+                updateProgress(team);
+                showFeedback(team, true);
+                
+                if (state.scores[team] >= state.targetScore) {
+                    endGame(team);
+                } else {
+                    setQuestion(team);
+                }
+            } else {
+                // Wrong - Penalty? Just visual feedback for now, delay next question slightly
+                showFeedback(team, false);
+                // Optional: Penalize score? Let's just make them try another
+                // state.scores[team] = Math.max(0, state.scores[team] - 1);
+                // updateProgress(team);
+            }
+        }
+
+        function startGame() {
+            // Validate operations
+            const checkboxes = document.querySelectorAll('.op-toggle:checked');
+            if (checkboxes.length === 0) {
+                document.getElementById('op-error').classList.remove('hidden');
+                return;
+            }
+            document.getElementById('op-error').classList.add('hidden');
+
+            // Gather settings
+            state.operations = Array.from(checkboxes).map(cb => cb.value);
+            state.difficulty = document.getElementById('difficulty').value;
+            state.targetScore = parseInt(document.getElementById('target-score-select').value);
+
+            // Reset State
+            state.scores = { left: 0, right: 0 };
+            state.isPlaying = true;
+            
+            // Update UI
+            els.displayTarget.textContent = state.targetScore;
+            els.settings.style.display = 'none';
+            els.winnerOverlay.style.display = 'none';
+            els.game.style.display = 'flex';
+            els.info.style.display = 'flex';
+            
+            updateProgress('left');
+            updateProgress('right');
+            
+            // Initial Questions
+            setQuestion('left');
+            setQuestion('right');
+        }
+
+        function showSettings() {
+            state.isPlaying = false;
+            els.settings.style.display = 'flex';
+            els.game.style.display = 'none';
+            els.info.style.display = 'none';
+            els.winnerOverlay.style.display = 'none';
+        }
+
+        function endGame(winningTeam) {
+            state.isPlaying = false;
+            els.winnerOverlay.style.display = 'flex';
+            
+            const isBlue = winningTeam === 'left';
+            els.winnerName.textContent = isBlue ? "TIM BIRU MENANG!" : "TIM MERAH MENANG!";
+            els.winnerName.className = `text-6xl mb-6 math-font ${isBlue ? 'text-blue-600' : 'text-red-600'}`;
+            
+            document.getElementById('final-score-left').textContent = state.scores.left;
+            document.getElementById('final-score-right').textContent = state.scores.right;
+            
+            fireConfetti(isBlue ? ['#3b82f6', '#60a5fa'] : ['#ef4444', '#f87171']);
+        }
+
+        function fireConfetti(colors) {
+            const ctx = els.confettiCanvas.getContext('2d');
+            els.confettiCanvas.width = window.innerWidth;
+            els.confettiCanvas.height = window.innerHeight;
+            
+            const pieces = [];
+            for (let i = 0; i < 150; i++) {
+                pieces.push({
+                    x: Math.random() * els.confettiCanvas.width,
+                    y: Math.random() * els.confettiCanvas.height - els.confettiCanvas.height,
+                    w: Math.random() * 10 + 5,
+                    h: Math.random() * 10 + 5,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: Math.random() * 2 - 1,
+                    rot: Math.random() * 360,
+                    rotSpeed: Math.random() * 5 - 2.5
+                });
+            }
+
+            function animate() {
+                if(els.winnerOverlay.style.display === 'none') return;
+                ctx.clearRect(0, 0, els.confettiCanvas.width, els.confettiCanvas.height);
+                
+                pieces.forEach(p => {
+                    p.y += p.speedY;
+                    p.x += p.speedX;
+                    p.rot += p.rotSpeed;
+                    
+                    if (p.y > els.confettiCanvas.height) {
+                        p.y = -10;
+                        p.x = Math.random() * els.confettiCanvas.width;
+                    }
+                    
+                    ctx.save();
+                    ctx.translate(p.x, p.y);
+                    ctx.rotate(p.rot * Math.PI / 180);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+                    ctx.restore();
+                });
+                
+                requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        // Handle window resize for confetti canvas
+        window.addEventListener('resize', () => {
+            els.confettiCanvas.width = window.innerWidth;
+            els.confettiCanvas.height = window.innerHeight;
+        });
+
+    </script>
+</body>
+</html>
